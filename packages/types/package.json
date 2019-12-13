@@ -1,0 +1,26 @@
+{
+    "name": "@jelly/types",
+    "version": "0.0.1",
+    "description": "Jelly Swap common types.",
+    "author": "kraykov <raykov@weichain.tech>",
+    "homepage": "https://jelly.market/",
+    "license": "ISC",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "directories": {
+        "dist": "dist"
+    },
+    "files": [
+        "dist"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "build": "tsc"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jelly-swap/monorepo.git"
+    }
+}

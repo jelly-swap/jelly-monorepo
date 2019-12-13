@@ -1,0 +1,41 @@
+{
+    "name": "@jelly/aeternity",
+    "version": "0.0.1",
+    "description": "JellySwap TypeScript implementation for Aeternity.",
+    "author": "kraykov <raykov@weichain.tech>",
+    "homepage": "https://jelly.market/",
+    "license": "ISC",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "directories": {
+        "dist": "dist"
+    },
+    "files": [
+        "dist"
+    ],
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "build": "tsc"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jelly-swap/monorepo.git"
+    },
+    "dependencies": {
+        "@aeternity/aepp-sdk": "^6.1.2",
+        "@jelly/types": "^0.0.1",
+        "@jelly/utils": "^0.0.1",
+        "axios": "^0.19.0",
+        "bignumber.js": "^9.0.0",
+        "json-bigint": "^0.3.0",
+        "memoizee": "^0.4.14",
+        "websocket": "^1.0.31"
+    },
+    "devDependencies": {
+        "@types/memoizee": "^0.4.3",
+        "@types/websocket": "^1.0.0",
+        "tslint-config-prettier": "^1.18.0"
+    }
+}

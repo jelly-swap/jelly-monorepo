@@ -1,0 +1,16 @@
+{
+    "name": "jelly-monorepo",
+    "private": true,
+    "devDependencies": {
+        "@types/node": "^12.12.17",
+        "lerna": "^3.19.0",
+        "typescript": "^3.7.3"
+    },
+    "workspaces": [
+        "packages/*"
+    ],
+    "scripts": {
+        "build": "lerna run build",
+        "publish": "lerna run tsc && lerna publish"
+    }
+}
