@@ -1,5 +1,5 @@
-import { ContractRefund, ContractWithdraw, ContractSwap } from '@jelly/types';
-import { fixHash } from '@jelly/utils';
+import { ContractRefund, ContractWithdraw, ContractSwap } from '@jelly-swap/types';
+import { fixHash } from '@jelly-swap/utils';
 
 export const getInputFromRefund = (refund: ContractRefund) => {
     const id = fixHash(refund.id, false);

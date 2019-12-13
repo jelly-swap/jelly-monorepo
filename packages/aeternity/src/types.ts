@@ -1,4 +1,4 @@
-import { ContractSwap, ContractWithdraw, ContractRefund } from '@jelly/types';
+import { ContractSwap, ContractWithdraw, ContractRefund } from '@jelly-swap/types';
 
 export {
     ContractSwap,
@@ -10,7 +10,7 @@ export {
     JellyContract,
     UserInputSwap,
     JellyAdapter,
-} from '@jelly/types';
+} from '@jelly-swap/types';
 
 export interface Provider {
     getBalance(address: string): Promise<string | number>;

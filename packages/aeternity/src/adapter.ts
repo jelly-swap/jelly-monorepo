@@ -1,5 +1,5 @@
 import { ContractSwap, UserInputSwap, JellyAdapter } from './types';
-import { generateHashLock, getExpiration, sha256, fixHash } from '@jelly/utils';
+import { generateHashLock, getExpiration, sha256, fixHash } from '@jelly-swap/utils';
 import BigNumber from 'bignumber.js';
 
 import Config from './config';
