@@ -1,6 +1,6 @@
 {
     "name": "@jelly/aeternity",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "JellySwap TypeScript implementation for Aeternity.",
     "author": "kraykov <raykov@weichain.tech>",
     "homepage": "https://jelly.market/",
@@ -25,8 +25,8 @@
     },
     "dependencies": {
         "@aeternity/aepp-sdk": "^6.1.2",
-        "@jelly/types": "^0.0.1",
-        "@jelly/utils": "^0.0.1",
+        "@jelly/types": "^0.0.2",
+        "@jelly/utils": "^0.0.2",
         "axios": "^0.19.0",
         "bignumber.js": "^9.0.0",
         "json-bigint": "^0.3.0",
