@@ -98,5 +98,6 @@ export interface JellyContract {
 }
 
 type Options = {
-    amount?: string | number;
+    amount?: any;
+    value?: any;
 };
