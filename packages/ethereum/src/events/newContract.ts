@@ -23,6 +23,7 @@ export default (args: any[], txHash?: any) => {
         outputAmount: args[1].toString(),
         expiration: args[2].toString(),
         outputNetwork: args[7].toString(),
+        outputAddress: args[8],
         transactionHash,
     };
 
