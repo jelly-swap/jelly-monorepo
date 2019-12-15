@@ -62,7 +62,13 @@ export default class Event {
             return result;
         }, []);
 
-        return result;
+        const ids = result.map((s: any) => s.id);
+
+        const status = await this.contract.getStatus(ids);
+
+        return result.map((s: any, index: number) => {
+            return { ...s, status: status[index] };
+        });
     }
 
     async subscribe(onMessage: Function, filter?: Function) {
