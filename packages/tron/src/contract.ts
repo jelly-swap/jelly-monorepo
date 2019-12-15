@@ -1,28 +1,88 @@
-import { JellyContract } from '@jelly-swap/types';
+import { JellyContract, ContractWithdraw, ContractRefund } from '@jelly-swap/types';
+import { safeAccess } from '@jelly-swap/utils';
+
+import EventHandler from './events';
+import Config from './config';
+import { TronContractSwap } from './types';
 
 export default class TronContract implements JellyContract {
-    subscribe(onMessage: Function, filter?: Function): void {
-        throw new Error('Method not implemented.');
+    private provider: any;
+    private contract: any;
+    private eventHandler: EventHandler;
+
+    constructor(provider: any) {
+        this.provider = provider;
+        this.eventHandler = new EventHandler(this);
     }
-    getPastEvents(type: string, filter: Function) {
-        throw new Error('Method not implemented.');
+
+    async setup() {
+        if (!this.contract) {
+            if (safeAccess(this.provider, ['tronWeb', 'contract'])) {
+                this.contract = await this.provider.contract().at(Config().contractAddress);
+            }
+        }
     }
-    getCurrentBlock(): Promise<string | number> {
-        throw new Error('Method not implemented.');
+
+    async subscribe(onMessage: Function, filter?: Function) {
+        this.eventHandler.subscribe(onMessage, filter);
     }
-    getBalance(address: string): Promise<string | number> {
-        throw new Error('Method not implemented.');
+
+    async getPastEvents(type: string, filter: Function) {
+        return await this.eventHandler.getPast(type, filter);
     }
-    newContract(swap: import('@jelly-swap/types').ContractSwap): Promise<string> {
-        throw new Error('Method not implemented.');
+
+    async getCurrentBlock(): Promise<string | number> {
+        if (safeAccess(this.provider, ['tronWeb', 'trx', 'getCurrentBlock'])) {
+            const blockInfo = await this.provider.tronWeb.trx.getCurrentBlock();
+            return safeAccess(blockInfo, ['block_header', 'raw_data', 'number']);
+        }
     }
-    withdraw(withdraw: import('@jelly-swap/types').ContractWithdraw): Promise<string> {
-        throw new Error('Method not implemented.');
+
+    async getBalance(address: string): Promise<string | number> {
+        if (safeAccess(this.provider, ['tronWeb', 'trx', 'getBalance'])) {
+            return await this.provider.tronWeb.trx.getBalance();
+        }
     }
-    refund(refund: import('@jelly-swap/types').ContractRefund): Promise<string> {
-        throw new Error('Method not implemented.');
+
+    async newContract(swap: TronContractSwap): Promise<string> {
+        await this.setup();
+        const result = await this.contract
+            .newContract(
+                swap.outputAmount,
+                swap.expiration,
+                swap.hashLock,
+                swap.receiver,
+                swap.outputNetwork,
+                swap.outputAddress
+            )
+            .send(swap.options);
+        return result;
     }
-    getStatus(ids: any[]) {
-        throw new Error('Method not implemented.');
+
+    async withdraw(withdraw: ContractWithdraw): Promise<string> {
+        await this.setup();
+
+        const result = await this.contract.withdraw(withdraw.id, withdraw.secret).send({
+            feeLimit: 100000000,
+            shouldPollResponse: false,
+        });
+
+        return result;
+    }
+
+    async refund(refund: ContractRefund): Promise<string> {
+        await this.setup();
+
+        const result = await this.contract.refund(refund.id).send({
+            feeLimit: 100000000,
+            shouldPollResponse: false,
+        });
+
+        return result;
+    }
+
+    async getStatus(ids: any[]) {
+        await this.setup();
+        return this.contract.getStatus(ids).call();
     }
 }
