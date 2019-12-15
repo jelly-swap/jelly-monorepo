@@ -2,6 +2,16 @@ import moment from 'moment';
 import { unitOfTime } from 'moment';
 import { sha256 } from './crypto';
 
+export const safeAccess = (object: any, path: string[]) => {
+    return object
+        ? path.reduce(
+              (accumulator, currentValue) =>
+                  accumulator && accumulator[currentValue] ? accumulator[currentValue] : null,
+              object
+          )
+        : null;
+};
+
 export function getExpiration(time = 24, timeUnit = 'hours' as unitOfTime.DurationConstructor, unix = true) {
     const expiration = moment(moment.now())
         .add(time, timeUnit)
