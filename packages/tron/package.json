@@ -28,6 +28,7 @@
     },
     "dependencies": {
         "@jelly-swap/types": "^0.1.0",
+        "ethers": "^4.0.40",
         "trongrid": "^1.2.4",
         "tronweb": "^2.8.1"
     }
