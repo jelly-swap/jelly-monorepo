@@ -21,12 +21,11 @@ export default class Event {
         this.cache = memoize(this._getPast, { maxAge: 30000 });
     }
 
-    async getPast(type: string, filter?: any) {
-        const result = await this.cache();
+    async getPast(type: string, filter?: Function) {
+        const { swaps, refunds, withdraws } = await this.cache(filter);
 
         switch (type) {
             case 'new': {
-                const swaps = filter ? filter(result.swaps) : result.swaps;
                 const ids = swaps.map((s: SwapEvent) => s.id);
                 const status = await this.provider.getStatus(ids);
 
@@ -36,20 +35,20 @@ export default class Event {
             }
 
             case 'withdraw': {
-                return filter ? filter(result.withdraws) : result.withdraws;
+                return withdraws;
             }
 
             case 'refund': {
-                return filter ? filter(result.refunds) : result.refunds;
+                return refunds;
             }
 
             default: {
-                return result;
+                return { swaps, refunds, withdraws };
             }
         }
     }
 
-    async _getPast() {
+    async _getPast(filter: Function) {
         return axios
             .get(`${Config().apiUrl}middleware/contracts/calls/address/${Config().contractAddress}`, {
                 transformResponse: [(data: any) => data],
@@ -60,7 +59,7 @@ export default class Event {
                 const refunds: RefundEvent[] = [];
 
                 JSONbig.parse(res.data).map((tx: any) => {
-                    const result = ParseEvent(tx.callinfo);
+                    const result = ParseEvent(tx.callinfo, filter);
 
                     if (result) {
                         const txIncluded = {
@@ -108,8 +107,7 @@ export default class Event {
 
                 if (data.payload.hash) {
                     const tx = await this.provider.getTxInfo(data.payload.hash);
-                    const result = ParseEvent(tx);
-                    const swap = filter ? filter(result) : result;
+                    const swap = ParseEvent(tx, filter);
                     if (swap) {
                         const key = `${swap.eventName}_${swap.id}`;
                         if (!this.history.get(key)) {
