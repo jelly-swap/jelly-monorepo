@@ -16,7 +16,7 @@ export default class Event {
 
     constructor(provider: Provider) {
         this.provider = provider;
-        this.webSocketClient = new w3cwebsocket('wss://testnet.aeternal.io/websocket');
+        this.webSocketClient = new w3cwebsocket(Config().wsUrl);
         this.history = new Map();
         this.cache = memoize(this._getPast, { maxAge: 30000 });
     }
