@@ -18,7 +18,7 @@ export default class TronContract implements JellyContract {
     async setup() {
         if (!this.contract) {
             if (safeAccess(this.provider, ['tronWeb', 'contract'])) {
-                this.contract = await this.provider.contract().at(Config().contractAddress);
+                this.contract = await this.provider.tronWeb.contract().at(Config().contractAddress);
             }
         }
     }
@@ -83,6 +83,6 @@ export default class TronContract implements JellyContract {
 
     async getStatus(ids: any[]) {
         await this.setup();
-        return this.contract.getStatus(ids).call();
+        return await this.contract.getStatus(ids).call();
     }
 }
