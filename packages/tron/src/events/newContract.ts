@@ -1,3 +1,5 @@
+import { Adapter } from '..';
+
 // event NewContract(
 //     uint256 inputAmount,
 //     uint256 outputAmount,
@@ -10,13 +12,13 @@
 //     string outputAddress
 //   );
 
-export default (event: any) => {
+export default (event: any, adapter: Adapter) => {
     const result = {
         network: 'TRX',
         eventName: 'NEW_CONTRACT',
         id: '0x' + event.result.id,
-        receiver: event.result.receiver,
-        sender: event.result.sender,
+        receiver: adapter.parseAddress(event.result.receiver),
+        sender: adapter.parseAddress(event.result.sender),
         transactionHash: event.transaction_id || event.transaction,
         expiration: event.result.expiration.toString(),
         inputAmount: event.result.inputAmount.toString(),
