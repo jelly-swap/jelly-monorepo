@@ -1,7 +1,9 @@
 import { Universal } from '@aeternity/aepp-sdk';
-import { ContractSwap, ContractWithdraw, ContractRefund, Provider } from '../types';
+import { safeAccess } from '@jelly-swap/utils';
 
 import { getInputFromSwap, getInputFromRefund, getInputFromWithdraw } from './utils';
+
+import { ContractSwap, ContractWithdraw, ContractRefund, Provider } from '../types';
 
 import Config from '../config';
 import ContractSource from '../config/contractSource';
@@ -37,8 +39,17 @@ export default class HttpProvider implements Provider {
 
     async getBalance(address: string) {
         await this.setup();
-        const accountInfo = await this.provider.api.getAccountByPubkey(address);
-        return accountInfo.balance;
+        try {
+            const accountInfo = await this.provider.api.getAccountByPubkey(address);
+            return accountInfo.balance;
+        } catch (err) {
+            const reason = safeAccess(err, ['response', 'data', 'reason']);
+            if (reason === 'Account not found') {
+                return 0;
+            } else {
+                throw new Error(err);
+            }
+        }
     }
 
     async newContract(swap: ContractSwap) {
