@@ -9,14 +9,14 @@ import ABI from './config/abi';
 
 export default class EthereumContract implements JellyContract {
     public contract: ethers.Contract;
-    private provider: ethers.providers.BaseProvider;
+    public provider: ethers.providers.BaseProvider;
     private eventHandler: EventHandler;
 
     constructor(provider: any) {
         const signer = provider.getSigner ? provider.getSigner() : provider;
         this.contract = new ethers.Contract(Config().contractAddress, ABI, signer);
         this.provider = provider;
-        this.eventHandler = new EventHandler(this.contract);
+        this.eventHandler = new EventHandler(this);
     }
 
     async subscribe(onMessage: Function, filter?: Function) {
