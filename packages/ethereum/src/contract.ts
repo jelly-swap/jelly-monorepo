@@ -5,7 +5,7 @@ import { JellyContract, ContractSwap, ContractRefund, ContractWithdraw } from '.
 import EventHandler from './events';
 
 import Config from './config';
-import ABI from './config/ABI';
+import ABI from './config/abi';
 
 export default class EthereumContract implements JellyContract {
     public contract: ethers.Contract;
