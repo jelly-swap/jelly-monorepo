@@ -1,4 +1,4 @@
-import { Contract, utils } from 'ethers';
+import { utils } from 'ethers';
 import { Log } from 'ethers/providers';
 
 import TransformNewContract from './newContract';
@@ -7,12 +7,13 @@ import TransformRefund from './refund';
 
 import Config from '../config';
 import ABI from '../config/abi';
+import EthereumContract from '../contract';
 
 export default class Event {
-    private contract: Contract;
+    private contract: EthereumContract;
     private interface: utils.Interface;
 
-    constructor(contract: Contract) {
+    constructor(contract: EthereumContract) {
         this.contract = contract;
         this.interface = new utils.Interface(ABI);
     }
@@ -20,7 +21,15 @@ export default class Event {
     async getPast(type: string, filter?: any, currentBlock?: string | number) {
         switch (type) {
             case 'new': {
-                return await this._getPast('NewContract', TransformNewContract, filter, currentBlock);
+                const result = await this._getPast('NewContract', TransformNewContract, filter, currentBlock);
+
+                const ids = result.map((s: any) => s.id);
+
+                const status = await this.contract.getStatus(ids);
+
+                return result.map((s: any, index: number) => {
+                    return { ...s, status: status[index] };
+                });
             }
 
             case 'withdraw': {
@@ -56,35 +65,29 @@ export default class Event {
             const f = filter ? filter(t) : t;
 
             if (f) {
-                result.push(t);
+                result.push(f);
             }
 
             return result;
         }, []);
 
-        const ids = result.map((s: any) => s.id);
-
-        const status = await this.contract.getStatus(ids);
-
-        return result.map((s: any, index: number) => {
-            return { ...s, status: status[index] };
-        });
+        return result;
     }
 
     async subscribe(onMessage: Function, filter?: Function) {
-        this.contract.on('NewContract', (...args: []) => {
+        this.contract.contract.on('NewContract', (...args: []) => {
             const swap = TransformNewContract(args);
             const result = filter ? filter(swap) : swap;
             onMessage(result);
         });
 
-        this.contract.on('Withdraw', (...args: []) => {
+        this.contract.contract.on('Withdraw', (...args: []) => {
             const withdraw = TransformWithdraw(args);
             const result = filter ? filter(withdraw) : withdraw;
             onMessage(result);
         });
 
-        this.contract.on('Refund', (...args: []) => {
+        this.contract.contract.on('Refund', (...args: []) => {
             const refund = TransformRefund(args);
             const result = filter ? filter(refund) : refund;
             onMessage(result);
