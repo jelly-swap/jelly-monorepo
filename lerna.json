@@ -1,9 +1,16 @@
 {
-    "packages": ["packages/*"],
-    "version": "0.1.8",
+    "packages": [
+        "packages/*"
+    ],
+    "version": "0.1.9",
     "command": {
         "publish": {
-            "ignoreChanges": ["*.md", "scripts", "dist", "tsconfig.json"]
+            "ignoreChanges": [
+                "*.md",
+                "scripts",
+                "dist",
+                "tsconfig.json"
+            ]
         }
     },
     "npmClient": "yarn",
