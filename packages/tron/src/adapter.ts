@@ -97,9 +97,14 @@ export default class TronAdapter implements JellyAdapter {
     }
 
     generateId(swap: ContractSwap): string {
+        const prefixedReceiver = this.TronConfig.receiverAddress;
+        const tronHex = TronWeb.address.toHex(swap.sender);
+        const sender = '0x' + tronHex.slice(2, tronHex.lenght);
+        const receiver = '0x' + prefixedReceiver.slice(2, prefixedReceiver.lenght);
+
         return utils.soliditySha256(
             ['address', 'address', 'uint256', 'bytes32', 'uint256'],
-            [swap.sender, swap.receiver, swap.inputAmount, swap.hashLock, swap.expiration]
+            [sender, receiver, swap.inputAmount, swap.hashLock, swap.expiration]
         );
     }
 }

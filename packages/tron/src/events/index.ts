@@ -73,7 +73,7 @@ export default class Event {
     async subscribe(onMessage: Function, filter?: Function) {
         await this.contract.setup();
 
-        this.contract.contract['NewContract']().watch(function(err: any, event: any) {
+        this.contract.contract['NewContract']().watch((err: any, event: any) => {
             if (err) {
                 // TODO: Handle errors
             }
@@ -85,7 +85,7 @@ export default class Event {
             }
         });
 
-        this.contract.contract['Withdraw']().watch(function(err: any, event: any) {
+        this.contract.contract['Withdraw']().watch((err: any, event: any) => {
             if (err) {
                 // TODO: Handle errors
             }
@@ -97,7 +97,7 @@ export default class Event {
             }
         });
 
-        this.contract.contract['Refund']().watch(function(err: any, event: any) {
+        this.contract.contract['Refund']().watch((err: any, event: any) => {
             if (err) {
                 // TODO: Handle errors
             }
