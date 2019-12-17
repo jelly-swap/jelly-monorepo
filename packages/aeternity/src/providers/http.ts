@@ -1,4 +1,4 @@
-import { Universal } from '@aeternity/aepp-sdk';
+import { Universal } from '@aeternity/aepp-sdk/es';
 
 import { getInputFromSwap, getInputFromRefund, getInputFromWithdraw } from './utils';
 
