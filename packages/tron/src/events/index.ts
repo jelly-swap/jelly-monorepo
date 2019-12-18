@@ -81,7 +81,9 @@ export default class Event {
             if (event) {
                 const swap = TransformNewContract(event, this.adapter);
                 const result = filter ? filter(swap) : swap;
-                onMessage(result);
+                if (result) {
+                    onMessage(result);
+                }
             }
         });
 
@@ -93,7 +95,9 @@ export default class Event {
             if (event) {
                 const withdraw = TransformWithdraw(event, this.adapter);
                 const result = filter ? filter(withdraw) : withdraw;
-                onMessage(result);
+                if (result) {
+                    onMessage(result);
+                }
             }
         });
 
@@ -105,7 +109,9 @@ export default class Event {
             if (event) {
                 const refund = TransformRefund(event, this.adapter);
                 const result = filter ? filter(refund) : refund;
-                onMessage(result);
+                if (result) {
+                    onMessage(result);
+                }
             }
         });
     }
