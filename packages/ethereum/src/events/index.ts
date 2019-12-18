@@ -78,19 +78,25 @@ export default class Event {
         this.contract.contract.on('NewContract', (...args: []) => {
             const swap = TransformNewContract(args);
             const result = filter ? filter(swap) : swap;
-            onMessage(result);
+            if (result) {
+                onMessage(result);
+            }
         });
 
         this.contract.contract.on('Withdraw', (...args: []) => {
             const withdraw = TransformWithdraw(args);
             const result = filter ? filter(withdraw) : withdraw;
-            onMessage(result);
+            if (result) {
+                onMessage(result);
+            }
         });
 
         this.contract.contract.on('Refund', (...args: []) => {
             const refund = TransformRefund(args);
             const result = filter ? filter(refund) : refund;
-            onMessage(result);
+            if (result) {
+                onMessage(result);
+            }
         });
     }
 }
