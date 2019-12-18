@@ -31,5 +31,6 @@
         "ethers": "^4.0.40",
         "trongrid": "^1.2.4",
         "tronweb": "^2.8.1"
-    }
+    },
+    "gitHead": "9ea3aaf581469cb0e423a1e69d277235495c1028"
 }
