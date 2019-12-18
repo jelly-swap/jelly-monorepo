@@ -63,6 +63,7 @@ export default class EthereumContract implements JellyContract {
     }
 
     async getStatus(ids: any[]) {
-        return await this.contract.getStatus(ids);
+        // Set `from` in order to be able to call the function without a signer
+        return await this.contract.getStatus(ids, { from: '0x0123456789012345678901234567890123456789' });
     }
 }
