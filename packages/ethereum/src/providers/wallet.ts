@@ -1,9 +1,15 @@
-import { ethers } from 'ethers';
+import { Wallet } from 'ethers';
+import { Filter } from 'ethers/providers';
+import { FilterByBlock } from 'ethers/providers/abstract-provider';
 import JsonRpcProvider from './jsonRpc';
 
-export default class WalletProvider extends ethers.Wallet {
+export default class WalletProvider extends Wallet {
     constructor(privateKey: string) {
         super(privateKey, new JsonRpcProvider());
+    }
+
+    async getLogs(filter: Filter | FilterByBlock) {
+        return await this.provider.getLogs(filter);
     }
 
     async getBlockNumber() {
