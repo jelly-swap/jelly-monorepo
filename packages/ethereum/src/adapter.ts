@@ -24,7 +24,7 @@ export default class EthereumAdapter implements JellyAdapter {
             outputNetwork: inputSwap.network,
             outputAddress: inputSwap.receiver,
             inputAmount: inputSwap.outputAmount,
-            options: { amount: inputAmount },
+            options: { value: utils.bigNumberify(inputSwap.outputAmount) },
         };
 
         const id = this.generateId(swap);
