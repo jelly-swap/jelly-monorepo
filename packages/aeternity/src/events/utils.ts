@@ -9,7 +9,7 @@ const TOPICS = {
     REFUND: 'c4e6ebe500e9327588e3eb820645ed28c99741f75e762e01faada721269ebab5',
 };
 
-export default (tx: any): any => {
+export default (tx: any, filter: Function): any => {
     const log = tx.log;
 
     if (log.length === 1) {
@@ -17,15 +17,30 @@ export default (tx: any): any => {
 
         switch (topic) {
             case TOPICS.NEW_CONTRACT: {
-                return formatNewContractEventData(log[0]);
+                const t = formatNewContractEventData(log[0]);
+                const f = filter ? filter(t) : t;
+                if (f) {
+                    return f;
+                }
+                break;
             }
 
             case TOPICS.REFUND: {
-                return formatRefundEventData(log[0]);
+                const t = formatRefundEventData(log[0]);
+                const f = filter ? filter(t) : t;
+                if (f) {
+                    return f;
+                }
+                break;
             }
 
             case TOPICS.WITHDRAW: {
-                return formatWithdrawEventData(log[0]);
+                const t = formatWithdrawEventData(log[0]);
+                const f = filter ? filter(t) : t;
+                if (f) {
+                    return f;
+                }
+                break;
             }
 
             default: {

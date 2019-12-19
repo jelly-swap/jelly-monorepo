@@ -1,7 +1,8 @@
 import { Universal } from '@aeternity/aepp-sdk';
-import { ContractSwap, ContractWithdraw, ContractRefund, Provider } from '../types';
 
 import { getInputFromSwap, getInputFromRefund, getInputFromWithdraw } from './utils';
+
+import { ContractSwap, ContractWithdraw, ContractRefund, Provider } from '../types';
 
 import Config from '../config';
 import ContractSource from '../config/contractSource';
@@ -37,8 +38,7 @@ export default class HttpProvider implements Provider {
 
     async getBalance(address: string) {
         await this.setup();
-        const accountInfo = await this.provider.api.getAccountByPubkey(address);
-        return accountInfo.balance;
+        return await this.provider.getBalance(address);
     }
 
     async newContract(swap: ContractSwap) {

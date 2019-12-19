@@ -64,7 +64,7 @@ export default class TronAdapter implements JellyAdapter {
     parseOutputAddress(address: string): string {
         try {
             const tronHex = TronWeb.address.toHex(address);
-            const outputAddress = '0x' + tronHex.slice(2, tronHex.lenght);
+            const outputAddress = '0x' + tronHex.slice(2);
             return outputAddress;
         } catch (error) {}
     }
@@ -97,9 +97,13 @@ export default class TronAdapter implements JellyAdapter {
     }
 
     generateId(swap: ContractSwap): string {
+        const tronHex = TronWeb.address.toHex(swap.sender);
+        const sender = '0x' + tronHex.slice(2);
+        const receiver = '0x' + swap.receiver.slice(2);
+
         return utils.soliditySha256(
             ['address', 'address', 'uint256', 'bytes32', 'uint256'],
-            [swap.sender, swap.receiver, swap.inputAmount, swap.hashLock, swap.expiration]
+            [sender, receiver, swap.inputAmount, swap.hashLock, swap.expiration]
         );
     }
 }

@@ -5,18 +5,18 @@ import { JellyContract, ContractSwap, ContractRefund, ContractWithdraw } from '.
 import EventHandler from './events';
 
 import Config from './config';
-import ABI from './config/ABI';
+import ABI from './config/abi';
 
 export default class EthereumContract implements JellyContract {
     public contract: ethers.Contract;
-    private provider: ethers.providers.BaseProvider;
+    public provider: ethers.providers.BaseProvider;
     private eventHandler: EventHandler;
 
     constructor(provider: any) {
         const signer = provider.getSigner ? provider.getSigner() : provider;
         this.contract = new ethers.Contract(Config().contractAddress, ABI, signer);
         this.provider = provider;
-        this.eventHandler = new EventHandler(this.contract);
+        this.eventHandler = new EventHandler(this);
     }
 
     async subscribe(onMessage: Function, filter?: Function) {
@@ -63,6 +63,7 @@ export default class EthereumContract implements JellyContract {
     }
 
     async getStatus(ids: any[]) {
-        return await this.contract.getStatus(ids);
+        // Set `from` in order to be able to call the function without a signer
+        return await this.contract.getStatus(ids, { from: '0x0123456789012345678901234567890123456789' });
     }
 }
