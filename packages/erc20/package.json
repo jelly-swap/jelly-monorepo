@@ -24,6 +24,9 @@
         "url": "https://github.com/jelly-swap/jelly-monorepo/issues"
     },
     "dependencies": {
-        "@jelly-swap/ethereum": "^0.0.0"
+        "@jelly-swap/ethereum": "^0.1.13",
+        "@jelly-swap/types": "^0.1.2",
+        "@jelly-swap/utils": "^0.1.9",
+        "ethers": "^4.0.40"
     }
 }
