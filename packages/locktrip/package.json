@@ -1,0 +1,30 @@
+{
+  "name": "@jelly-swap/locktrip",
+  "version": "0.0.1",
+  "description": "JellySwap TypeScript implementation for LockTrip network.",
+  "author": "kraykov <raykov@weichain.tech>",
+  "homepage": "https://github.com/jelly-swap/monorepo#readme",
+  "license": "ISC",
+  "main": "./dist/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jelly-swap/monorepo.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/jelly-swap/monorepo/issues"
+  },
+  "dependencies": {
+    "@jelly-swap/types": "^0.1.2",
+    "@jelly-swap/utils": "^0.1.9"
+  }
+}
