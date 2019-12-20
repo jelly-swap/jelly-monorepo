@@ -1,6 +1,6 @@
 {
     "name": "@jelly-swap/erc20",
-    "version": "0.0.1",
+    "version": "0.1.14",
     "description": "JellySwap TypeScript implementation for ERC20 tokens.",
     "author": "kraykov <raykov@weichain.tech>",
     "homepage": "https://github.com/jelly-swap/jelly-monorepo#readme",
@@ -27,9 +27,9 @@
         "url": "https://github.com/jelly-swap/jelly-monorepo/issues"
     },
     "dependencies": {
-        "@jelly-swap/ethereum": "^0.1.13",
-        "@jelly-swap/types": "^0.1.2",
-        "@jelly-swap/utils": "^0.1.9",
+        "@jelly-swap/ethereum": "^0.1.14",
+        "@jelly-swap/types": "^0.1.14",
+        "@jelly-swap/utils": "^0.1.14",
         "ethers": "^4.0.40"
     }
 }
