@@ -1,4 +1,4 @@
-import { Crypto } from '@aeternity/aepp-sdk';
+import { decodeBase64Check, encodeBase58Check } from '@aeternity/aepp-sdk/es/utils/crypto';
 import BigNumber from 'bignumber.js';
 
 BigNumber.config({ EXPONENTIAL_AT: 100, POW_PRECISION: 100 });
@@ -127,7 +127,7 @@ const formatNewContractEventData = (log: any) => {
 };
 
 const decodeLogData = (log: any) => {
-    return Crypto.decodeBase64Check(log.data.slice(3))
+    return decodeBase64Check(log.data.slice(3))
         .toString('utf-8')
         .split(',');
 };
@@ -149,7 +149,7 @@ const pad64WithPrefix = (val: string, big = true) => {
 
 const encodeEventAddress = (input: string, prefix: string) => {
     const address = new BigNumber(input).toString(16);
-    return `${prefix}${Crypto.encodeBase58Check(Buffer.from(address, 'hex'))}`;
+    return `${prefix}${encodeBase58Check(Buffer.from(address, 'hex'))}`;
 };
 
 export const mapStatus = (status: string) => {
