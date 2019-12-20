@@ -20,6 +20,9 @@
     "scripts": {
         "build": "tsc"
     },
+    "publishConfig": {
+        "access": "public"
+    },
     "bugs": {
         "url": "https://github.com/jelly-swap/jelly-monorepo/issues"
     },
