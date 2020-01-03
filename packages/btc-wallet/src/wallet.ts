@@ -9,11 +9,12 @@ import Address from './Address';
 import Networks from './networks';
 
 export default class BtcWallet {
+    public network: Network;
+    public provider: any;
+
     private derivationPath: string;
-    private network: Network;
     private mnemonic: string;
     private addressType: string;
-    private provider: any;
 
     constructor(network = Networks.testnet, mnemonic: string, addressType = 'bech32', provider: any) {
         if (!Config.AddressTypes.includes(addressType)) {
