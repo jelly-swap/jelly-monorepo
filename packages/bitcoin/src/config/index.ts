@@ -1,12 +1,12 @@
 export default (expiration = 10800) => {
     return {
         network: 'BTC',
-        explorer: '',
-        providerUrl: '',
-        contractAddress: '',
-        receiverAddress: '',
+        explorer: 'https://blockstream.info/testnet/tx/',
+        providerUrl: 'https://spacejelly.network/bitpay/api/BTC/testnet',
+        receiverAddress: 'tb1qc4mwllgvmy0xqsdexpm5v8g74ldmv698whnyrw',
         expiration,
         decimals: 8,
         unix: true,
+        apiProviderUrl: 'http://localhost:8080/api/v1/btc',
     };
 };

@@ -13,10 +13,10 @@ export default class HTLC {
     private provider: BtcProvider;
     private mode: string;
 
-    constructor(wallet: BtcWallet, provider: BtcProvider, mode = 'p2wsh') {
-        this.network = wallet.network;
+    constructor(wallet: BtcWallet, network: any, mode = 'p2wsh') {
+        this.network = network;
         this.wallet = wallet;
-        this.provider = provider;
+        this.provider = wallet.provider;
         this.mode = mode;
     }
 

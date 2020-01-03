@@ -61,7 +61,7 @@ export default class BitcoinAdapter implements JellyAdapter {
         return {
             ...data,
             inputAmount,
-            hashLock: '0x' + hashLock,
+            hashLock,
             receiver,
             network: 'BTC',
             expiration,

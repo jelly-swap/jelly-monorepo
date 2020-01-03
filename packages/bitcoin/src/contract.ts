@@ -1,48 +1,52 @@
-import BtcWallet from '@jelly-swap/btc-wallet';
+import BtcWallet, { Networks } from '@jelly-swap/btc-wallet';
 import BtcProvider from '@jelly-swap/btc-provider';
 import { safeAccess } from '@jelly-swap/utils';
 
-import {
-    JellyContract,
-    ContractSwap,
-    BtcContractRefund,
-    BtcContractWithdraw,
-} from './types';
+import { JellyContract, ContractSwap, BtcContractRefund, BtcContractWithdraw } from './types';
 
 import HTLC from './htlc';
+import EventHandler from './events';
 
 export default class BitcoinContract implements JellyContract {
-    private wallet: BtcWallet;
+    private wallet: BtcProvider | BtcWallet;
     private provider: BtcProvider;
     private contract: HTLC;
+    private eventHandler: EventHandler;
 
-    constructor(provider: BtcProvider, wallet: BtcWallet) {
-        this.provider = provider;
-        this.wallet = wallet;
-        this.contract = new HTLC(wallet, provider);
+    constructor(wallet: BtcProvider | BtcWallet, network = Networks.testnet) {
+        if (wallet instanceof BtcWallet) {
+            this.wallet = wallet;
+            this.contract = new HTLC(wallet, network);
+            this.provider = safeAccess(wallet, ['provider']);
+        } else {
+            this.provider = wallet;
+        }
+
+        this.eventHandler = new EventHandler();
     }
+
     subscribe(onMessage: Function, filter?: Function): void {
-        throw new Error('Method not implemented.');
-    }
-    getPastEvents(type: string, filter: Function) {
-        throw new Error('Method not implemented.');
+        this.eventHandler.subscribe(onMessage, filter);
     }
 
-    getCurrentBlock(): Promise<string | number> {
-        throw new Error('Method not implemented.');
+    async getPastEvents(type: string, filter: Function) {
+        return await this.eventHandler.getPast(type, filter);
+    }
+
+    async getCurrentBlock(): Promise<string | number> {
+        return await this.provider.getBlockHeight();
     }
 
     async getBalance(_address: string): Promise<string | number> {
-        const balance = safeAccess(this.wallet, ['getBalance']);
-        if (balance) {
-            return await balance();
+        if (this.wallet instanceof BtcWallet) {
+            return await this.wallet.getBalance();
         }
         return 0;
     }
 
     async newContract(swap: ContractSwap): Promise<string> {
         const metadata = {
-            eventName: 'REFUND',
+            eventName: 'NEW_CONTRACT',
             id: swap.id,
             sender: swap.sender,
             receiver: swap.receiver,
@@ -58,7 +62,7 @@ export default class BitcoinContract implements JellyContract {
         const refundAddress = swap.sender;
 
         const result = await this.contract.newSwap(
-            swap.inputAmount,
+            Number(swap.inputAmount),
             swap.receiver,
             refundAddress,
             swap.hashLock,
@@ -75,16 +79,17 @@ export default class BitcoinContract implements JellyContract {
             hashLock: withdraw.hashLock,
             sender: withdraw.sender,
             receiver: withdraw.receiver,
-            secret: withdraw.
+            secret: withdraw.secret,
         };
 
-        const result = await this.contract.refund(
+        const result = await this.contract.withdraw(
             withdraw.transactionHash,
             withdraw.receiver,
             withdraw.refundAddress,
             Number(withdraw.expiration),
-            withdraw.hashLock,
-            metadata
+            withdraw.secret,
+            metadata,
+            withdraw.hashLock
         );
 
         return result.txid;
