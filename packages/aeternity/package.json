@@ -37,5 +37,6 @@
         "@types/memoizee": "^0.4.3",
         "@types/websocket": "^1.0.0",
         "tslint-config-prettier": "^1.18.0"
-    }
+    },
+    "gitHead": "8639449906eb7425eb2f910bcf0c8604730defd7"
 }

@@ -31,5 +31,6 @@
         "@jelly-swap/types": "^0.1.17",
         "@jelly-swap/utils": "^0.1.17",
         "ethers": "^4.0.40"
-    }
+    },
+    "gitHead": "8639449906eb7425eb2f910bcf0c8604730defd7"
 }

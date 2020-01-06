@@ -30,5 +30,6 @@
     "devDependencies": {
         "@types/create-hash": "^1.2.2",
         "tslint-config-prettier": "^1.18.0"
-    }
+    },
+    "gitHead": "8639449906eb7425eb2f910bcf0c8604730defd7"
 }
