@@ -7,6 +7,6 @@ export default (expiration = 10800) => {
         expiration,
         decimals: 8,
         unix: true,
-        apiProviderUrl: 'http://localhost:8080/api/v1/btc',
+        apiProviderUrl: 'https://spacejelly.network/btc/api/v1/btc',
     };
 };
