@@ -1,6 +1,6 @@
 {
     "name": "@jelly-swap/bitcoin",
-    "version": "0.1.17",
+    "version": "0.1.18",
     "description": "JellySwap TypeScript implementation for Bitcoin.",
     "author": "kraykov <raykov@weichain.tech>",
     "homepage": "https://github.com/jelly-swap/monorepo#readme",
@@ -27,10 +27,10 @@
         "access": "public"
     },
     "dependencies": {
-        "@jelly-swap/btc-provider": "^0.1.17",
-        "@jelly-swap/btc-wallet": "^0.1.17",
-        "@jelly-swap/types": "^0.1.17",
-        "@jelly-swap/utils": "^0.1.17",
+        "@jelly-swap/btc-provider": "^0.1.18",
+        "@jelly-swap/btc-wallet": "^0.1.18",
+        "@jelly-swap/types": "^0.1.18",
+        "@jelly-swap/utils": "^0.1.18",
         "bignumber.js": "^9.0.0",
         "bitcoinjs-lib": "^5.1.6"
     },
