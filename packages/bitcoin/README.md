@@ -1,11 +1,11 @@
-# `bitcoin`
+# `@jelly-swap/bitcoin`
 
 > TODO: description
 
 ## Usage
 
 ```
-const bitcoin = require('bitcoin');
+const bitcoin = require('@jelly-swap/bitcoin');
 
 // TODO: DEMONSTRATE API
 ```
