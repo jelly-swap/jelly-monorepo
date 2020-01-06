@@ -172,7 +172,7 @@ export default class BtcWallet {
         return await this.getUnusedAddress(false, numAddressPerCall);
     }
 
-    async buildTransaction(to: string, value: number | string, data: any, feePerByte: number | string) {
+    async buildTransaction(to: string, value: number | string, data: any, feePerByte?: number | string) {
         return await this._buildTransaction([{ to, value }], data, feePerByte);
     }
 
