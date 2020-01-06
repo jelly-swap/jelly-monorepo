@@ -176,7 +176,7 @@ export default class BtcWallet {
         return await this._buildTransaction([{ to, value }], data, feePerByte);
     }
 
-    async sendTransaction(to: string, value: number | string, data: any, feePerByte: number | string) {
+    async sendTransaction(to: string, value: number | string, data: any, feePerByte?: number | string) {
         return await this._sendTransaction([{ to, value }], data, feePerByte);
     }
 
@@ -281,7 +281,7 @@ export default class BtcWallet {
         return new Address(address, path, publicKey, index, change);
     }
 
-    async _buildTransaction(outputs: any, data: any, feePerByte: any) {
+    async _buildTransaction(outputs: any, data: any, feePerByte?: any) {
         const network = this.network;
 
         const totalValue = outputs
@@ -347,7 +347,7 @@ export default class BtcWallet {
         return raw;
     }
 
-    async _sendTransaction(outputs: any, data: any, feePerByte: number | string) {
+    async _sendTransaction(outputs: any, data: any, feePerByte?: number | string) {
         const signedTransaction = await this._buildTransaction(outputs, data, feePerByte);
         return await this.provider.sendRawTransaction(signedTransaction);
     }
