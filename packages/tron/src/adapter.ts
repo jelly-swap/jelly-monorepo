@@ -57,7 +57,7 @@ export default class TronAdapter implements JellyAdapter {
     parseAddress(address: string): string {
         try {
             const base58 = TronWeb.address.fromHex(address);
-            return base58.toLowerCase();
+            return base58;
         } catch (error) {}
     }
 
