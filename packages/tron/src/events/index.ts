@@ -14,12 +14,27 @@ export default class Event {
         this.adapter = new Adapter();
     }
 
+    async getStatus(ids: any[]) {
+        const contract = this.contract;
+        const multiArrayOfIds = chunkArray(ids, 50);
+
+        const result: any[] = await Promise.all(
+            multiArrayOfIds.map(ids => {
+                return contract.getStatus(ids);
+            })
+        );
+
+        const statuses = [].concat.apply([], result);
+        return statuses;
+    }
+
     async getPast(type: string, filter?: any, currentBlock?: string | number) {
         switch (type) {
             case 'new': {
                 const result = await this._getPast('NewContract', TransformNewContract, filter, currentBlock);
                 const ids = result.map((s: any) => s.id);
-                const status = await this.contract.getStatus(ids);
+                const status = await this.getStatus(ids);
+
                 return result.map((s: any, index: number) => {
                     return { ...s, status: status[index] };
                 });
@@ -115,4 +130,15 @@ export default class Event {
             }
         });
     }
+}
+
+function chunkArray(arr: any[], size: number) {
+    const result = [];
+
+    while (arr.length > size) {
+        result.push(arr.splice(0, size));
+    }
+    result.push(arr.slice(0));
+
+    return result;
 }
