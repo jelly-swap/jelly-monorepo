@@ -132,10 +132,10 @@ export default class Event {
     }
 }
 
-function chunkArray(arr: string[], size: number) {
+function chunkArray(arr: any[], size: number) {
     const result = [];
 
-    for (let index = 0; arr.length > size; index++) {
+    while (arr.length > size) {
         result.push(arr.splice(0, size));
     }
     result.push(arr.slice(0));
