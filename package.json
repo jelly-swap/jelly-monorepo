@@ -12,6 +12,6 @@
     "scripts": {
         "build": "lerna run build",
         "publish": "lerna run tsc && lerna publish",
-        "clean": "for d in packages/*/dist; do echo removing $d; rm -r $d; done"
+        "clean": "lerna clean --yes && for d in packages/*/dist; do if [ -d $d ]; then echo removing $d; rm -r $d; fi; done"
     }
 }
