@@ -3,7 +3,7 @@ import TronGrid from 'trongrid';
 import Config from '../config';
 
 export default class WalletProvider {
-    constructor(providerUrl = Config().providerUrl, privateKey: string) {
+    constructor( privateKey: string, providerUrl = Config().providerUrl) {
         const tronWeb = new TronWeb({
             fullNode: providerUrl,
             solidityNode: providerUrl,
