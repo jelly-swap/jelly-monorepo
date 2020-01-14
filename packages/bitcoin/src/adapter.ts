@@ -5,14 +5,14 @@ import { JellyAdapter, ContractSwap, UserInputSwap } from './types';
 import Config from './config';
 
 export default class BitcoinAdapter implements JellyAdapter {
-    private BtcConfig: any;
+    private config: any;
 
-    constructor() {
-        this.BtcConfig = Config();
+    constructor(config = Config()) {
+        this.config = config;
     }
 
-    createSwapFromInput(inputSwap: ContractSwap, sender = this.BtcConfig.receiverAddress): ContractSwap {
-        const expiration = getExpiration(this.BtcConfig.expiration, 'second', this.BtcConfig.unix);
+    createSwapFromInput(inputSwap: ContractSwap, sender = this.config.receiverAddress): ContractSwap {
+        const expiration = getExpiration(this.config.expiration, 'second', this.config.unix);
 
         const result = {
             network: inputSwap.outputNetwork,
@@ -52,11 +52,11 @@ export default class BitcoinAdapter implements JellyAdapter {
         return new BigNumber(amount).dividedBy(new BigNumber(10).exponentiatedBy(8)).toString();
     }
 
-    formatInput(data: UserInputSwap, receiver = this.BtcConfig.receiverAddress): ContractSwap {
+    formatInput(data: UserInputSwap, receiver = this.config.receiverAddress): ContractSwap {
         const inputAmount = this.parseToNative(data.inputAmount);
         const hashLock = generateHashLock(data.secret);
 
-        const expiration = getExpiration(this.BtcConfig.expiration, 'second', this.BtcConfig.unix);
+        const expiration = getExpiration(this.config.expiration, 'second', this.config.unix);
 
         return {
             ...data,

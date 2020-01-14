@@ -3,7 +3,7 @@ import { HttpClient } from '@jelly-swap/btc-provider';
 export default class ApiProvider {
     private client: HttpClient;
 
-    constructor(url = 'https://spacejelly.network/btc/api/v1/btc') {
+    constructor(url: string) {
         this.client = new HttpClient(url);
     }
 
