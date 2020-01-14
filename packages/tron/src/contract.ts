@@ -6,11 +6,13 @@ import Config from './config';
 import { TronContractSwap } from './types';
 
 export default class TronContract implements JellyContract {
+    private config: any;
     private provider: any;
     private contract: any;
     private eventHandler: EventHandler;
 
-    constructor(provider: any) {
+    constructor(provider: any, config = Config()) {
+        this.config = config;
         this.provider = provider;
         this.eventHandler = new EventHandler(this);
     }
@@ -18,7 +20,7 @@ export default class TronContract implements JellyContract {
     async setup() {
         if (!this.contract) {
             if (safeAccess(this.provider, ['tronWeb', 'contract'])) {
-                this.contract = await this.provider.tronWeb.contract().at(Config().contractAddress);
+                this.contract = await this.provider.tronWeb.contract().at(this.config.contractAddress);
             }
         }
     }
