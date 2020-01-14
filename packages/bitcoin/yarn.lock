@@ -2,33 +2,33 @@
 # yarn lockfile v1
 
 
-"@jelly-swap/btc-provider@^0.1.16":
-  version "0.1.16"
-  resolved "https://registry.yarnpkg.com/@jelly-swap/btc-provider/-/btc-provider-0.1.16.tgz#885228d519e4cb4875b9e2e285ea55db096cecb8"
-  integrity sha512-6QtTmnxRp+c7m2uGlmj3p65neQnM4QbKK3RjjLsCwPnvcVxewX5uji1TrVZkIMnxhfoCxUi2KPYiHoKnLseLjg==
+"@jelly-swap/btc-provider@^0.1.19":
+  version "0.1.19"
+  resolved "https://registry.yarnpkg.com/@jelly-swap/btc-provider/-/btc-provider-0.1.19.tgz#9e4159af97787c219061238e4ae931dfbb73a2eb"
+  integrity sha512-KpksJ7W0GtPZ8T7lSvrMQavUeqbQRKcGiFfkGLMep2rq9S3Y56NuA8G+tuNdCzFfq32SE6fv1k24BmWgp6Kg7A==
   dependencies:
     axios "^0.19.0"
     bignumber.js "^9.0.0"
 
-"@jelly-swap/btc-wallet@^0.1.16":
-  version "0.1.16"
-  resolved "https://registry.yarnpkg.com/@jelly-swap/btc-wallet/-/btc-wallet-0.1.16.tgz#9e1b3b448feda6d16f793629c4ba19e6f82e7868"
-  integrity sha512-BZ0q7qmtM+TbQGH1jPPW6T5WfNcCKBmQ7sULUT+zCzKJ62atGuB2K+x/Oqwb/EmCJ4puwZilUSfwp7XVQL8ZTQ==
+"@jelly-swap/btc-wallet@^0.1.18":
+  version "0.1.18"
+  resolved "https://registry.yarnpkg.com/@jelly-swap/btc-wallet/-/btc-wallet-0.1.18.tgz#7b8e72683a366d06d5b1d242b0dd3e56c5ed6895"
+  integrity sha512-NvqJbI0LyF/h7oCfVwuFa9JjU2DzpSlMMo3m/l52Fs7iQo+52LnsQZnt5nynbjZxoiSz79Mny50XTqDrzhmc/A==
   dependencies:
     bignumber.js "^9.0.0"
     bip39 "^3.0.2"
     bitcoinjs-lib "^5.1.6"
     coinselect "^3.1.11"
 
-"@jelly-swap/types@^0.1.14":
-  version "0.1.14"
-  resolved "https://registry.yarnpkg.com/@jelly-swap/types/-/types-0.1.14.tgz#1c9fc98366dd102485a82c52ef850babc7278e78"
-  integrity sha512-eyx74c7btIEc+HrADBPzeEi0PokapqZW6UDxE4CfbEWoCO3J3fyJvzNGXRLdWj6xjD2q2REgZuNi0h+uz5aomQ==
+"@jelly-swap/types@^0.1.18":
+  version "0.1.18"
+  resolved "https://registry.yarnpkg.com/@jelly-swap/types/-/types-0.1.18.tgz#61bec4e7ad584fff8694bd52373480d56098f7c6"
+  integrity sha512-4Nv/V+/wytfuJCM0as7KAE1zou0it5AVwK1/mm8CxR028TFwRcgLT8jJUrEysFUkkop+4VQO1VrrVj6AipCQfw==
 
-"@jelly-swap/utils@^0.1.9":
-  version "0.1.14"
-  resolved "https://registry.yarnpkg.com/@jelly-swap/utils/-/utils-0.1.14.tgz#55e254d017a308265c4724f50a4562e79d9bd169"
-  integrity sha512-3T3mcxvXG3vuzJIIkWaUmpWPuuKxmTTz6JTxEB+D2+0DP361yZqAai2KSDgIu9Z8aOk6f44URvd8PYrE9ECViw==
+"@jelly-swap/utils@^0.1.18":
+  version "0.1.18"
+  resolved "https://registry.yarnpkg.com/@jelly-swap/utils/-/utils-0.1.18.tgz#a1ac0087ecf5632549aace6bbc727a67922816ee"
+  integrity sha512-FQZ+3+9U+B/Rlgn2FMgW9X0kPaC24mWstRH7hZjnzHLGi+hDUkU9bZXIEvY9/PpJi6I2Dx5OfkS0WU/bWHwFCg==
   dependencies:
     create-hash "^1.2.0"
     moment "^2.24.0"
