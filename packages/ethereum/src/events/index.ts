@@ -10,10 +10,12 @@ import ABI from '../config/abi';
 import EthereumContract from '../contract';
 
 export default class Event {
+    private config: any;
     private contract: EthereumContract;
     private interface: utils.Interface;
 
-    constructor(contract: EthereumContract) {
+    constructor(contract: EthereumContract, config = Config()) {
+        this.config = config;
         this.contract = contract;
         this.interface = new utils.Interface(ABI);
     }
@@ -51,7 +53,7 @@ export default class Event {
         }
 
         const eventFilter = {
-            address: Config().contractAddress,
+            address: this.config.contractAddress,
             fromBlock: Number(currentBlock) - 15000, // TODO: constants
             toBlock: currentBlock,
             topics: [this.interface.events[eventName].topic],

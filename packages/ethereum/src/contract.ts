@@ -12,11 +12,11 @@ export default class EthereumContract implements JellyContract {
     public provider: ethers.providers.BaseProvider;
     private eventHandler: EventHandler;
 
-    constructor(provider: any) {
+    constructor(provider: any, config = Config()) {
         const signer = provider.getSigner ? provider.getSigner() : provider;
-        this.contract = new ethers.Contract(Config().contractAddress, ABI, signer);
+        this.contract = new ethers.Contract(config.contractAddress, ABI, signer);
         this.provider = provider;
-        this.eventHandler = new EventHandler(this);
+        this.eventHandler = new EventHandler(this, config);
     }
 
     async subscribe(onMessage: Function, filter?: Function) {

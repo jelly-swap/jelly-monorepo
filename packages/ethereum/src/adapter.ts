@@ -4,15 +4,15 @@ import { JellyAdapter, ContractSwap, UserInputSwap } from './types';
 import { generateHashLock, getExpiration } from '@jelly-swap/utils';
 
 export default class EthereumAdapter implements JellyAdapter {
-    private EthConfig: any;
+    private config: any;
 
-    constructor() {
-        this.EthConfig = Config();
+    constructor(config = Config()) {
+        this.config = config;
     }
 
-    createSwapFromInput(inputSwap: ContractSwap, sender = this.EthConfig.receiverAddress): ContractSwap {
+    createSwapFromInput(inputSwap: ContractSwap, sender = this.config.receiverAddress): ContractSwap {
         const inputAmount = inputSwap.outputAmount;
-        const expiration = getExpiration(this.EthConfig.expiration, 'second', this.EthConfig.unix);
+        const expiration = getExpiration(this.config.expiration, 'second', this.config.unix);
 
         const swap: ContractSwap = {
             network: inputSwap.outputNetwork,
@@ -23,8 +23,8 @@ export default class EthereumAdapter implements JellyAdapter {
             receiver: inputSwap.outputAddress,
             outputNetwork: inputSwap.network,
             outputAddress: inputSwap.receiver,
-            inputAmount: inputSwap.outputAmount,
-            options: { value: utils.bigNumberify(inputSwap.outputAmount) },
+            inputAmount,
+            options: { value: utils.bigNumberify(inputAmount) },
         };
 
         const id = this.generateId(swap);
@@ -59,10 +59,10 @@ export default class EthereumAdapter implements JellyAdapter {
         return utils.formatEther(amount);
     };
 
-    formatInput = (data: UserInputSwap, receiver = this.EthConfig.receiverAddress) => {
+    formatInput = (data: UserInputSwap, receiver = this.config.receiverAddress) => {
         const value = utils.parseEther(String(data.inputAmount));
         const inputAmount = value.toString();
-        const expiration = getExpiration(this.EthConfig.expiration, 'second', this.EthConfig.unix);
+        const expiration = getExpiration(this.config.expiration, 'second', this.config.unix);
 
         return {
             ...data,
@@ -70,7 +70,7 @@ export default class EthereumAdapter implements JellyAdapter {
             hashLock: generateHashLock(data.secret),
             inputAmount,
             receiver,
-            network: this.EthConfig.network,
+            network: this.config.network,
             options: { value },
         };
     };
