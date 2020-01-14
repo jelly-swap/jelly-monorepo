@@ -10,10 +10,12 @@ import ABI from '../config/abi';
 import Erc20Contract from '../contract';
 
 export default class Event {
+    private config: any;
     private contract: Erc20Contract;
     private interface: utils.Interface;
 
-    constructor(contract: Erc20Contract) {
+    constructor(contract: Erc20Contract, config = Config()) {
+        this.config = config;
         this.contract = contract;
         this.interface = new utils.Interface(ABI);
     }
@@ -51,7 +53,7 @@ export default class Event {
         }
 
         const eventFilter = {
-            address: Config().contractAddress,
+            address: this.config.contractAddress,
             fromBlock: Number(currentBlock) - 15000, // TODO: constants
             toBlock: currentBlock,
             topics: [this.interface.events[eventName].topic],
