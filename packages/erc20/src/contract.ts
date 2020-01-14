@@ -98,6 +98,6 @@ export default class Erc20Contract implements Erc20JellyContract {
     }
 
     getTokenContract(tokenAddress: string) {
-        return new ethers.Contract(tokenAddress, ERC20ABI, this.provider);
+        return new ethers.Contract(tokenAddress, ERC20ABI as any, this.provider);
     }
 }
