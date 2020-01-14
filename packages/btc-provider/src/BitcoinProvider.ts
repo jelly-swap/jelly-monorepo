@@ -78,7 +78,7 @@ export default class BitcoinProvider {
             queries.map(addrs => this._getUnspentTransactions(addrs, currentHeight))
         );
 
-        const utxos = utxoSets.flat();
+        const utxos = [].concat.apply([], utxoSets);
         return utxos;
     }
 
