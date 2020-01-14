@@ -7,12 +7,14 @@ import Config from '../config';
 import ContractSource from '../config/contractSource';
 
 export default class WaelletProvider implements Provider {
+    private config: any;
     private provider: any;
     private api: HttpProvider;
 
-    constructor(provider: any) {
+    constructor(config = Config(), provider: any) {
+        this.config = config;
         this.provider = provider;
-        this.api = new HttpProvider();
+        this.api = new HttpProvider(config);
     }
 
     async getBalance(address: string) {
@@ -27,7 +29,7 @@ export default class WaelletProvider implements Provider {
         const result = await this.provider.request
             .contractCall({
                 source: ContractSource,
-                address: Config().contractAddress,
+                address: this.config.contractAddress,
                 method: 'new_contract',
                 params: getInputFromSwap(swap),
                 options: swap.options,
@@ -44,7 +46,7 @@ export default class WaelletProvider implements Provider {
         const result = await this.provider.request
             .contractCall({
                 source: ContractSource,
-                address: Config().contractAddress,
+                address: this.config.contractAddress,
                 method: 'withdraw',
                 params: getInputFromWithdraw(withdraw),
             })
@@ -60,7 +62,7 @@ export default class WaelletProvider implements Provider {
         const result = await this.provider.request
             .contractCall({
                 source: ContractSource,
-                address: Config().contractAddress,
+                address: this.config.contractAddress,
                 method: 'refund',
                 params: getInputFromRefund(refund),
             })
@@ -76,7 +78,7 @@ export default class WaelletProvider implements Provider {
         const result = await this.provider.request
             .contractCallStatic({
                 source: ContractSource,
-                address: Config().contractAddress,
+                address: this.config.contractAddress,
                 method: 'get_many_status',
                 params: [ids],
             })
