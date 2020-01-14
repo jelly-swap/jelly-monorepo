@@ -14,7 +14,7 @@ export default class TronContract implements JellyContract {
     constructor(provider: any, config = Config()) {
         this.config = config;
         this.provider = provider;
-        this.eventHandler = new EventHandler(this);
+        this.eventHandler = new EventHandler(this, config);
     }
 
     async setup() {
