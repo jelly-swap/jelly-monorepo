@@ -9,14 +9,14 @@ const ADDRESS_SIZE = 42;
 const ADDRESS_PREFIX = '41';
 
 export default class TronAdapter implements JellyAdapter {
-    private TronConfig: any;
+    private config: any;
 
-    constructor() {
-        this.TronConfig = Config();
+    constructor(config = Config()) {
+        this.config = config;
     }
 
-    createSwapFromInput(inputSwap: ContractSwap, sender = this.TronConfig.receiverAddress): TronContractSwap {
-        const expiration = getExpiration(this.TronConfig.expiration, 'seconds', this.TronConfig.unix);
+    createSwapFromInput(inputSwap: ContractSwap, sender = this.config.receiverAddress): TronContractSwap {
+        const expiration = getExpiration(this.config.expiration, 'seconds', this.config.unix);
 
         const swap: TronContractSwap = {
             network: inputSwap.outputNetwork,
@@ -77,16 +77,16 @@ export default class TronAdapter implements JellyAdapter {
         return TronWeb.fromSun(amount);
     }
 
-    formatInput(data: UserInputSwap, receiver = this.TronConfig.receiverAddress): TronContractSwap {
+    formatInput(data: UserInputSwap, receiver = this.config.receiverAddress): TronContractSwap {
         const inputAmount = TronWeb.toSun(data.inputAmount);
-        const expiration = getExpiration(this.TronConfig.expiration, 'seconds', this.TronConfig.unix);
+        const expiration = getExpiration(this.config.expiration, 'seconds', this.config.unix);
 
         return {
             ...data,
             hashLock: generateHashLock(data.secret),
             inputAmount,
             expiration,
-            network: this.TronConfig.network,
+            network: this.config.network,
             receiver,
             options: {
                 feeLimit: 100000000,

@@ -9,14 +9,16 @@ import ParseEvent, { mapStatus } from './utils';
 import Config from '../config';
 
 export default class Event {
+    private config: any;
     private webSocketClient: w3cwebsocket;
     private provider: Provider;
     private history: Map<String, Boolean>;
     private cache: Function;
 
-    constructor(provider: Provider) {
+    constructor(provider: Provider, config = Config()) {
+        this.config = config;
         this.provider = provider;
-        this.webSocketClient = new w3cwebsocket(Config().wsUrl);
+        this.webSocketClient = new w3cwebsocket(this.config.wsUrl);
         this.history = new Map();
         this.cache = memoize(this._getPast, { maxAge: 30000 });
     }
@@ -50,7 +52,7 @@ export default class Event {
 
     async _getPast(filter: Function) {
         return axios
-            .get(`${Config().apiUrl}middleware/contracts/calls/address/${Config().contractAddress}`, {
+            .get(`${this.config.apiUrl}middleware/contracts/calls/address/${this.config.contractAddress}`, {
                 transformResponse: [(data: any) => data],
             })
             .then((res: any) => {
@@ -96,7 +98,7 @@ export default class Event {
                 JSON.stringify({
                     op: 'Subscribe',
                     payload: 'Object',
-                    target: Config().contractAddress,
+                    target: this.config.contractAddress,
                 })
             );
         };

@@ -7,25 +7,29 @@ import { ContractSwap, ContractWithdraw, ContractRefund, Provider } from '../typ
 import Config from '../config';
 import ContractSource from '../config/contractSource';
 
+const CONFIG = Config();
+
 export default class HttpProvider implements Provider {
+    private config: any;
     private provider: any;
     private contract: any;
     private initialized: boolean;
 
-    constructor(
-        url = Config().providerUrl,
-        internalUrl = Config().internalUrl,
-        compilerUrl = Config().compilerUrl,
-        keypair?: any
-    ) {
-        this.provider = Universal({ url, internalUrl, compilerUrl, keypair });
+    constructor(config = Config(), keypair?: any) {
+        this.config = config;
+        this.provider = Universal({
+            url: config.providerUrl,
+            internalUrl: config.internalUrl,
+            compilerUrl: config.compilerUrl,
+            keypair,
+        });
     }
 
     async setup() {
         if (!this.initialized) {
             this.provider = await this.provider;
             this.contract = await this.provider.getContractInstance(ContractSource, {
-                contractAddress: Config().contractAddress,
+                contractAddress: this.config.contractAddress,
             });
             this.initialized = true;
         }

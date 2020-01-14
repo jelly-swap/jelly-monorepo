@@ -1,14 +1,15 @@
 import { JellyContract, Provider, ContractSwap, ContractWithdraw, ContractRefund } from './types';
 
 import EventHandler from './events';
+import { Config } from '.';
 
 export default class AeternityContract implements JellyContract {
     private provider: any;
     private eventHandler: EventHandler;
 
-    constructor(provider: Provider) {
+    constructor(provider: Provider, config = Config()) {
         this.provider = provider;
-        this.eventHandler = new EventHandler(this.provider);
+        this.eventHandler = new EventHandler(this.provider, config);
     }
 
     async subscribe(onMessage: Function, filter?: Function) {

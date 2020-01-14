@@ -5,14 +5,14 @@ import { JellyAdapter, Erc20ContractSwap, Erc20UserInputSwap } from './types';
 import Config from './config';
 
 export default class Erc20Adapter implements JellyAdapter {
-    private erc20Config: any;
+    private config: any;
 
-    constructor(token: string) {
-        this.erc20Config = Config(token);
+    constructor(token: string, config = Config(token)) {
+        this.config = config;
     }
 
-    createSwapFromInput(inputSwap: Erc20ContractSwap, sender?: string): Erc20ContractSwap {
-        const expiration = getExpiration(this.erc20Config.expiration, 'second', this.erc20Config.unix);
+    createSwapFromInput(inputSwap: Erc20ContractSwap, sender = this.config.receiverAddress): Erc20ContractSwap {
+        const expiration = getExpiration(this.config.expiration, 'second', this.config.unix);
 
         const network = inputSwap.outputNetwork;
 
@@ -20,13 +20,13 @@ export default class Erc20Adapter implements JellyAdapter {
             network,
             outputAmount: inputSwap.inputAmount,
             expiration,
-            sender: this.erc20Config.receiverAddress,
+            sender,
             hashLock: inputSwap.hashLock,
             receiver: inputSwap.outputAddress,
             outputNetwork: inputSwap.network,
             outputAddress: inputSwap.receiver,
             inputAmount: inputSwap.outputAmount,
-            tokenAddress: this.erc20Config.address,
+            tokenAddress: this.config.address,
         };
 
         const id = this.generateId(result);
@@ -47,17 +47,17 @@ export default class Erc20Adapter implements JellyAdapter {
     }
 
     parseToNative(amount: string): string | number {
-        return utils.parseUnits(amount, this.erc20Config.decimals).toString();
+        return utils.parseUnits(amount, this.config.decimals).toString();
     }
 
     parseFromNative(amount: string): string | number {
-        return utils.formatUnits(amount, this.erc20Config.decimals);
+        return utils.formatUnits(amount, this.config.decimals);
     }
 
-    formatInput(data: Erc20UserInputSwap, receiver = this.erc20Config.receiverAddress): Erc20ContractSwap {
-        const inputAmount = utils.parseUnits(String(data.inputAmount), this.erc20Config.decimals).toString();
-        const expiration = getExpiration(this.erc20Config.expiration, 'second', this.erc20Config.unix);
-        const tokenAddress = data.tokenAddress || this.erc20Config.address;
+    formatInput(data: Erc20UserInputSwap, receiver = this.config.receiverAddress): Erc20ContractSwap {
+        const inputAmount = utils.parseUnits(String(data.inputAmount), this.config.decimals).toString();
+        const expiration = getExpiration(this.config.expiration, 'second', this.config.unix);
+        const tokenAddress = data.tokenAddress || this.config.address;
 
         return {
             ...data,
@@ -66,7 +66,7 @@ export default class Erc20Adapter implements JellyAdapter {
             hashLock: generateHashLock(data.secret),
             inputAmount,
             receiver,
-            network: this.erc20Config.network,
+            network: this.config.network,
         };
     }
 

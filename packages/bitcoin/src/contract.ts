@@ -4,6 +4,7 @@ import { safeAccess } from '@jelly-swap/utils';
 
 import { JellyContract, ContractSwap, BtcContractRefund, BtcContractWithdraw } from './types';
 
+import Config from './config';
 import HTLC from './htlc';
 import EventHandler from './events';
 
@@ -13,7 +14,7 @@ export default class BitcoinContract implements JellyContract {
     private contract: HTLC;
     private eventHandler: EventHandler;
 
-    constructor(wallet: BtcProvider | BtcWallet, network = Networks.testnet) {
+    constructor(wallet: BtcProvider | BtcWallet, network = Networks.testnet, providerUrl = Config().apiProviderUrl) {
         if (wallet instanceof BtcWallet) {
             this.wallet = wallet;
             this.contract = new HTLC(wallet, network);
@@ -22,7 +23,7 @@ export default class BitcoinContract implements JellyContract {
             this.provider = wallet;
         }
 
-        this.eventHandler = new EventHandler();
+        this.eventHandler = new EventHandler(providerUrl);
     }
 
     subscribe(onMessage: Function, filter?: Function): void {

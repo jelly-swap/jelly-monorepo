@@ -1,4 +1,3 @@
-import Config from '../config';
 import NewContractEvent from './newContract';
 import WithdrawEvent from './withdraw';
 import ApiProvider from './api';
@@ -7,9 +6,9 @@ export default class Event {
     private newContract: NewContractEvent;
     private withdraw: WithdrawEvent;
 
-    constructor() {
-        const config = Config();
-        const provider = new ApiProvider(config.apiProviderUrl);
+    constructor(apiProviderUrl: string) {
+        const provider = new ApiProvider(apiProviderUrl);
+
         this.newContract = new NewContractEvent(provider);
         this.withdraw = new WithdrawEvent(provider);
     }

@@ -5,16 +5,16 @@ import BigNumber from 'bignumber.js';
 import Config from './config';
 
 export default class AeternityAdapter implements JellyAdapter {
-    private AeConfig: any;
+    private config: any;
 
-    constructor() {
-        this.AeConfig = Config();
+    constructor(config = Config()) {
+        this.config = config;
     }
 
-    createSwapFromInput(inputSwap: ContractSwap, sender = this.AeConfig.receiverAddress): ContractSwap {
+    createSwapFromInput(inputSwap: ContractSwap, sender = this.config.receiverAddress): ContractSwap {
         const inputAmount = inputSwap.outputAmount;
 
-        const expiration = getExpiration(this.AeConfig.expiration, 'second', this.AeConfig.unix);
+        const expiration = getExpiration(this.config.expiration, 'second', this.config.unix);
 
         const swap: ContractSwap = {
             network: inputSwap.outputNetwork,
@@ -54,10 +54,10 @@ export default class AeternityAdapter implements JellyAdapter {
         return new BigNumber(amount).dividedBy(1000000000000000000).toString();
     };
 
-    formatInput = (swap: UserInputSwap, receiver = this.AeConfig.receiverAddress): ContractSwap => {
+    formatInput = (swap: UserInputSwap, receiver = this.config.receiverAddress): ContractSwap => {
         const inputAmount = this.parseToNative(swap.inputAmount);
 
-        const expiration = getExpiration(this.AeConfig.expiration, 'second', this.AeConfig.unix);
+        const expiration = getExpiration(this.config.expiration, 'second', this.config.unix);
 
         return {
             ...swap,
@@ -65,7 +65,7 @@ export default class AeternityAdapter implements JellyAdapter {
             hashLock: generateHashLock(swap.secret),
             inputAmount,
             receiver,
-            network: this.AeConfig.network,
+            network: this.config.network,
             options: { amount: inputAmount },
         };
     };

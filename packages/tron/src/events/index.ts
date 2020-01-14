@@ -6,10 +6,12 @@ import Config from '../config';
 import Adapter from '../adapter';
 
 export default class Event {
+    private config: any;
     private contract: any;
     private adapter: Adapter;
 
-    constructor(contract: any) {
+    constructor(contract: any, config = Config()) {
+        this.config = config;
         this.contract = contract;
         this.adapter = new Adapter();
     }
@@ -59,7 +61,7 @@ export default class Event {
         let events: any[] = [];
 
         do {
-            const e = await this.contract.provider.contract.getEvents(Config().contractAddress, {
+            const e = await this.contract.provider.contract.getEvents(this.config.contractAddress, {
                 event_name: eventName,
                 limit: 200,
                 only_confirmed: true,
