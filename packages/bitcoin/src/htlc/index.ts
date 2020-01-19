@@ -127,7 +127,7 @@ export default class HTLC {
 
             // Add metadata
             if (metadata) {
-                const embed = BitcoinPayments.embed({ data: [Buffer.from(JSON.stringify(metadata), 'utf8')] });
+                const embed = BitcoinPayments.embed({ data: [Buffer.from(`J_${metadata.eventName}`, 'utf8')] });
                 txBuilder.addOutput(embed.output, 0);
             }
 
@@ -177,7 +177,7 @@ export default class HTLC {
                 tx.setInputScript(0, paymentWithInput.input);
             }
 
-            return this.provider.sendRawTransaction(tx.toHex());
+            return this.provider.sendRawTransaction(tx.toHex(), metadata);
         } else {
             throw new Error(`INVALID_REDEEM_${isWithdraw}`);
         }
