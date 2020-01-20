@@ -301,7 +301,7 @@ export default class BtcWallet {
 
         // Add metadata
         if (data) {
-            const metadata = Buffer.from(JSON.stringify(data), 'utf8');
+            const metadata = Buffer.from(`J_${data.eventName}`, 'utf8');
             const embed = payments.embed({ data: [metadata] });
             txBuilder.addOutput(embed.output, 0);
         }
@@ -349,6 +349,6 @@ export default class BtcWallet {
 
     async _sendTransaction(outputs: any, data: any, feePerByte?: number | string) {
         const signedTransaction = await this._buildTransaction(outputs, data, feePerByte);
-        return await this.provider.sendRawTransaction(signedTransaction);
+        return await this.provider.sendRawTransaction(signedTransaction, data);
     }
 }

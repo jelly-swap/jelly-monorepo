@@ -70,7 +70,7 @@ export default class BitcoinContract implements JellyContract {
             Number(swap.expiration),
             metadata
         );
-        return result.txid;
+        return result;
     }
 
     async withdraw(withdraw: BtcContractWithdraw): Promise<string> {
@@ -93,7 +93,7 @@ export default class BitcoinContract implements JellyContract {
             withdraw.hashLock
         );
 
-        return result.txid;
+        return result;
     }
 
     async refund(refund: BtcContractRefund): Promise<string> {
@@ -114,7 +114,7 @@ export default class BitcoinContract implements JellyContract {
             metadata
         );
 
-        return result.txid;
+        return result;
     }
 
     getStatus(ids: any[]) {
