@@ -250,7 +250,24 @@ export default class BtcWallet {
             feePerByte = await this.provider.getFeePerByte();
         }
 
-        const { inputs, outputs, fee } = coinselect(updatedUtxos, [{ id: 'main', value: amount }], feePerByte);
+        const result = this.getInputs(updatedUtxos, Number(amount), feePerByte);
+
+        if (result.inputs) {
+            return result;
+        } else {
+            // if user tries to use the whole available balance
+            const fixedAmount = new BigNumber(amount).minus(result.fee).toNumber();
+            const fixedResult = this.getInputs(updatedUtxos, Number(fixedAmount), feePerByte);
+            if (fixedResult.inputs) {
+                return fixedResult;
+            }
+        }
+
+        throw new Error('NOT_ENOUGHT_BALANCE');
+    }
+
+    getInputs(utxos: any, amount: Number, feePerByte: any) {
+        const { inputs, outputs, fee } = coinselect(utxos, [{ id: 'main', value: amount }], feePerByte);
 
         if (inputs && outputs) {
             let change = outputs.find((output: any) => output.id !== 'main');
@@ -261,10 +278,10 @@ export default class BtcWallet {
                 }
             }
 
-            return { inputs, change, fee };
+            return { inputs, change, fee, amount };
         }
 
-        throw new Error('NOT_ENOUGHT_BALANCE');
+        return { fee, amount };
     }
 
     _getAddress(node: bip32.BIP32Interface, index: number, change: boolean) {
@@ -290,7 +307,8 @@ export default class BtcWallet {
             }, new BigNumber(0))
             .toNumber();
 
-        const { inputs, change } = await this.getInputsForAmount(totalValue, feePerByte);
+        const { inputs, change, amount } = await this.getInputsForAmount(totalValue, feePerByte);
+        let amountWithoutFee = amount;
 
         if (change) {
             const unusedAddress = await this.getUnusedChangeAddress();
@@ -304,11 +322,24 @@ export default class BtcWallet {
             const metadata = Buffer.from(`J_${data.eventName}`, 'utf8');
             const embed = payments.embed({ data: [metadata] });
             txBuilder.addOutput(embed.output, 0);
+
+            // replace the inputAmount of the metadata with amount - fee in case the whole balance is used.
+            if (amountWithoutFee) {
+                data.inputAmount = amountWithoutFee;
+            }
         }
 
         for (const output of outputs) {
             const to = output.to.address || output.to;
-            txBuilder.addOutput(to, output.value);
+
+            // the fee is substracted from the first output if the balance is insufficient
+            // amountWithoutFee = amount - fee
+            if (amountWithoutFee) {
+                txBuilder.addOutput(to, amountWithoutFee as any);
+                amountWithoutFee = null;
+            } else {
+                txBuilder.addOutput(to, output.value);
+            }
         }
 
         const prevOutScriptType = this.getScriptType();
