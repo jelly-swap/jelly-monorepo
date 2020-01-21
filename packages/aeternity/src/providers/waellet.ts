@@ -86,8 +86,7 @@ export default class WaelletProvider implements Provider {
             .catch((err: any) => {
                 throw new Error(err);
             });
-        // Fix decoded result for Waellet since its discrepancy with the SDK provider.
-        return result.decodedResult.map((r: any) => Object.keys(r)[0]);
+        return result.decodedResult;
     }
 
     async getTxInfo(txHash: string) {
