@@ -1,9 +1,7 @@
-import { AddressToToken } from '../config/tokens';
-
-export default (args: any[], txHash?: any) => {
+export default (args: any[], config: any, txHash?: any) => {
     const transactionHash = args[6] ? args[6].transactionHash : txHash;
     const tokenAddress = args[3].toLowerCase();
-    const token = AddressToToken[tokenAddress].network;
+    const token = config.AddressToToken[tokenAddress].network;
 
     if (token) {
         const result = {
