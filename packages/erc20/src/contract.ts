@@ -5,7 +5,6 @@ import { Erc20JellyContract, Erc20ContractSwap, Erc20ContractRefund, Erc20Contra
 import EventHandler from './events';
 
 import Config from './config';
-import { tokenToAddress } from './config/tokens';
 import ABI from './config/abi';
 import ERC20ABI from './config/abi/erc20';
 
@@ -39,7 +38,7 @@ export default class Erc20Contract implements Erc20JellyContract {
     }
 
     async getBalance(address: string, token: string): Promise<string | number> {
-        const tokenAddress = tokenToAddress(token);
+        const tokenAddress = this.config.TokenToAddress(token);
         const tokenContract = this.getTokenContract(tokenAddress);
         return await tokenContract.balanceOf(address, { from: address });
     }

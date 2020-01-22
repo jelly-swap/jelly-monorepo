@@ -1,11 +1,6 @@
 import { TokenConfig, AddressToToken } from './tokens';
 
-export default (
-    token?: string,
-    tokenConfig = TokenConfig[token],
-    addressToToken = AddressToToken,
-    expiration = 10800
-) => {
+export default (token?: string, tokenConfig = TokenConfig, addressToToken = AddressToToken, expiration = 10800) => {
     return {
         explorer: 'https://ropsten.etherscan.io/tx/',
         providerUrl: 'https://ropsten.infura.io/v3/8fe4fc9626494d238879981936dbf144',
@@ -15,6 +10,9 @@ export default (
         expiration, // 3 hours,
         unix: true,
         AddressToToken: addressToToken,
-        ...tokenConfig,
+        TokenToAddress: (token: string) => {
+            return tokenConfig[token].address;
+        },
+        ...tokenConfig[token],
     };
 };
