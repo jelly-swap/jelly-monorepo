@@ -63,7 +63,7 @@ export default class Event {
 
         const result = logs.reduce<Log[]>((result: Log[], log: Log): Log[] => {
             const event = this.interface.parseLog(log);
-            const t = transform(event.values, log.transactionHash);
+            const t = transform(event.values, this.config, log.transactionHash);
             if (t) {
                 const f = filter ? filter(t) : t;
 
@@ -80,7 +80,7 @@ export default class Event {
 
     async subscribe(onMessage: Function, filter?: Function) {
         this.contract.contract.on('NewContract', (...args: []) => {
-            const swap = TransformNewContract(args);
+            const swap = TransformNewContract(args, this.config);
             const result = filter ? filter(swap) : swap;
             if (result) {
                 onMessage(result);
@@ -88,7 +88,7 @@ export default class Event {
         });
 
         this.contract.contract.on('Withdraw', (...args: []) => {
-            const withdraw = TransformWithdraw(args);
+            const withdraw = TransformWithdraw(args, this.config);
             const result = filter ? filter(withdraw) : withdraw;
             if (result) {
                 onMessage(result);
@@ -96,7 +96,7 @@ export default class Event {
         });
 
         this.contract.contract.on('Refund', (...args: []) => {
-            const refund = TransformRefund(args);
+            const refund = TransformRefund(args, this.config);
             const result = filter ? filter(refund) : refund;
             if (result) {
                 onMessage(result);
