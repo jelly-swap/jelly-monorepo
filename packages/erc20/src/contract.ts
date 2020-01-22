@@ -13,10 +13,11 @@ export default class Erc20Contract implements Erc20JellyContract {
     public provider: ethers.providers.BaseProvider;
     private eventHandler: EventHandler;
     private config: any;
+    private signer: any;
 
     constructor(provider: any, config = Config()) {
-        const signer = provider.getSigner ? provider.getSigner() : provider;
-        this.contract = new ethers.Contract(config.contractAddress, ABI, signer);
+        this.signer = provider.getSigner ? provider.getSigner() : provider;
+        this.contract = new ethers.Contract(config.contractAddress, ABI, this.signer);
         this.provider = provider;
         this.eventHandler = new EventHandler(this, config);
         this.config = config;
@@ -97,6 +98,6 @@ export default class Erc20Contract implements Erc20JellyContract {
     }
 
     getTokenContract(tokenAddress: string) {
-        return new ethers.Contract(tokenAddress, ERC20ABI as any, this.provider);
+        return new ethers.Contract(tokenAddress, ERC20ABI as any, this.signer);
     }
 }
