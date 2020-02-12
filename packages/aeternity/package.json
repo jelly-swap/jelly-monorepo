@@ -1,6 +1,6 @@
 {
     "name": "@jelly-swap/aeternity",
-    "version": "0.1.25",
+    "version": "0.1.29",
     "description": "JellySwap TypeScript implementation for Aeternity.",
     "author": "kraykov <raykov@weichain.tech>",
     "homepage": "https://jelly.market/",
