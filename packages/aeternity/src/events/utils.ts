@@ -148,7 +148,7 @@ const pad64WithPrefix = (val: string, big = true) => {
 };
 
 const encodeEventAddress = (input: string, prefix: string) => {
-    const address = pad64(input)
+    const address = pad64(input);
     return `${prefix}${encodeBase58Check(Buffer.from(address, 'hex'))}`;
 };
 
