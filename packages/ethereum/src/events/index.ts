@@ -1,13 +1,13 @@
+import { filter } from '@jelly-swap/utils';
+import { SwapEvent, WithdrawEvent, RefundEvent } from '@jelly-swap/types';
+
 import { utils } from 'ethers';
 import { Log } from 'ethers/providers';
 
-import TransformNewContract from './newContract';
-import TransformWithdraw from './withdraw';
-import TransformRefund from './refund';
+import EthereumContract from '../contract';
 
 import Config from '../config';
 import ABI from '../config/abi';
-import EthereumContract from '../contract';
 
 export default class Event {
     private config: any;
@@ -20,85 +20,198 @@ export default class Event {
         this.interface = new utils.Interface(ABI);
     }
 
-    async getPast(type: string, filter?: any, currentBlock?: string | number) {
+    async getPast(type: string, filterObject?: any, fromBlock?: string | number, toBlock?: string | number) {
+        const { swaps, refunds, withdraws } = await this._getPast(filterObject, fromBlock, toBlock);
+
         switch (type) {
             case 'new': {
-                const result = await this._getPast('NewContract', TransformNewContract, filter, currentBlock);
-
-                const ids = result.map((s: any) => s.id);
-
-                const status = await this.contract.getStatus(ids);
-
-                return result.map((s: any, index: number) => {
-                    return { ...s, status: status[index] };
-                });
+                return await this.getSwapsWithStatus(swaps);
             }
 
             case 'withdraw': {
-                return await this._getPast('Withdraw', TransformWithdraw, filter, currentBlock);
+                return withdraws;
             }
 
             case 'refund': {
-                return await this._getPast('Refund', TransformRefund, filter, currentBlock);
+                return refunds;
+            }
+
+            case 'all': {
+                return {
+                    swaps: await this.getSwapsWithStatus(swaps),
+                    refunds,
+                    withdraws,
+                };
             }
 
             default: {
+                throw new Error(`Ivalind event type. Available event types: 'new', 'withdraw', 'refund', 'all'`);
             }
         }
     }
 
-    async _getPast(eventName: string, transform: Function, filter?: Function, currentBlock?: string | number) {
-        if (!currentBlock) {
-            currentBlock = await this.contract.provider.getBlockNumber();
-        }
+    async getSwapsWithStatus(swaps: SwapEvent[]) {
+        const ids = swaps.map((s: any) => s.id);
 
-        const eventFilter = {
+        const status = await this.contract.getStatus(ids);
+
+        return swaps.map((s: any, index: number) => {
+            return { ...s, status: status[index] };
+        });
+    }
+
+    async _getPast(filters?: any, fromBlock?: string | number, toBlock?: string | number) {
+        const swaps: SwapEvent[] = [];
+        const withdraws: WithdrawEvent[] = [];
+        const refunds: RefundEvent[] = [];
+
+        const logsFilter = {
+            fromBlock: fromBlock || this.config.originBlock, // TODO: constants
+            toBlock: toBlock || 'latest',
             address: this.config.contractAddress,
-            fromBlock: Number(currentBlock) - 15000, // TODO: constants
-            toBlock: currentBlock,
-            topics: [this.interface.events[eventName].topic],
         };
 
-        const logs = await this.contract.provider.getLogs(eventFilter);
+        const logs = await this.contract.provider.getLogs(logsFilter);
 
-        const result = logs.reduce<Log[]>((result: Log[], log: Log): Log[] => {
-            const event = this.interface.parseLog(log);
-            const t = transform(event.values, log.transactionHash);
-            const f = filter ? filter(t) : t;
+        logs.forEach((log: Log) => {
+            const parsed = this.interface.parseLog(log);
 
-            if (f) {
-                result.push(f);
+            switch (parsed.name) {
+                case 'NewContract': {
+                    const swap = {
+                        network: 'ETH',
+                        eventName: 'NEW_CONTRACT',
+                        id: parsed.values.id,
+                        hashLock: parsed.values.hashLock,
+                        sender: parsed.values.sender,
+                        receiver: parsed.values.receiver,
+                        inputAmount: parsed.values.inputAmount.toString(),
+                        outputAmount: parsed.values.outputAmount.toString(),
+                        expiration: parsed.values.expiration.toString(),
+                        outputNetwork: parsed.values.outputNetwork,
+                        outputAddress: parsed.values.outputAddress,
+                        transactionHash: log.transactionHash,
+                    };
+
+                    if (filter(filters.new, swap)) {
+                        swaps.push(swap);
+                    }
+
+                    break;
+                }
+
+                case 'Withdraw': {
+                    const withdraw = {
+                        network: 'ETH',
+                        eventName: 'WITHDRAW',
+                        id: parsed.values.id,
+                        secret: parsed.values.secret,
+                        hashLock: parsed.values.hashLock,
+                        sender: parsed.values.sender,
+                        receiver: parsed.values.receiver,
+                        transactionHash: log.transactionHash,
+                    };
+
+                    if (filter(filters.withdraw, withdraw)) {
+                        withdraws.push(withdraw);
+                    }
+
+                    break;
+                }
+
+                case 'Refund': {
+                    const refund = {
+                        network: 'ETH',
+                        eventName: 'REFUND',
+                        id: parsed.values.id,
+                        hashLock: parsed.values.hashLock,
+                        sender: parsed.values.sender,
+                        receiver: parsed.values.receiver,
+                        transactionHash: log.transactionHash,
+                    };
+
+                    if (filter(filters.refund, refund)) {
+                        refunds.push(refund);
+                    }
+
+                    break;
+                }
             }
+        });
 
-            return result;
-        }, []);
-
-        return result;
+        return { swaps, withdraws, refunds };
     }
 
-    async subscribe(onMessage: Function, filter?: Function) {
-        this.contract.contract.on('NewContract', (...args: []) => {
-            const swap = TransformNewContract(args);
-            const result = filter ? filter(swap) : swap;
-            if (result) {
-                onMessage(result);
-            }
-        });
+    async subscribe(onMessage: Function, filters?: any) {
+        this.contract.contract.on(
+            {
+                address: this.config.contractAddress,
+            },
+            log => {
+                const parsed = this.interface.parseLog(log);
 
-        this.contract.contract.on('Withdraw', (...args: []) => {
-            const withdraw = TransformWithdraw(args);
-            const result = filter ? filter(withdraw) : withdraw;
-            if (result) {
-                onMessage(result);
-            }
-        });
+                switch (parsed.name) {
+                    case 'NewContract': {
+                        const swap = {
+                            network: 'ETH',
+                            eventName: 'NEW_CONTRACT',
+                            id: parsed.values.id,
+                            hashLock: parsed.values.hashLock,
+                            sender: parsed.values.sender,
+                            receiver: parsed.values.receiver,
+                            inputAmount: parsed.values.inputAmount.toString(),
+                            outputAmount: parsed.values.outputAmount.toString(),
+                            expiration: parsed.values.expiration.toString(),
+                            outputNetwork: parsed.values.outputNetwork,
+                            outputAddress: parsed.values.outputAddress,
+                            transactionHash: log.transactionHash,
+                        };
 
-        this.contract.contract.on('Refund', (...args: []) => {
-            const refund = TransformRefund(args);
-            const result = filter ? filter(refund) : refund;
-            if (result) {
-                onMessage(result);
+                        if (filter(filters.new, swap)) {
+                            onMessage(swap);
+                        }
+
+                        break;
+                    }
+
+                    case 'Withdraw': {
+                        const withdraw = {
+                            network: 'ETH',
+                            eventName: 'WITHDRAW',
+                            id: parsed.values.id,
+                            secret: parsed.values.secret,
+                            hashLock: parsed.values.hashLock,
+                            sender: parsed.values.sender,
+                            receiver: parsed.values.receiver,
+                            transactionHash: log.transactionHash,
+                        };
+
+                        if (filter(filters.withdraw, withdraw)) {
+                            onMessage(withdraw);
+                        }
+
+                        break;
+                    }
+
+                    case 'Refund': {
+                        const refund = {
+                            network: 'ETH',
+                            eventName: 'REFUND',
+                            id: parsed.values.id,
+                            hashLock: parsed.values.hashLock,
+                            sender: parsed.values.sender,
+                            receiver: parsed.values.receiver,
+                            transactionHash: log.transactionHash,
+                        };
+
+                        if (filter(filters.refund, refund)) {
+                            onMessage(refund);
+                        }
+
+                        break;
+                    }
+                }
             }
-        });
+        );
     }
 }
