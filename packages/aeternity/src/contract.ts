@@ -4,12 +4,16 @@ import EventHandler from './events';
 import { Config } from '.';
 
 export default class AeternityContract implements JellyContract {
-    private provider: any;
+    public config: any;
+    public provider: any;
+
     private eventHandler: EventHandler;
 
     constructor(provider: Provider, config = Config()) {
+        this.config = config;
         this.provider = provider;
-        this.eventHandler = new EventHandler(this.provider, config);
+
+        this.eventHandler = new EventHandler(this.provider, this.config);
     }
 
     async subscribe(onMessage: Function, filter?: Function) {

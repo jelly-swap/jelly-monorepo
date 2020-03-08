@@ -9,12 +9,16 @@ import HTLC from './htlc';
 import EventHandler from './events';
 
 export default class BitcoinContract implements JellyContract {
-    private wallet: BtcProvider | BtcWallet;
-    private provider: BtcProvider;
+    public config: any;
+    public provider: BtcProvider;
+
     private contract: HTLC;
+    private wallet: BtcProvider | BtcWallet;
     private eventHandler: EventHandler;
 
-    constructor(wallet: BtcProvider | BtcWallet, network = Networks.testnet, providerUrl = Config().apiProviderUrl) {
+    constructor(wallet: BtcProvider | BtcWallet, config = Config(), network = Networks.testnet) {
+        this.config = config;
+
         if (wallet instanceof BtcWallet) {
             this.wallet = wallet;
             this.contract = new HTLC(wallet, network);
@@ -23,7 +27,7 @@ export default class BitcoinContract implements JellyContract {
             this.provider = wallet;
         }
 
-        this.eventHandler = new EventHandler(providerUrl);
+        this.eventHandler = new EventHandler(this.config.apiProviderUrl);
     }
 
     subscribe(onMessage: Function, filter?: Function): void {

@@ -6,8 +6,9 @@ import Config from './config';
 import { TronContractSwap } from './types';
 
 export default class TronContract implements JellyContract {
-    private config: any;
-    private provider: any;
+    public config: any;
+    public provider: any;
+
     private contract: any;
     private eventHandler: EventHandler;
 

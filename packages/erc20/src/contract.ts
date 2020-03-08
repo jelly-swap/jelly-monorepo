@@ -9,18 +9,20 @@ import ABI from './config/abi';
 import ERC20ABI from './config/abi/erc20';
 
 export default class Erc20Contract implements Erc20JellyContract {
+    public config: any;
     public contract: ethers.Contract;
     public provider: ethers.providers.BaseProvider;
+
     private eventHandler: EventHandler;
-    private config: any;
     private signer: any;
 
     constructor(provider: any, config = Config()) {
+        this.config = config;
+        this.provider = provider;
         this.signer = provider.getSigner ? provider.getSigner() : provider;
         this.contract = new ethers.Contract(config.contractAddress, ABI, this.signer);
-        this.provider = provider;
+
         this.eventHandler = new EventHandler(this, config);
-        this.config = config;
     }
 
     subscribe(onMessage: Function, filter?: Function): void {

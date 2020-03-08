@@ -8,15 +8,20 @@ import Config from './config';
 import ABI from './config/abi';
 
 export default class EthereumContract implements JellyContract {
+    public config: any;
     public contract: ethers.Contract;
     public provider: ethers.providers.BaseProvider;
+
     private eventHandler: EventHandler;
 
     constructor(provider: any, config = Config()) {
         const signer = provider.getSigner ? provider.getSigner() : provider;
-        this.contract = new ethers.Contract(config.contractAddress, ABI, signer);
+
+        this.config = config;
+        this.contract = new ethers.Contract(this.config.contractAddress, ABI, signer);
         this.provider = provider;
-        this.eventHandler = new EventHandler(this, config);
+
+        this.eventHandler = new EventHandler(this, this.config);
     }
 
     async subscribe(onMessage: Function, filter?: Function) {
