@@ -20,6 +20,7 @@ export default class EthereumContract implements JellyContract {
         this.config = config;
         this.contract = new ethers.Contract(this.config.contractAddress, ABI, signer);
         this.provider = provider;
+        this.provider.pollingInterval = config.pollingInterval || Config().pollingInterval;
 
         this.eventHandler = new EventHandler(this, this.config);
     }
