@@ -101,3 +101,15 @@ type Options = {
     amount?: any;
     value?: any;
 };
+
+export interface EventFilter {
+    sender?: string;
+    receiver?: string;
+    outputNetwork?: string;
+    outputAddress?: string;
+}
+export interface Filter {
+    new?: EventFilter;
+    withdraw?: EventFilter;
+    refund?: EventFilter;
+}

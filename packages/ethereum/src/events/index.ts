@@ -1,5 +1,5 @@
 import { filter } from '@jelly-swap/utils';
-import { SwapEvent, WithdrawEvent, RefundEvent } from '@jelly-swap/types';
+import { SwapEvent, WithdrawEvent, RefundEvent, Filter } from '@jelly-swap/types';
 
 import { utils } from 'ethers';
 import { Log } from 'ethers/providers';
@@ -22,15 +22,15 @@ export default class Event {
 
     async getPast(
         type: string,
-        filterObject?: any,
+        _filter?: Filter,
         fromBlock?: string | number,
         toBlock?: string | number
     ): Promise<any> {
-        const { swaps, refunds, withdraws } = await this._getPast(filterObject, fromBlock, toBlock);
+        const { swaps, refunds, withdraws } = await this._getPast(_filter, fromBlock, toBlock);
 
         switch (type) {
             case 'new': {
-                return await this.getSwapsWithStatus(swaps, filterObject);
+                return await this.getSwapsWithStatus(swaps, _filter);
             }
 
             case 'withdraw': {
@@ -43,7 +43,7 @@ export default class Event {
 
             case 'all': {
                 return {
-                    swaps: await this.getSwapsWithStatus(swaps, filterObject),
+                    swaps: await this.getSwapsWithStatus(swaps, _filter),
                     refunds,
                     withdraws,
                 } as any;
@@ -55,7 +55,7 @@ export default class Event {
         }
     }
 
-    async getSwapsWithStatus(swaps: SwapEvent[], filter: any) {
+    async getSwapsWithStatus(swaps: SwapEvent[], filter: Filter) {
         const ids = swaps.map((s: any) => s.id);
 
         const status = await this.contract.getStatus(ids);
@@ -68,7 +68,7 @@ export default class Event {
         });
     }
 
-    async _getPast(filters?: any, fromBlock?: string | number, toBlock?: string | number) {
+    async _getPast(_filter?: any, fromBlock?: string | number, toBlock?: string | number) {
         const swaps: SwapEvent[] = [];
         const withdraws: WithdrawEvent[] = [];
         const refunds: RefundEvent[] = [];
@@ -101,8 +101,8 @@ export default class Event {
                         transactionHash: log.transactionHash,
                     };
 
-                    if (filters.new) {
-                        if (filter(filters.new, swap)) {
+                    if (_filter.new) {
+                        if (filter(_filter.new, swap)) {
                             swaps.push(swap);
                         }
                     } else {
@@ -124,8 +124,8 @@ export default class Event {
                         transactionHash: log.transactionHash,
                     };
 
-                    if (filters.withdraw) {
-                        if (filter(filters.withdraw, withdraw)) {
+                    if (_filter.withdraw) {
+                        if (filter(_filter.withdraw, withdraw)) {
                             withdraws.push(withdraw);
                         }
                     } else {
@@ -146,8 +146,8 @@ export default class Event {
                         transactionHash: log.transactionHash,
                     };
 
-                    if (filters.refund) {
-                        if (filter(filters.refund, refund)) {
+                    if (_filter.refund) {
+                        if (filter(_filter.refund, refund)) {
                             refunds.push(refund);
                         }
                     } else {
@@ -162,7 +162,7 @@ export default class Event {
         return { swaps, withdraws, refunds };
     }
 
-    async subscribe(onMessage: Function, filters?: any) {
+    async subscribe(onMessage: Function, _filter?: Filter) {
         this.contract.contract.on(
             {
                 address: this.config.contractAddress,
@@ -187,9 +187,9 @@ export default class Event {
                             transactionHash: log.transactionHash,
                         };
 
-                        if (filters.new) {
-                            if (filter(filters.new, swap)) {
-                                if (filters.new.sender?.toLowerCase() === swap.sender.toLowerCase()) {
+                        if (_filter.new) {
+                            if (filter(_filter.new, swap)) {
+                                if (_filter.new.sender?.toLowerCase() === swap.sender.toLowerCase()) {
                                     onMessage({ ...swap, isSender: true });
                                 } else {
                                     onMessage(swap);
@@ -214,8 +214,8 @@ export default class Event {
                             transactionHash: log.transactionHash,
                         };
 
-                        if (filters.withdraw) {
-                            if (filter(filters.withdraw, withdraw)) {
+                        if (_filter.withdraw) {
+                            if (filter(_filter.withdraw, withdraw)) {
                                 onMessage(withdraw);
                             }
                         } else {
@@ -236,8 +236,8 @@ export default class Event {
                             transactionHash: log.transactionHash,
                         };
 
-                        if (filters.refund) {
-                            if (filter(filters.refund, refund)) {
+                        if (_filter.refund) {
+                            if (filter(_filter.refund, refund)) {
                                 onMessage(refund);
                             }
                         } else {
