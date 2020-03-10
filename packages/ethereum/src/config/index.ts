@@ -11,5 +11,6 @@ export default (expiration = 10800) => {
         decimals: 18,
         unix: true,
         pollingInterval: 15000,
+        cacheAge: 15000,
     };
 };

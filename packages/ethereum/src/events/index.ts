@@ -4,6 +4,8 @@ import { SwapEvent, WithdrawEvent, RefundEvent, Filter } from '@jelly-swap/types
 import { utils } from 'ethers';
 import { Log } from 'ethers/providers';
 
+import memoize from 'memoizee';
+
 import EthereumContract from '../contract';
 
 import Config from '../config';
@@ -13,11 +15,19 @@ export default class Event {
     private config: any;
     private contract: EthereumContract;
     private interface: utils.Interface;
+    private cache: Function;
 
     constructor(contract: EthereumContract, config = Config()) {
         this.config = config;
         this.contract = contract;
         this.interface = new utils.Interface(ABI);
+        this.cache = memoize(this._getPast, {
+            maxAge: config.cacheAge,
+            promise: true,
+            normalizer: (a: any[]) => {
+                return JSON.stringify(a);
+            },
+        });
     }
 
     async getPast(
@@ -26,7 +36,7 @@ export default class Event {
         fromBlock?: string | number,
         toBlock?: string | number
     ): Promise<any> {
-        const { swaps, refunds, withdraws } = await this._getPast(_filter, fromBlock, toBlock);
+        const { swaps, refunds, withdraws } = await this.cache(_filter, fromBlock, toBlock);
 
         switch (type) {
             case 'new': {
