@@ -1,10 +1,11 @@
-import { filter } from '@jelly-swap/utils';
 import { SwapEvent, WithdrawEvent, RefundEvent, Filter } from '@jelly-swap/types';
 
 import { utils } from 'ethers';
 import { Log } from 'ethers/providers';
 
 import memoize from 'memoizee';
+
+import { parseSwapEvent, fillArrayAfterFilter, onFilter, parseEvent } from './utils';
 
 import EthereumContract from '../contract';
 
@@ -78,7 +79,7 @@ export default class Event {
         });
     }
 
-    async _getPast(_filter?: any, fromBlock?: string | number, toBlock?: string | number) {
+    async _getPast(_filter?: Filter, fromBlock?: string | number, toBlock?: string | number) {
         const swaps: SwapEvent[] = [];
         const withdraws: WithdrawEvent[] = [];
         const refunds: RefundEvent[] = [];
@@ -96,74 +97,20 @@ export default class Event {
 
             switch (parsed.name) {
                 case 'NewContract': {
-                    const swap = {
-                        network: 'ETH',
-                        eventName: 'NEW_CONTRACT',
-                        id: parsed.values.id,
-                        hashLock: parsed.values.hashLock,
-                        sender: parsed.values.sender,
-                        receiver: parsed.values.receiver,
-                        inputAmount: parsed.values.inputAmount.toString(),
-                        outputAmount: parsed.values.outputAmount.toString(),
-                        expiration: parsed.values.expiration.toString(),
-                        outputNetwork: parsed.values.outputNetwork,
-                        outputAddress: parsed.values.outputAddress,
-                        transactionHash: log.transactionHash,
-                    };
-
-                    if (_filter.new) {
-                        if (filter(_filter.new, swap)) {
-                            swaps.push(swap);
-                        }
-                    } else {
-                        swaps.push(swap);
-                    }
-
+                    const swap = parseSwapEvent(parsed.values, log);
+                    fillArrayAfterFilter(swaps, _filter.new, swap);
                     break;
                 }
 
                 case 'Withdraw': {
-                    const withdraw = {
-                        network: 'ETH',
-                        eventName: 'WITHDRAW',
-                        id: parsed.values.id,
-                        secret: parsed.values.secret,
-                        hashLock: parsed.values.hashLock,
-                        sender: parsed.values.sender,
-                        receiver: parsed.values.receiver,
-                        transactionHash: log.transactionHash,
-                    };
-
-                    if (_filter.withdraw) {
-                        if (filter(_filter.withdraw, withdraw)) {
-                            withdraws.push(withdraw);
-                        }
-                    } else {
-                        withdraws.push(withdraw);
-                    }
-
+                    const withdraw = parseEvent('WITHDRAW', parsed.values, log);
+                    fillArrayAfterFilter(withdraws, _filter.withdraw, withdraw);
                     break;
                 }
 
                 case 'Refund': {
-                    const refund = {
-                        network: 'ETH',
-                        eventName: 'REFUND',
-                        id: parsed.values.id,
-                        hashLock: parsed.values.hashLock,
-                        sender: parsed.values.sender,
-                        receiver: parsed.values.receiver,
-                        transactionHash: log.transactionHash,
-                    };
-
-                    if (_filter.refund) {
-                        if (filter(_filter.refund, refund)) {
-                            refunds.push(refund);
-                        }
-                    } else {
-                        refunds.push(refund);
-                    }
-
+                    const refund = parseEvent('REFUND', parsed.values, log);
+                    fillArrayAfterFilter(refunds, _filter.refund, refund);
                     break;
                 }
             }
@@ -182,78 +129,26 @@ export default class Event {
 
                 switch (parsed.name) {
                     case 'NewContract': {
-                        const swap = {
-                            network: 'ETH',
-                            eventName: 'NEW_CONTRACT',
-                            id: parsed.values.id,
-                            hashLock: parsed.values.hashLock,
-                            sender: parsed.values.sender,
-                            receiver: parsed.values.receiver,
-                            inputAmount: parsed.values.inputAmount.toString(),
-                            outputAmount: parsed.values.outputAmount.toString(),
-                            expiration: parsed.values.expiration.toString(),
-                            outputNetwork: parsed.values.outputNetwork,
-                            outputAddress: parsed.values.outputAddress,
-                            transactionHash: log.transactionHash,
-                        };
-
-                        if (_filter.new) {
-                            if (filter(_filter.new, swap)) {
-                                if (_filter.new.sender?.toLowerCase() === swap.sender.toLowerCase()) {
-                                    onMessage({ ...swap, isSender: true });
-                                } else {
-                                    onMessage(swap);
-                                }
+                        const swap = parseSwapEvent(parsed.values, log);
+                        onFilter(_filter.new, swap, () => {
+                            if (_filter.new.sender?.toLowerCase() === swap.sender.toLowerCase()) {
+                                onMessage({ ...swap, isSender: true });
+                            } else {
+                                onMessage(swap);
                             }
-                        } else {
-                            onMessage(swap);
-                        }
-
+                        });
                         break;
                     }
 
                     case 'Withdraw': {
-                        const withdraw = {
-                            network: 'ETH',
-                            eventName: 'WITHDRAW',
-                            id: parsed.values.id,
-                            secret: parsed.values.secret,
-                            hashLock: parsed.values.hashLock,
-                            sender: parsed.values.sender,
-                            receiver: parsed.values.receiver,
-                            transactionHash: log.transactionHash,
-                        };
-
-                        if (_filter.withdraw) {
-                            if (filter(_filter.withdraw, withdraw)) {
-                                onMessage(withdraw);
-                            }
-                        } else {
-                            onMessage(withdraw);
-                        }
-
+                        const withdraw = parseEvent('WITHDRAW', parsed.values, log);
+                        onFilter(_filter.withdraw, withdraw, onMessage);
                         break;
                     }
 
                     case 'Refund': {
-                        const refund = {
-                            network: 'ETH',
-                            eventName: 'REFUND',
-                            id: parsed.values.id,
-                            hashLock: parsed.values.hashLock,
-                            sender: parsed.values.sender,
-                            receiver: parsed.values.receiver,
-                            transactionHash: log.transactionHash,
-                        };
-
-                        if (_filter.refund) {
-                            if (filter(_filter.refund, refund)) {
-                                onMessage(refund);
-                            }
-                        } else {
-                            onMessage(refund);
-                        }
-
+                        const refund = parseEvent('REFUND', parsed.values, log);
+                        onFilter(_filter.refund, refund, onMessage);
                         break;
                     }
                 }
