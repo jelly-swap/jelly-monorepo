@@ -31,7 +31,7 @@ export default class TronAdapter implements JellyAdapter {
             options: {
                 feeLimit: 100000000,
                 callValue: inputSwap.outputAmount,
-                shouldPollResponse: true,
+                shouldPollResponse: false,
             },
         };
 

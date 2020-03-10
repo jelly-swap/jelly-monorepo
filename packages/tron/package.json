@@ -1,6 +1,6 @@
 {
     "name": "@jelly-swap/tron",
-    "version": "0.1.30",
+    "version": "0.1.31",
     "description": "JellySwap TypeScript implementation for Tron.",
     "author": "kraykov <raykov@weichain.tech>",
     "homepage": "https://github.com/jelly-swap/jelly-monorepo#readme",
