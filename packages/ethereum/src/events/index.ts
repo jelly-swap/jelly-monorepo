@@ -20,12 +20,17 @@ export default class Event {
         this.interface = new utils.Interface(ABI);
     }
 
-    async getPast(type: string, filterObject?: any, fromBlock?: string | number, toBlock?: string | number) {
+    async getPast(
+        type: string,
+        filterObject?: any,
+        fromBlock?: string | number,
+        toBlock?: string | number
+    ): Promise<any> {
         const { swaps, refunds, withdraws } = await this._getPast(filterObject, fromBlock, toBlock);
 
         switch (type) {
             case 'new': {
-                return await this.getSwapsWithStatus(swaps);
+                return await this.getSwapsWithStatus(swaps, filterObject);
             }
 
             case 'withdraw': {
@@ -38,10 +43,10 @@ export default class Event {
 
             case 'all': {
                 return {
-                    swaps: await this.getSwapsWithStatus(swaps),
+                    swaps: await this.getSwapsWithStatus(swaps, filterObject),
                     refunds,
                     withdraws,
-                };
+                } as any;
             }
 
             default: {
@@ -50,13 +55,16 @@ export default class Event {
         }
     }
 
-    async getSwapsWithStatus(swaps: SwapEvent[]) {
+    async getSwapsWithStatus(swaps: SwapEvent[], filter: any) {
         const ids = swaps.map((s: any) => s.id);
 
         const status = await this.contract.getStatus(ids);
 
         return swaps.map((s: any, index: number) => {
-            return { ...s, status: status[index] };
+            if (filter?.new?.sender?.toLowerCase() === s.sender.toLowerCase()) {
+                return { ...s, status: Number(status[index].toString()), isSender: true };
+            }
+            return { ...s, status: Number(status[index].toString()) };
         });
     }
 
@@ -93,7 +101,11 @@ export default class Event {
                         transactionHash: log.transactionHash,
                     };
 
-                    if (filter(filters.new, swap)) {
+                    if (filters.new) {
+                        if (filter(filters.new, swap)) {
+                            swaps.push(swap);
+                        }
+                    } else {
                         swaps.push(swap);
                     }
 
@@ -112,7 +124,11 @@ export default class Event {
                         transactionHash: log.transactionHash,
                     };
 
-                    if (filter(filters.withdraw, withdraw)) {
+                    if (filters.withdraw) {
+                        if (filter(filters.withdraw, withdraw)) {
+                            withdraws.push(withdraw);
+                        }
+                    } else {
                         withdraws.push(withdraw);
                     }
 
@@ -130,7 +146,11 @@ export default class Event {
                         transactionHash: log.transactionHash,
                     };
 
-                    if (filter(filters.refund, refund)) {
+                    if (filters.refund) {
+                        if (filter(filters.refund, refund)) {
+                            refunds.push(refund);
+                        }
+                    } else {
                         refunds.push(refund);
                     }
 
@@ -167,7 +187,15 @@ export default class Event {
                             transactionHash: log.transactionHash,
                         };
 
-                        if (filter(filters.new, swap)) {
+                        if (filters.new) {
+                            if (filter(filters.new, swap)) {
+                                if (filters.new.sender?.toLowerCase() === swap.sender.toLowerCase()) {
+                                    onMessage({ ...swap, isSender: true });
+                                } else {
+                                    onMessage(swap);
+                                }
+                            }
+                        } else {
                             onMessage(swap);
                         }
 
@@ -186,7 +214,11 @@ export default class Event {
                             transactionHash: log.transactionHash,
                         };
 
-                        if (filter(filters.withdraw, withdraw)) {
+                        if (filters.withdraw) {
+                            if (filter(filters.withdraw, withdraw)) {
+                                onMessage(withdraw);
+                            }
+                        } else {
                             onMessage(withdraw);
                         }
 
@@ -204,7 +236,11 @@ export default class Event {
                             transactionHash: log.transactionHash,
                         };
 
-                        if (filter(filters.refund, refund)) {
+                        if (filters.refund) {
+                            if (filter(filters.refund, refund)) {
+                                onMessage(refund);
+                            }
+                        } else {
                             onMessage(refund);
                         }
 
