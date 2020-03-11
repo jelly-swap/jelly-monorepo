@@ -2,6 +2,20 @@ import moment from 'moment';
 import { unitOfTime } from 'moment';
 import { sha256 } from './crypto';
 
+export const filter = (f: any, o: any) => {
+    return f
+        ? Object.keys(f).some((k: any) => {
+              if (f[k] instanceof Array) {
+                  return f[k].some((v: any) => {
+                      return o[k]?.toLowerCase() === v?.toLowerCase();
+                  });
+              } else {
+                  return o[k]?.toLowerCase() === f[k]?.toLowerCase();
+              }
+          })
+        : null;
+};
+
 export const safeAccess = (object: any, path: string[]) => {
     return object
         ? path.reduce(

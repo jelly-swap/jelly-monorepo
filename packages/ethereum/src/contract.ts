@@ -20,19 +20,17 @@ export default class EthereumContract implements JellyContract {
         this.config = config;
         this.contract = new ethers.Contract(this.config.contractAddress, ABI, signer);
         this.provider = provider;
+        this.provider.pollingInterval = config.pollingInterval || Config().pollingInterval;
 
         this.eventHandler = new EventHandler(this, this.config);
     }
 
-    async subscribe(onMessage: Function, filter?: Function) {
+    async subscribe(onMessage: Function, filter?: any) {
         this.eventHandler.subscribe(onMessage, filter);
     }
 
-    async getPastEvents(type: string, filter: Function, currentBlock?: string | number) {
-        if (!currentBlock) {
-            currentBlock = await this.getCurrentBlock();
-        }
-        return await this.eventHandler.getPast(type, filter, currentBlock);
+    async getPastEvents(type: string, filter: any, fromBlock?: string | number, toBlock?: string | number) {
+        return await this.eventHandler.getPast(type, filter, fromBlock, toBlock);
     }
 
     async getCurrentBlock() {
