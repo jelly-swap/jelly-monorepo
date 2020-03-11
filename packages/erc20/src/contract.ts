@@ -21,19 +21,17 @@ export default class Erc20Contract implements Erc20JellyContract {
         this.provider = provider;
         this.signer = provider.getSigner ? provider.getSigner() : provider;
         this.contract = new ethers.Contract(config.contractAddress, ABI, this.signer);
+        this.provider.pollingInterval = config.pollingInterval || Config().pollingInterval;
 
         this.eventHandler = new EventHandler(this, config);
     }
 
-    subscribe(onMessage: Function, filter?: Function): void {
+    subscribe(onMessage: Function, filter?: any): void {
         this.eventHandler.subscribe(onMessage, filter);
     }
 
-    async getPastEvents(type: string, filter: Function, currentBlock?: string | number) {
-        if (!currentBlock) {
-            currentBlock = await this.getCurrentBlock();
-        }
-        return await this.eventHandler.getPast(type, filter, currentBlock);
+    async getPastEvents(type: string, filter: any, fromBlock?: string | number, toBlock?: string | number) {
+        return await this.eventHandler.getPast(type, filter, fromBlock, toBlock);
     }
 
     async getCurrentBlock(): Promise<string | number> {
