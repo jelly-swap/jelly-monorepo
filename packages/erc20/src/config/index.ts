@@ -7,8 +7,12 @@ export default (token?: string, tokenConfig = TokenConfig, addressToToken = Addr
         contractAddress: '0x66ea49fd943544d59e14d1bd9107217c7503906a',
         receiverAddress: '0xc555d8bc1B47F53F2b28fd2B3301aD94F7add17C',
         blockTime: 15,
-        expiration, // 3 hours,
+        expiration,
         unix: true,
+        cacheAge: 15000,
+        pollingInterval: 15000,
+        originBlock: 7487753,
+
         AddressToToken: addressToToken,
         TokenToAddress: (token: string) => {
             return tokenConfig[token].address;

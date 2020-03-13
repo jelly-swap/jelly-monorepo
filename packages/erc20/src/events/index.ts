@@ -1,9 +1,11 @@
-import { Contract, utils } from 'ethers';
+import { SwapEvent, WithdrawEvent, RefundEvent, Filter } from '@jelly-swap/types';
+
+import { utils } from 'ethers';
 import { Log } from 'ethers/providers';
 
-import TransformNewContract from './newContract';
-import TransformWithdraw from './withdraw';
-import TransformRefund from './refund';
+import memoize from 'memoizee';
+
+import { parseSwapEvent, fillArrayAfterFilter, onFilter, parseEvent } from './utils';
 
 import Config from '../config';
 import ABI from '../config/abi';
@@ -13,94 +15,139 @@ export default class Event {
     private config: any;
     private contract: Erc20Contract;
     private interface: utils.Interface;
+    private cache: Function;
 
     constructor(contract: Erc20Contract, config = Config()) {
         this.config = config;
         this.contract = contract;
         this.interface = new utils.Interface(ABI);
+        this.cache = memoize(this._getPast, {
+            maxAge: config.cacheAge,
+            promise: true,
+            normalizer: (a: any[]) => {
+                return JSON.stringify(a);
+            },
+        });
     }
 
-    async getPast(type: string, filter?: any, currentBlock?: string | number) {
+    async getPast(type: string, _filter?: Filter, fromBlock?: string | number, toBlock?: string | number) {
+        const { swaps, refunds, withdraws } = await this.cache(_filter, fromBlock, toBlock);
+
         switch (type) {
             case 'new': {
-                const result = await this._getPast('NewContract', TransformNewContract, filter, currentBlock);
-
-                const ids = result.map((s: any) => s.id);
-
-                const status = await this.contract.getStatus(ids);
-
-                return result.map((s: any, index: number) => {
-                    return { ...s, status: status[index] };
-                });
+                return await this.getSwapsWithStatus(swaps, _filter);
             }
 
             case 'withdraw': {
-                return await this._getPast('Withdraw', TransformWithdraw, filter, currentBlock);
+                return withdraws;
             }
 
             case 'refund': {
-                return await this._getPast('Refund', TransformRefund, filter, currentBlock);
+                return refunds;
+            }
+
+            case 'all': {
+                return {
+                    swaps: await this.getSwapsWithStatus(swaps, _filter),
+                    refunds,
+                    withdraws,
+                } as any;
             }
 
             default: {
+                throw new Error(`Ivalind event type. Available event types: 'new', 'withdraw', 'refund', 'all'`);
             }
         }
     }
 
-    async _getPast(eventName: string, transform: Function, filter?: Function, currentBlock?: string | number) {
-        if (!currentBlock) {
-            currentBlock = await this.contract.provider.getBlockNumber();
-        }
+    async getSwapsWithStatus(swaps: SwapEvent[], filter: Filter) {
+        const ids = swaps.map((s: any) => s.id);
 
-        const eventFilter = {
+        const status = await this.contract.getStatus(ids);
+
+        return swaps.map((s: any, index: number) => {
+            if (filter?.new?.sender?.toLowerCase() === s.sender.toLowerCase()) {
+                return { ...s, status: Number(status[index].toString()), isSender: true };
+            }
+            return { ...s, status: Number(status[index].toString()) };
+        });
+    }
+
+    async _getPast(_filter?: Filter, fromBlock?: string | number, toBlock?: string | number) {
+        const swaps: SwapEvent[] = [];
+        const withdraws: WithdrawEvent[] = [];
+        const refunds: RefundEvent[] = [];
+
+        const logsFilter = {
+            fromBlock: fromBlock || this.config.originBlock, // TODO: constants
+            toBlock: toBlock || 'latest',
             address: this.config.contractAddress,
-            fromBlock: Number(currentBlock) - 15000, // TODO: constants
-            toBlock: currentBlock,
-            topics: [this.interface.events[eventName].topic],
         };
 
-        const logs = await this.contract.provider.getLogs(eventFilter);
+        const logs = await this.contract.provider.getLogs(logsFilter);
+        logs.forEach((log: Log) => {
+            const parsed = this.interface.parseLog(log);
 
-        const result = logs.reduce<Log[]>((result: Log[], log: Log): Log[] => {
-            const event = this.interface.parseLog(log);
-            const t = transform(event.values, this.config, log.transactionHash);
-            if (t) {
-                const f = filter ? filter(t) : t;
+            switch (parsed.name) {
+                case 'NewContract': {
+                    const swap = parseSwapEvent(parsed.values, log, this.config);
+                    fillArrayAfterFilter(swaps, _filter?.new, swap);
+                    break;
+                }
 
-                if (f) {
-                    result.push(f);
+                case 'Withdraw': {
+                    const withdraw = parseEvent('WITHDRAW', parsed.values, log, this.config);
+                    fillArrayAfterFilter(withdraws, _filter?.withdraw, withdraw);
+                    break;
+                }
+
+                case 'Refund': {
+                    const refund = parseEvent('REFUND', parsed.values, log, this.config);
+                    fillArrayAfterFilter(refunds, _filter?.refund, refund);
+                    break;
                 }
             }
+        });
 
-            return result;
-        }, []);
-
-        return result;
+        return { swaps, withdraws, refunds };
     }
 
-    async subscribe(onMessage: Function, filter?: Function) {
-        this.contract.contract.on('NewContract', (...args: []) => {
-            const swap = TransformNewContract(args, this.config);
-            const result = filter ? filter(swap) : swap;
-            if (result) {
-                onMessage(result);
-            }
-        });
+    async subscribe(onMessage: Function, _filter?: Filter) {
+        this.contract.contract.on(
+            {
+                address: this.config.contractAddress,
+            },
+            log => {
+                const parsed = this.interface.parseLog(log);
 
-        this.contract.contract.on('Withdraw', (...args: []) => {
-            const withdraw = TransformWithdraw(args, this.config);
-            const result = filter ? filter(withdraw) : withdraw;
-            if (result) {
-                onMessage(result);
-            }
-        });
+                switch (parsed.name) {
+                    case 'NewContract': {
+                        const swap = parseSwapEvent(parsed.values, log, this.config);
 
-        this.contract.contract.on('Refund', (...args: []) => {
-            const refund = TransformRefund(args, this.config);
-            const result = filter ? filter(refund) : refund;
-            if (result) {
-                onMessage(result);
+                        onFilter(_filter?.new, swap, () => {
+                            if (_filter?.new?.sender?.toLowerCase() === swap.sender.toLowerCase()) {
+                                onMessage({ ...swap, isSender: true });
+                            } else {
+                                onMessage(swap);
+                            }
+                        });
+
+                        break;
+                    }
+
+                    case 'Withdraw': {
+                        const withdraw = parseEvent('WITHDRAW', parsed.values, log, this.config);
+                        onFilter(_filter?.withdraw, withdraw, onMessage);
+                        break;
+                    }
+
+                    case 'Refund': {
+                        const refund = parseEvent('REFUND', parsed.values, log, this.config);
+                        onFilter(_filter?.refund, refund, onMessage);
+                        break;
+                    }
+                }
             }
-        });
+        );
     }
 }
