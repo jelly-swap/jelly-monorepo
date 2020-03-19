@@ -10,6 +10,7 @@ export {
     JellyContract,
     UserInputSwap,
     JellyAdapter,
+    Filter,
 } from '@jelly-swap/types';
 
 export interface Provider {
