@@ -1,4 +1,4 @@
-import { Universal } from '@aeternity/aepp-sdk/es';
+import { Node, Universal, MemoryAccount } from '../sdk-node';
 
 import { getInputFromSwap, getInputFromRefund, getInputFromWithdraw } from './utils';
 
@@ -7,31 +7,30 @@ import { ContractSwap, ContractWithdraw, ContractRefund, Provider } from '../typ
 import Config from '../config';
 import ContractSource from '../config/contractSource';
 
-const CONFIG = Config();
-
 export default class HttpProvider implements Provider {
     private config: any;
     private provider: any;
     private contract: any;
-    private initialized: boolean;
+    private keypair: any;
 
     constructor(config = Config(), keypair?: any) {
         this.config = config;
-        this.provider = Universal({
-            url: config.providerUrl,
-            internalUrl: config.internalUrl,
-            compilerUrl: config.compilerUrl,
-            keypair,
-        });
+        this.keypair = keypair;
     }
 
     async setup() {
-        if (!this.initialized) {
-            this.provider = await this.provider;
+        if (!this.provider) {
+            const node = await Node({ url: this.config.providerUrl, internalUrl: this.config.internalUrl });
+
+            this.provider = await Universal({
+                nodes: [{ name: 'Jelly', instance: node }],
+                compilerUrl: this.config.compilerUrl,
+                accounts: this.keypair && [MemoryAccount({ keypair: this.keypair })],
+            });
+
             this.contract = await this.provider.getContractInstance(ContractSource, {
                 contractAddress: this.config.contractAddress,
             });
-            this.initialized = true;
         }
     }
 
