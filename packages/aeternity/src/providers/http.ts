@@ -8,10 +8,13 @@ export default class HttpProvider implements Provider {
     public config: any;
     public client: any;
     public contract: any;
+
+    private contractSource: string;
     private keypair: any;
 
-    constructor(config = Config(), keypair?: any) {
+    constructor(config = Config(), contractSource = ContractSource, keypair?: any) {
         this.config = config;
+        this.contractSource = contractSource;
         this.keypair = keypair;
     }
 
@@ -25,7 +28,7 @@ export default class HttpProvider implements Provider {
                 accounts: this.keypair && [MemoryAccount({ keypair: this.keypair })],
             });
 
-            this.contract = await this.client.getContractInstance(ContractSource, {
+            this.contract = await this.client.getContractInstance(this.contractSource, {
                 contractAddress: this.config.contractAddress,
             });
         }
@@ -53,7 +56,7 @@ export default class HttpProvider implements Provider {
             await this.client.connectToWallet(connection);
 
             if (!this.contract) {
-                this.contract = await this.client.getContractInstance(ContractSource, {
+                this.contract = await this.client.getContractInstance(this.contractSource, {
                     contractAddress: this.config.contractAddress,
                 });
             }
