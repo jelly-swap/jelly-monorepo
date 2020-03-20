@@ -60,9 +60,6 @@ export default class Event {
         const status = await this.provider.getStatus(ids);
 
         return swaps.map((s: any, index: number) => {
-            if (filter?.new?.sender?.toLowerCase() === s.sender.toLowerCase()) {
-                return { ...s, status: mapStatus(status[index]), id: '0x' + s.id, isSender: true };
-            }
             return { ...s, status: mapStatus(status[index]), id: '0x' + s.id };
         });
     }
@@ -124,9 +121,11 @@ export default class Event {
             if (message.type === 'message' && message.data.includes('payload')) {
                 const data = JSON.parse(message.data);
                 const txHash = data.payload.hash;
+
                 if (txHash) {
                     const tx = await this.provider.getTxInfo(txHash);
                     const result = ParseEvent(tx, filter);
+
                     if (result) {
                         const key = `${result.eventName}_${txHash}`;
                         if (!this.history.get(key)) {

@@ -3,7 +3,7 @@ import { filter } from '@jelly-swap/utils';
 
 import BigNumber from 'bignumber.js';
 
-import { decodeBase64Check, addressFromDecimal } from '../sdk-node';
+import { decodeBase64Check, addressFromDecimal } from '../sdk-browser';
 
 BigNumber.config({ EXPONENTIAL_AT: 100, POW_PRECISION: 100 });
 
@@ -23,6 +23,9 @@ export default (tx: any, _filter: Filter): any => {
             case TOPICS.NEW_CONTRACT: {
                 const t = formatNewContractEventData(log[0]);
                 if (filter(_filter.new, t)) {
+                    if (_filter.new.sender?.toLowerCase() === t?.sender?.toLowerCase()) {
+                        return { ...t, isSender: true };
+                    }
                     return t;
                 }
                 break;
