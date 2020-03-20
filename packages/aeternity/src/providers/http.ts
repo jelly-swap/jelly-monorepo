@@ -1,4 +1,4 @@
-import { Node, Universal, MemoryAccount } from '../sdk-node';
+import { Node, RpcAepp, Universal, MemoryAccount } from '../sdk-browser';
 
 import { getInputFromSwap, getInputFromRefund, getInputFromWithdraw } from './utils';
 
@@ -7,10 +7,10 @@ import { ContractSwap, ContractWithdraw, ContractRefund, Provider } from '../typ
 import Config from '../config';
 import ContractSource from '../config/contractSource';
 
-export default class HttpProvider implements Provider {
-    private config: any;
-    private provider: any;
-    private contract: any;
+export default class HttpProvider {
+    public config: any;
+    public provider: any;
+    public contract: any;
     private keypair: any;
 
     constructor(config = Config(), keypair?: any) {
@@ -23,7 +23,7 @@ export default class HttpProvider implements Provider {
             const node = await Node({ url: this.config.providerUrl, internalUrl: this.config.internalUrl });
 
             this.provider = await Universal({
-                nodes: [{ name: 'Jelly', instance: node }],
+                nodes: [{ name: 'JellySwap', instance: node }],
                 compilerUrl: this.config.compilerUrl,
                 accounts: this.keypair && [MemoryAccount({ keypair: this.keypair })],
             });
@@ -31,6 +31,37 @@ export default class HttpProvider implements Provider {
             this.contract = await this.provider.getContractInstance(ContractSource, {
                 contractAddress: this.config.contractAddress,
             });
+        }
+    }
+
+    async setupRpc(wallet: any, onAddressChange: Function, onNetworkChange: Function) {
+        const node = await Node({ url: this.config.providerUrl, internalUrl: this.config.internalUrl });
+
+        this.provider = await RpcAepp({
+            name: 'JellySwap',
+            nodes: [{ name: 'testnet', instance: node }],
+            compilerUrl: this.config.compilerUrl,
+
+            onNetworkChange: (network: any) => {
+                onNetworkChange(network);
+            },
+            onAddressChange: async (addresses: any) => {
+                onAddressChange(addresses);
+            },
+        });
+
+        const connection = await wallet.getConnection();
+
+        if (connection) {
+            await this.provider.connectToWallet(connection);
+
+            if (!this.contract) {
+                this.contract = await this.provider.getContractInstance(ContractSource, {
+                    contractAddress: this.config.contractAddress,
+                });
+            }
+
+            return await this.provider.subscribeAddress('subscribe', 'current');
         }
     }
 
@@ -46,7 +77,8 @@ export default class HttpProvider implements Provider {
 
     async newContract(swap: ContractSwap) {
         await this.setup();
-        return await this.contract.call('new_contract', getInputFromSwap(swap), swap.options);
+        const result = await this.contract.methods.new_contract(...getInputFromSwap(swap), swap.options);
+        return result;
     }
 
     async withdraw(withdraw: ContractWithdraw) {
