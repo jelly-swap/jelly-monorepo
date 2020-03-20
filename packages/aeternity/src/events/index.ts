@@ -12,13 +12,15 @@ import { SwapEvent, WithdrawEvent, RefundEvent, Provider, Filter } from '../type
 export default class Event {
     private config: any;
     private webSocketClient: w3cwebsocket;
+    private contract: any;
     private provider: Provider;
     private history: Map<String, Boolean>;
     private cache: Function;
 
-    constructor(provider: Provider, config = Config()) {
+    constructor(contract: any, config = Config()) {
         this.config = config;
-        this.provider = provider;
+        this.contract = contract;
+        this.provider = contract.provider;
         this.webSocketClient = new w3cwebsocket(this.config.wsUrl);
         this.history = new Map();
         this.cache = memoize(this._getPast, { maxAge: 30000 });
@@ -57,7 +59,7 @@ export default class Event {
     async getSwapsWithStatus(swaps: SwapEvent[], filter: Filter) {
         const ids = swaps.map((s: SwapEvent) => s.id);
 
-        const status = await this.provider.getStatus(ids);
+        const status = await this.contract.getStatus(ids);
 
         return swaps.map((s: any, index: number) => {
             return { ...s, status: mapStatus(status[index]), id: '0x' + s.id };
