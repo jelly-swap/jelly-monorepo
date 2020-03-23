@@ -77,7 +77,7 @@ export default class Event {
                 const refunds: RefundEvent[] = [];
 
                 JSONbig.parse(res.data).map((tx: any) => {
-                    const result = ParseEvent(tx.callinfo, filter);
+                    const result = ParseEvent(tx.callinfo, filter, this.config);
 
                     if (result) {
                         const txIncluded = {
@@ -126,7 +126,7 @@ export default class Event {
 
                 if (txHash) {
                     const tx = await this.provider.getTxInfo(txHash);
-                    const result = ParseEvent(tx, filter);
+                    const result = ParseEvent(tx, filter, this.config);
 
                     if (result) {
                         const key = `${result.eventName}_${txHash}`;
