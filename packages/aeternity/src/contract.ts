@@ -16,11 +16,11 @@ export default class AeternityContract implements JellyContract {
         this.eventHandler = new EventHandler(this.provider, this.config);
     }
 
-    async subscribe(onMessage: Function, filter?: Function) {
+    async subscribe(onMessage: Function, filter: any) {
         this.eventHandler.subscribe(onMessage, filter);
     }
 
-    async getPastEvents(type: string, filter: Function) {
+    async getPastEvents(type: string, filter: any) {
         return await this.eventHandler.getPast(type, filter);
     }
 

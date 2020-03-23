@@ -1,5 +1,9 @@
-import { decodeBase64Check, encodeBase58Check } from '@aeternity/aepp-sdk/es/utils/crypto';
+import { Filter } from '@jelly-swap/types';
+import { filter } from '@jelly-swap/utils';
+
 import BigNumber from 'bignumber.js';
+
+import { decodeBase64Check, addressFromDecimal } from '../sdk-browser';
 
 BigNumber.config({ EXPONENTIAL_AT: 100, POW_PRECISION: 100 });
 
@@ -9,7 +13,7 @@ const TOPICS = {
     REFUND: 'c4e6ebe500e9327588e3eb820645ed28c99741f75e762e01faada721269ebab5',
 };
 
-export default (tx: any, filter: Function): any => {
+export default (tx: any, _filter: Filter): any => {
     const log = tx.log;
 
     if (log.length === 1) {
@@ -18,29 +22,29 @@ export default (tx: any, filter: Function): any => {
         switch (topic) {
             case TOPICS.NEW_CONTRACT: {
                 const t = formatNewContractEventData(log[0]);
-                const f = filter ? filter(t) : t;
-                if (f) {
-                    return f;
+                if (filter(_filter.new, t)) {
+                    if (_filter.new.sender?.toLowerCase() === t?.sender?.toLowerCase()) {
+                        return { ...t, isSender: true };
+                    }
+                    return t;
                 }
                 break;
             }
 
             case TOPICS.REFUND: {
                 const t = formatRefundEventData(log[0]);
-                const f = filter ? filter(t) : t;
-                if (f) {
-                    return f;
+                if (filter(_filter.refund, t)) {
+                    return t;
                 }
+
                 break;
             }
 
             case TOPICS.WITHDRAW: {
                 const t = formatWithdrawEventData(log[0]);
-                const f = filter ? filter(t) : t;
-                if (f) {
-                    return f;
+                if (filter(_filter.withdraw, t)) {
+                    return t;
                 }
-                break;
             }
 
             default: {
@@ -51,13 +55,14 @@ export default (tx: any, filter: Function): any => {
 };
 
 const formatRefundEventData = (log: any) => {
-    const args = decodeLogData(log);
+    const args = decodeString(log);
+    const data = log.topics;
 
     const hashLock = pad64WithPrefix(args[0], false);
-    const id = pad64WithPrefix(log.topics[1]);
+    const id = pad64WithPrefix(data[1]);
 
-    const sender = encodeEventAddress(log.topics[2], 'ak_');
-    const receiver = encodeEventAddress(log.topics[3], 'ak_');
+    const sender = addressFromDecimal(data[2]);
+    const receiver = addressFromDecimal(data[3]);
 
     const result = {
         eventName: 'REFUND',
@@ -72,15 +77,16 @@ const formatRefundEventData = (log: any) => {
 };
 
 const formatWithdrawEventData = (log: any) => {
-    const args = decodeLogData(log);
+    const args = decodeString(log);
+    const data = log.topics;
 
     const secret = pad64WithPrefix(args[0], false);
     const hashLock = pad64WithPrefix(args[1], false);
 
-    const id = pad64WithPrefix(log.topics[1]);
+    const id = pad64WithPrefix(data[1]);
 
-    const sender = encodeEventAddress(log.topics[2], 'ak_');
-    const receiver = encodeEventAddress(log.topics[3], 'ak_');
+    const sender = addressFromDecimal(data[2], 'ak_');
+    const receiver = addressFromDecimal(data[3], 'ak_');
 
     const result = {
         eventName: 'WITHDRAW',
@@ -96,7 +102,8 @@ const formatWithdrawEventData = (log: any) => {
 };
 
 const formatNewContractEventData = (log: any) => {
-    const args = decodeLogData(log);
+    const args = decodeString(log);
+    const data = log.topics;
 
     const outputNetwork = args[0];
     const outputAddress = args[1];
@@ -105,9 +112,9 @@ const formatNewContractEventData = (log: any) => {
     const expiration = args[4];
     const hashLock = pad64WithPrefix(args[5], false);
 
-    const id = pad64(log.topics[1]);
-    const sender = encodeEventAddress(log.topics[2], 'ak_');
-    const receiver = encodeEventAddress(log.topics[3], 'ak_');
+    const id = pad64(data[1]);
+    const sender = addressFromDecimal(data[2], 'ak_');
+    const receiver = addressFromDecimal(data[3], 'ak_');
 
     const result = {
         eventName: 'NEW_CONTRACT',
@@ -126,7 +133,7 @@ const formatNewContractEventData = (log: any) => {
     return result;
 };
 
-const decodeLogData = (log: any) => {
+const decodeString = (log: any) => {
     return decodeBase64Check(log.data.slice(3))
         .toString('utf-8')
         .split(',');
@@ -145,11 +152,6 @@ const pad64 = (val: string, big = true) => {
 
 const pad64WithPrefix = (val: string, big = true) => {
     return '0x' + pad64(val, big);
-};
-
-const encodeEventAddress = (input: string, prefix: string) => {
-    const address = pad64(input);
-    return `${prefix}${encodeBase58Check(Buffer.from(address, 'hex'))}`;
 };
 
 export const mapStatus = (status: string) => {

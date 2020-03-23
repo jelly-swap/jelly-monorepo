@@ -2,11 +2,12 @@ import { w3cwebsocket } from 'websocket';
 import axios from 'axios';
 import JSONbig from 'json-bigint';
 import memoize from 'memoizee';
-import { SwapEvent, WithdrawEvent, RefundEvent, Provider } from '../types';
 
 import ParseEvent, { mapStatus } from './utils';
 
 import Config from '../config';
+
+import { SwapEvent, WithdrawEvent, RefundEvent, Provider, Filter } from '../types';
 
 export default class Event {
     private config: any;
@@ -23,17 +24,12 @@ export default class Event {
         this.cache = memoize(this._getPast, { maxAge: 30000 });
     }
 
-    async getPast(type: string, filter?: Function) {
+    async getPast(type: string, filter?: Filter) {
         const { swaps, refunds, withdraws } = await this.cache(filter);
 
         switch (type) {
             case 'new': {
-                const ids = swaps.map((s: SwapEvent) => s.id);
-                const status = await this.provider.getStatus(ids);
-
-                return swaps.map((s: SwapEvent, index: number) => {
-                    return { ...s, status: mapStatus(status[index]), id: '0x' + s.id };
-                });
+                return await this.getSwapsWithStatus(swaps, filter);
             }
 
             case 'withdraw': {
@@ -44,13 +40,31 @@ export default class Event {
                 return refunds;
             }
 
+            case 'all': {
+                return {
+                    swaps: await this.getSwapsWithStatus(swaps, filter),
+                    refunds,
+                    withdraws,
+                } as any;
+            }
+
             default: {
-                return { swaps, refunds, withdraws };
+                throw new Error(`Ivalind event type. Available event types: 'new', 'withdraw', 'refund', 'all'`);
             }
         }
     }
 
-    async _getPast(filter: Function) {
+    async getSwapsWithStatus(swaps: SwapEvent[], filter: Filter) {
+        const ids = swaps.map((s: SwapEvent) => s.id);
+
+        const status = await this.provider.getStatus(ids);
+
+        return swaps.map((s: any, index: number) => {
+            return { ...s, status: mapStatus(status[index]), id: '0x' + s.id };
+        });
+    }
+
+    async _getPast(filter: Filter) {
         return axios
             .get(`${this.config.apiUrl}middleware/contracts/calls/address/${this.config.contractAddress}`, {
                 transformResponse: [(data: any) => data],
@@ -92,7 +106,7 @@ export default class Event {
             });
     }
 
-    async subscribe(onMessage: Function, filter?: Function) {
+    async subscribe(onMessage: Function, filter?: Filter) {
         this.webSocketClient.onopen = () => {
             this.webSocketClient.send(
                 JSON.stringify({
@@ -106,14 +120,16 @@ export default class Event {
         this.webSocketClient.onmessage = async (message: any) => {
             if (message.type === 'message' && message.data.includes('payload')) {
                 const data = JSON.parse(message.data);
+                const txHash = data.payload.hash;
 
-                if (data.payload.hash) {
-                    const tx = await this.provider.getTxInfo(data.payload.hash);
-                    const swap = ParseEvent(tx, filter);
-                    if (swap) {
-                        const key = `${swap.eventName}_${swap.id}`;
+                if (txHash) {
+                    const tx = await this.provider.getTxInfo(txHash);
+                    const result = ParseEvent(tx, filter);
+
+                    if (result) {
+                        const key = `${result.eventName}_${txHash}`;
                         if (!this.history.get(key)) {
-                            onMessage({ ...swap, transactionHash: data.payload.hash });
+                            onMessage({ ...result, transactionHash: txHash });
                             this.history.set(key, true);
                         }
                     }
