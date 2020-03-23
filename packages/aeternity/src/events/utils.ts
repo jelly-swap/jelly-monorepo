@@ -133,13 +133,13 @@ const formatNewContractEventData = (log: any) => {
     return result;
 };
 
-const decodeString = (log: any) => {
+export const decodeString = (log: any) => {
     return decodeBase64Check(log.data.slice(3))
         .toString('utf-8')
         .split(',');
 };
 
-const pad64 = (val: string, big = true) => {
+export const pad64 = (val: string, big = true) => {
     if (big) {
         return new BigNumber(val)
             .toString(16)
@@ -150,7 +150,7 @@ const pad64 = (val: string, big = true) => {
     }
 };
 
-const pad64WithPrefix = (val: string, big = true) => {
+export const pad64WithPrefix = (val: string, big = true) => {
     return '0x' + pad64(val, big);
 };
 
@@ -158,7 +158,7 @@ export const mapStatus = (status: string) => {
     return BLOCKCHAIN_STATUS[status];
 };
 
-type BlockchainStatusOptions = {
+export type BlockchainStatusOptions = {
     [key: string]: number;
 };
 
