@@ -1,34 +1,34 @@
 import { Node, RpcAepp, Universal, MemoryAccount } from '../sdk-browser';
 
-import { getInputFromSwap, getInputFromRefund, getInputFromWithdraw } from './utils';
-
-import { ContractSwap, ContractWithdraw, ContractRefund, Provider } from '../types';
-
 import Config from '../config';
 import ContractSource from '../config/contractSource';
+import { Provider } from '../types';
 
-export default class HttpProvider {
+export default class HttpProvider implements Provider {
     public config: any;
-    public provider: any;
+    public client: any;
     public contract: any;
+
+    private contractSource: string;
     private keypair: any;
 
-    constructor(config = Config(), keypair?: any) {
+    constructor(config = Config(), contractSource = ContractSource, keypair?: any) {
         this.config = config;
+        this.contractSource = contractSource;
         this.keypair = keypair;
     }
 
     async setup() {
-        if (!this.provider) {
+        if (!this.client) {
             const node = await Node({ url: this.config.providerUrl, internalUrl: this.config.internalUrl });
 
-            this.provider = await Universal({
+            this.client = await Universal({
                 nodes: [{ name: 'JellySwap', instance: node }],
                 compilerUrl: this.config.compilerUrl,
                 accounts: this.keypair && [MemoryAccount({ keypair: this.keypair })],
             });
 
-            this.contract = await this.provider.getContractInstance(ContractSource, {
+            this.contract = await this.client.getContractInstance(this.contractSource, {
                 contractAddress: this.config.contractAddress,
             });
         }
@@ -37,7 +37,7 @@ export default class HttpProvider {
     async setupRpc(wallet: any, onAddressChange: Function, onNetworkChange: Function) {
         const node = await Node({ url: this.config.providerUrl, internalUrl: this.config.internalUrl });
 
-        this.provider = await RpcAepp({
+        this.client = await RpcAepp({
             name: 'JellySwap',
             nodes: [{ name: 'testnet', instance: node }],
             compilerUrl: this.config.compilerUrl,
@@ -53,52 +53,35 @@ export default class HttpProvider {
         const connection = await wallet.getConnection();
 
         if (connection) {
-            await this.provider.connectToWallet(connection);
+            await this.client.connectToWallet(connection);
 
             if (!this.contract) {
-                this.contract = await this.provider.getContractInstance(ContractSource, {
+                this.contract = await this.client.getContractInstance(this.contractSource, {
                     contractAddress: this.config.contractAddress,
                 });
             }
 
-            return await this.provider.subscribeAddress('subscribe', 'current');
+            return await this.client.subscribeAddress('subscribe', 'current');
         }
+    }
+
+    async callContract(method: string, args: any[], options?: any) {
+        await this.setup();
+        return await this.contract.methods[method](...args, options);
     }
 
     async getCurrentBlock() {
         await this.setup();
-        return await this.provider.height();
+        return await this.client.height();
     }
 
-    async getBalance(address: string) {
+    async getAeBalance(address: string) {
         await this.setup();
-        return await this.provider.getBalance(address);
-    }
-
-    async newContract(swap: ContractSwap) {
-        await this.setup();
-        const result = await this.contract.methods.new_contract(...getInputFromSwap(swap), swap.options);
-        return result;
-    }
-
-    async withdraw(withdraw: ContractWithdraw) {
-        await this.setup();
-        return await this.contract.call('withdraw', getInputFromWithdraw(withdraw));
-    }
-
-    async refund(refund: ContractRefund) {
-        await this.setup();
-        return await this.contract.call('refund', getInputFromRefund(refund));
+        return await this.client.getBalance(address);
     }
 
     async getTxInfo(txHash: string) {
         await this.setup();
-        return await this.provider.getTxInfo(txHash);
-    }
-
-    async getStatus(ids: any[]) {
-        await this.setup();
-        const result = await this.contract.methods['get_many_status'](ids);
-        return result.decodedResult;
+        return await this.client.getTxInfo(txHash);
     }
 }

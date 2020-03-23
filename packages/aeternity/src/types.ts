@@ -1,5 +1,3 @@
-import { ContractSwap, ContractWithdraw, ContractRefund } from '@jelly-swap/types';
-
 export {
     ContractSwap,
     ContractWithdraw,
@@ -14,17 +12,17 @@ export {
 } from '@jelly-swap/types';
 
 export interface Provider {
-    getBalance(address: string): Promise<string | number>;
+    setup(): void;
 
-    newContract(swap: ContractSwap): Promise<string>;
+    setupRpc(wallet: any, onAddressChange: Function, onNetworkChange: Function): Promise<any>;
 
-    withdraw(withdraw: ContractWithdraw): Promise<string>;
+    callContract(method: string, args: any[], options?: any): Promise<any>;
 
-    refund(refund: ContractRefund): Promise<string>;
+    getCurrentBlock(): Promise<string | number>;
+
+    getAeBalance(address: string): Promise<string | number>;
 
     getTxInfo(txHash: string): Promise<TxInfo>;
-
-    getStatus(ids: any[]): any;
 }
 
 type TxInfo = {

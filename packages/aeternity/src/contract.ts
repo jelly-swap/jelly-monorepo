@@ -2,6 +2,7 @@ import { JellyContract, Provider, ContractSwap, ContractWithdraw, ContractRefund
 
 import EventHandler from './events';
 import { Config } from '.';
+import { getInputFromSwap, getInputFromWithdraw, getInputFromRefund } from './utils';
 
 export default class AeternityContract implements JellyContract {
     public config: any;
@@ -12,8 +13,7 @@ export default class AeternityContract implements JellyContract {
     constructor(provider: Provider, config = Config()) {
         this.config = config;
         this.provider = provider;
-
-        this.eventHandler = new EventHandler(this.provider, this.config);
+        this.eventHandler = new EventHandler(this, this.config);
     }
 
     async subscribe(onMessage: Function, filter: any) {
@@ -29,25 +29,26 @@ export default class AeternityContract implements JellyContract {
     }
 
     async getBalance(address: string) {
-        return await this.provider.getBalance(address);
+        return await this.provider.getAeBalance(address);
     }
 
     async newContract(swap: ContractSwap) {
-        const result = await this.provider.newContract(swap);
+        const result = await this.provider.callContract('new_contract', getInputFromSwap(swap), swap.options);
         return result;
     }
 
     async withdraw(withdraw: ContractWithdraw) {
-        const result = await this.provider.withdraw(withdraw);
+        const result = await this.provider.callContract('withdraw', getInputFromWithdraw(withdraw));
         return result;
     }
 
     async refund(refund: ContractRefund) {
-        const result = await this.provider.refund(refund);
+        const result = await this.provider.callContract('refund', getInputFromRefund(refund));
         return result;
     }
 
     async getStatus(ids: any[]) {
-        return await this.provider.getStatus(ids);
+        const result = await this.provider.callContract('get_many_status', [ids]);
+        return result?.decodedResult;
     }
 }
