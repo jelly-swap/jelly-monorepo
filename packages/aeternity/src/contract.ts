@@ -49,6 +49,6 @@ export default class AeternityContract implements JellyContract {
 
     async getStatus(ids: any[]) {
         const result = await this.provider.callContract('get_many_status', [ids]);
-        return result;
+        return result?.decodedResult;
     }
 }
