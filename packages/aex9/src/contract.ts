@@ -1,3 +1,5 @@
+import BigNumber from 'bignumber.js';
+
 import { Aex9JellyContract, Aex9ContractSwap, Aex9ContractWithdraw, Aex9ContractRefund } from './types';
 
 import Aex9Source from './config/aex9';
@@ -6,6 +8,7 @@ import EventHandler from './events';
 import { Config } from '.';
 import { getInputFromSwap, getInputFromWithdraw, getInputFromRefund } from './utils';
 
+const MAX_ALLOWANCE = '1000000000000000000000000000000000000000000000000000000000000';
 export default class AeternityContract implements Aex9JellyContract {
     public config: any;
     public provider: any;
@@ -30,18 +33,34 @@ export default class AeternityContract implements Aex9JellyContract {
         return await this.provider.getCurrentBlock();
     }
 
-    async getBalance(address: string) {
-        return await this.provider.getAeBalance(address);
+    async getBalance(address: string, token: string): Promise<string | number> {
+        const tokenAddress = this.config.TokenToAddress(token);
+        const tokenContract = await this.getTokenContract(tokenAddress.replace('ak', 'ct'));
+        const result = await tokenContract.methods.balance(address);
+        return result?.decodedResult || 0;
     }
 
-    async getTokenContract(tokenAddress: string) {
-        await this.provider.setup();
-        return await this.provider.client.getContractInstance(Aex9Source, {
-            contractAddress: tokenAddress,
-        });
-    }
+    async newContract(swap: Aex9ContractSwap, checkAllowance = false) {
+        const contractAddress = this.config.contractAddress.replace('ct', 'ak');
+        const { inputAmount, sender, tokenAddress } = swap;
 
-    async newContract(swap: Aex9ContractSwap) {
+        if (checkAllowance) {
+            const tokenContract = await this.getTokenContract(tokenAddress);
+
+            const allowanceResult = await tokenContract.methods.allowance({
+                from_account: sender,
+                for_account: contractAddress,
+            });
+
+            const allowance = new BigNumber(allowanceResult?.decodedResult || 0);
+
+            if (allowance.lt(inputAmount)) {
+                await tokenContract.methods.create_allowance(contractAddress, MAX_ALLOWANCE);
+                const result = await this.provider.callContract('new_contract', getInputFromSwap(swap));
+                return result;
+            }
+        }
+
         const result = await this.provider.callContract('new_contract', getInputFromSwap(swap));
         return result;
     }
@@ -59,5 +78,12 @@ export default class AeternityContract implements Aex9JellyContract {
     async getStatus(ids: any[]) {
         const result = await this.provider.callContract('get_many_status', [ids]);
         return result?.decodedResult;
+    }
+
+    async getTokenContract(tokenAddress: string) {
+        await this.provider.setup();
+        return await this.provider.client.getContractInstance(Aex9Source, {
+            contractAddress: tokenAddress,
+        });
     }
 }
