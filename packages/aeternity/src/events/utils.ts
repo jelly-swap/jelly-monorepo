@@ -169,3 +169,5 @@ const BLOCKCHAIN_STATUS: BlockchainStatusOptions = {
     EXPIRED: 4,
     PENDING: 5,
 };
+
+export { decodeBase64Check, addressFromDecimal };

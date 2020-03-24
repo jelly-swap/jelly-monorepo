@@ -1,11 +1,8 @@
 import { EventUtils } from '@jelly-swap/aeternity';
-
 import { Filter } from '@jelly-swap/types';
 import { filter } from '@jelly-swap/utils';
 
 import BigNumber from 'bignumber.js';
-
-import { addressFromDecimal } from '../sdk-node';
 
 BigNumber.config({ EXPONENTIAL_AT: 100, POW_PRECISION: 100 });
 
@@ -66,8 +63,8 @@ const formatRefundEventData = (log: any, config: any) => {
     const network = config.AddressToToken[tokenAddress].network;
 
     const id = EventUtils.pad64WithPrefix(data[1]);
-    const sender = addressFromDecimal(data[2]);
-    const receiver = addressFromDecimal(data[3]);
+    const sender = EventUtils.addressFromDecimal(data[2]);
+    const receiver = EventUtils.addressFromDecimal(data[3]);
 
     const result = {
         eventName: 'REFUND',
@@ -93,8 +90,8 @@ const formatWithdrawEventData = (log: any, config: any) => {
     const network = config.AddressToToken[tokenAddress].network;
 
     const id = EventUtils.pad64WithPrefix(data[1]);
-    const sender = addressFromDecimal(data[2], 'ak_');
-    const receiver = addressFromDecimal(data[3], 'ak_');
+    const sender = EventUtils.addressFromDecimal(data[2], 'ak_');
+    const receiver = EventUtils.addressFromDecimal(data[3], 'ak_');
 
     const result = {
         eventName: 'WITHDRAW',
@@ -125,8 +122,8 @@ const formatNewContractEventData = (log: any, config: any) => {
     const network = config.AddressToToken[tokenAddress].network;
 
     const id = EventUtils.pad64(data[1]);
-    const sender = addressFromDecimal(data[2], 'ak_');
-    const receiver = addressFromDecimal(data[3], 'ak_');
+    const sender = EventUtils.addressFromDecimal(data[2], 'ak_');
+    const receiver = EventUtils.addressFromDecimal(data[3], 'ak_');
 
     const result = {
         eventName: 'NEW_CONTRACT',
