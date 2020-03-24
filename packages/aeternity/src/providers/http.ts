@@ -12,7 +12,7 @@ export default class HttpProvider implements Provider {
     private contractSource: string;
     private keypair: any;
 
-    constructor(config = Config(), contractSource = ContractSource, keypair?: any) {
+    constructor(config = Config(), keypair?: any, contractSource = ContractSource) {
         this.config = config;
         this.contractSource = contractSource;
         this.keypair = keypair;

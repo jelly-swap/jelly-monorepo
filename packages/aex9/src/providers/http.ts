@@ -4,8 +4,8 @@ import Config from '../config';
 import ContractSource from '../config/contractSource';
 
 export default class HttpProvider extends Providers.HTTP {
-    constructor(config = Config(), contractSource = ContractSource, keypair?: any) {
-        super(config, contractSource, keypair);
+    constructor(config = Config(), keypair?: any, contractSource = ContractSource) {
+        super(config, keypair, contractSource);
     }
 
     async getContractInstance(contractSource: string, contractAddress: string) {
