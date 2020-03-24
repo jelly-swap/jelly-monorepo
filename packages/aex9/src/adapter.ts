@@ -7,7 +7,7 @@ import Config from './config';
 export default class AeternityAdapter implements JellyAdapter {
     private config: any;
 
-    constructor(config = Config()) {
+    constructor(token: string, config = Config(token)) {
         this.config = config;
     }
 
