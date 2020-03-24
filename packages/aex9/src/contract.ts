@@ -8,7 +8,7 @@ import EventHandler from './events';
 import { Config } from '.';
 import { getInputFromSwap, getInputFromWithdraw, getInputFromRefund } from './utils';
 
-const MAX_ALLOWANCE = '1000000000000000000000000000000000000000000000000000000000000';
+const MAX_ALLOWANCE = '1000000000000000000000000000000000000000000000000000000000000'; // This can be improved
 export default class AeternityContract implements Aex9JellyContract {
     public config: any;
     public provider: any;
@@ -40,12 +40,12 @@ export default class AeternityContract implements Aex9JellyContract {
         return result?.decodedResult || 0;
     }
 
-    async newContract(swap: Aex9ContractSwap, checkAllowance = false) {
+    async newContract(swap: Aex9ContractSwap, checkAllowance = false, waitMined = false) {
         const contractAddress = this.config.contractAddress.replace('ct', 'ak');
         const { inputAmount, sender, tokenAddress } = swap;
 
         if (checkAllowance) {
-            const tokenContract = await this.getTokenContract(tokenAddress);
+            const tokenContract = await this.getTokenContract(tokenAddress.replace('ak', 'ct'));
 
             const allowanceResult = await tokenContract.methods.allowance({
                 from_account: sender,
@@ -56,23 +56,19 @@ export default class AeternityContract implements Aex9JellyContract {
 
             if (allowance.lt(inputAmount)) {
                 await tokenContract.methods.create_allowance(contractAddress, MAX_ALLOWANCE);
-                const result = await this.provider.callContract('new_contract', getInputFromSwap(swap));
-                return result;
+                return await this.provider.callContract('new_contract', getInputFromSwap(swap), { waitMined });
             }
         }
 
-        const result = await this.provider.callContract('new_contract', getInputFromSwap(swap));
-        return result;
+        return await this.provider.callContract('new_contract', getInputFromSwap(swap), { waitMined });
     }
 
-    async withdraw(withdraw: Aex9ContractWithdraw) {
-        const result = await this.provider.callContract('withdraw', getInputFromWithdraw(withdraw));
-        return result;
+    async withdraw(withdraw: Aex9ContractWithdraw, waitMined = false) {
+        return await this.provider.callContract('withdraw', getInputFromWithdraw(withdraw), { waitMined });
     }
 
-    async refund(refund: Aex9ContractRefund) {
-        const result = await this.provider.callContract('refund', getInputFromRefund(refund));
-        return result;
+    async refund(refund: Aex9ContractRefund, waitMined = false) {
+        return await this.provider.callContract('refund', getInputFromRefund(refund), { waitMined });
     }
 
     async getStatus(ids: any[]) {
@@ -81,9 +77,6 @@ export default class AeternityContract implements Aex9JellyContract {
     }
 
     async getTokenContract(tokenAddress: string) {
-        await this.provider.setup();
-        return await this.provider.client.getContractInstance(Aex9Source, {
-            contractAddress: tokenAddress,
-        });
+        return await this.provider.getContractInstance(Aex9Source, tokenAddress);
     }
 }
