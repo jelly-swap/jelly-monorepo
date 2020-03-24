@@ -24,7 +24,7 @@ export default class AeternityAdapter implements JellyAdapter {
             outputNetwork: inputSwap.network,
             outputAddress: inputSwap.receiver,
             inputAmount: inputSwap.outputAmount,
-            tokenAddress: this.config.address,
+            tokenAddress: this.config.address.replace('ak', 'ct'),
         };
 
         const id = this.generateId(swap);
@@ -59,7 +59,7 @@ export default class AeternityAdapter implements JellyAdapter {
 
         return {
             ...swap,
-            tokenAddress,
+            tokenAddress: tokenAddress.replace('ak', 'ct'),
             expiration,
             hashLock: generateHashLock(swap.secret),
             inputAmount,
