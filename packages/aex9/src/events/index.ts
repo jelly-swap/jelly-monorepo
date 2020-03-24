@@ -131,7 +131,7 @@ export default class Event {
                     if (result) {
                         const key = `${result.eventName}_${txHash}`;
                         if (!this.history.get(key)) {
-                            onMessage({ ...result, transactionHash: txHash });
+                            onMessage({ ...result, transactionHash: txHash, id: '0x' + result.id });
                             this.history.set(key, true);
                         }
                     }
