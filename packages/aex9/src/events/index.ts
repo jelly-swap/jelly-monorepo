@@ -1,3 +1,4 @@
+import { fixHash } from '@jelly-swap/utils';
 import { w3cwebsocket } from 'websocket';
 import axios from 'axios';
 import JSONbig from 'json-bigint';
@@ -125,16 +126,18 @@ export default class Event {
                 const txHash = data.payload.hash;
 
                 if (txHash) {
-                    const tx = await this.provider.getTxInfo(txHash);
-                    const result = ParseEvent(tx, filter, this.config);
+                    try {
+                        const tx = await this.provider.getTxInfo(txHash);
+                        const result = ParseEvent(tx, filter, this.config);
 
-                    if (result) {
-                        const key = `${result.eventName}_${txHash}`;
-                        if (!this.history.get(key)) {
-                            onMessage({ ...result, transactionHash: txHash, id: '0x' + result.id });
-                            this.history.set(key, true);
+                        if (result) {
+                            const key = `${result.eventName}_${txHash}`;
+                            if (!this.history.get(key)) {
+                                onMessage({ ...result, transactionHash: txHash, id: fixHash(result.id) });
+                                this.history.set(key, true);
+                            }
                         }
-                    }
+                    } catch (err) {}
                 }
             }
         };
