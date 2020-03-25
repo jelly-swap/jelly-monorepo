@@ -32,18 +32,21 @@ export default class AeternityContract implements JellyContract {
         return await this.provider.getAeBalance(address);
     }
 
-    async newContract(swap: ContractSwap) {
-        const result = await this.provider.callContract('new_contract', getInputFromSwap(swap), swap.options);
+    async newContract(swap: ContractSwap, waitMined = false) {
+        const result = await this.provider.callContract('new_contract', getInputFromSwap(swap), {
+            ...swap.options,
+            waitMined,
+        });
         return result;
     }
 
-    async withdraw(withdraw: ContractWithdraw) {
-        const result = await this.provider.callContract('withdraw', getInputFromWithdraw(withdraw));
+    async withdraw(withdraw: ContractWithdraw, waitMined = false) {
+        const result = await this.provider.callContract('withdraw', getInputFromWithdraw(withdraw), { waitMined });
         return result;
     }
 
-    async refund(refund: ContractRefund) {
-        const result = await this.provider.callContract('refund', getInputFromRefund(refund));
+    async refund(refund: ContractRefund, waitMined = false) {
+        const result = await this.provider.callContract('refund', getInputFromRefund(refund), { waitMined });
         return result;
     }
 
