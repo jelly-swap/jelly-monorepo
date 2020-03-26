@@ -38,18 +38,35 @@ contract AEX9Token =
   entrypoint check_swap           : (address)               => int
   entrypoint swapped              : ()                      => map(address, int)
 
-contract HashTimeLock =
-  datatype status = INVALID | ACTIVE | REFUNDED | WITHDRAWN | EXPIRED
+contract JellyHTLC = 
+
+  record state = { swaps : map(hash, swap) }
+
+  datatype status = INVALID | ACTIVE | REFUNDED | WITHDRAWN | EXPIRED 
+
+  record swap = {
+    input_amount : int,
+    output_amount : int,
+    expiration : int,
+    hash_lock : hash,
+    status: status,
+    token: AEX9Token,
+    sender : address,
+    receiver : address,
+    output_network : string,
+    output_address : string}
 
   datatype event =
     Withdraw(hash, address, address, string)
     | Refund(hash, address, address, string)
-    | New_contract(hash, address, address, string)
+    | NewSwap(hash, address, address, string)
 
-  stateful entrypoint new_contract     : (int, int, int, hash, address, AEX9Token, string, string)  => unit
-  stateful entrypoint withdraw         : (hash, hash, AEX9Token)                                    => unit
-  stateful entrypoint refund           : (hash, AEX9Token)                                          => unit
-  entrypoint get_one_status            : (hash)                                                     => status
-  entrypoint get_many_status           : (list(hash))                                               => list(status)
-  entrypoint generate_id               : (address, address, int, hash, int)                         => hash
+  stateful payable entrypoint new_swap : (int, int, int, hash, address, AEX9Token, string, string) => unit
+  stateful entrypoint withdraw         : (hash, hash, AEX9Token)                                   => unit
+  stateful entrypoint refund           : (hash, AEX9Token)                                         => unit
+
+  entrypoint get_one_status            : (hash)                                                    => status
+  entrypoint get_many_status           : (list(hash))                                              => list(status)
+  entrypoint generate_id               : (address, address, int, hash, int, AEX9Token)             => hash
+  entrypoint get_swap                  : (hash)                                                    => swap
 `;

@@ -7,7 +7,7 @@ import BigNumber from 'bignumber.js';
 BigNumber.config({ EXPONENTIAL_AT: 100, POW_PRECISION: 100 });
 
 const TOPICS = {
-    NEW_CONTRACT: 'd3d98a7d52b2b1f51f8e6909ae20f227695f4e6d7fdb9c0052388b59091b6555',
+    NEW_SWAP: '7c7095895733e8f0237b537a14ed87e0417372c3baa08c0226a15beed44332c9',
     WITHDRAW: 'c697685b94066657fe65070d9b29384389e827776cd5f0e2270252cfb7e9cf14',
     REFUND: 'c4e6ebe500e9327588e3eb820645ed28c99741f75e762e01faada721269ebab5',
 };
@@ -19,8 +19,8 @@ export default (tx: any, _filter: Filter, config: any): any => {
         const topic = new BigNumber(log[0].topics[0]).toString(16);
 
         switch (topic) {
-            case TOPICS.NEW_CONTRACT: {
-                const t = formatNewContractEventData(log[0], config);
+            case TOPICS.NEW_SWAP: {
+                const t = formatNewSwap(log[0], config);
                 if (filter(_filter.new, t)) {
                     if (_filter.new.sender?.toLowerCase() === t?.sender?.toLowerCase()) {
                         return { ...t, isSender: true };
@@ -107,7 +107,7 @@ const formatWithdrawEventData = (log: any, config: any) => {
     return result;
 };
 
-const formatNewContractEventData = (log: any, config: any) => {
+const formatNewSwap = (log: any, config: any) => {
     const args = EventUtils.decodeString(log);
     const data = log.topics;
 
