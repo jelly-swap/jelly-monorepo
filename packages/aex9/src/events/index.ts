@@ -24,7 +24,13 @@ export default class Event {
         this.provider = contract.provider;
         this.webSocketClient = new w3cwebsocket(this.config.wsUrl);
         this.history = new Map();
-        this.cache = memoize(this._getPast, { maxAge: 30000 });
+        this.cache = memoize(this._getPast, {
+            maxAge: 30000,
+            promise: true,
+            normalizer: (a: any[]) => {
+                return JSON.stringify(a);
+            },
+        });
     }
 
     async getPast(type: string, filter?: Filter) {
