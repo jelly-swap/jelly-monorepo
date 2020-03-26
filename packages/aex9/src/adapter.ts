@@ -74,7 +74,8 @@ export default class AeternityAdapter implements JellyAdapter {
             swap.receiver +
             swap.inputAmount +
             fixHash(swap.hashLock, false).toUpperCase() +
-            swap.expiration;
+            swap.expiration +
+            swap.tokenAddress.replace('ct', 'ak');
 
         const id = '0x' + sha256(input).toString('hex');
         return id;
