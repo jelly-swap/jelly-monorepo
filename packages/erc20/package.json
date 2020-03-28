@@ -18,6 +18,7 @@
         "url": "git+https://github.com/jelly-swap/jelly-monorepo.git"
     },
     "scripts": {
+        "test": "jest --config ../../jest.config.json",
         "build": "tsc"
     },
     "publishConfig": {

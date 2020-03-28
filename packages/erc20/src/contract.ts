@@ -26,6 +26,10 @@ export default class Erc20Contract implements Erc20JellyContract {
         this.eventHandler = new EventHandler(this, config);
     }
 
+    unsubscribe() {
+        this.eventHandler.unsubscribe();
+    }
+
     subscribe(onMessage: Function, filter?: any): void {
         this.eventHandler.subscribe(onMessage, filter);
     }

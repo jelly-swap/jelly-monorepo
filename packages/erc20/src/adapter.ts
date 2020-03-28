@@ -72,8 +72,8 @@ export default class Erc20Adapter implements JellyAdapter {
 
     generateId(swap: Erc20ContractSwap): string {
         return utils.soliditySha256(
-            ['address', 'address', 'uint256', 'bytes32', 'uint256'],
-            [swap.sender, swap.receiver, swap.inputAmount, swap.hashLock, swap.expiration]
+            ['address', 'address', 'uint256', 'bytes32', 'uint256', 'address'],
+            [swap.sender, swap.receiver, swap.inputAmount, swap.hashLock, swap.expiration, swap.tokenAddress]
         );
     }
 }
