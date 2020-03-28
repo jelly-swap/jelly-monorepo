@@ -112,42 +112,41 @@ export default class Event {
         return { swaps, withdraws, refunds };
     }
 
-    async subscribe(onMessage: Function, _filter?: Filter) {
-        this.contract.contract.on(
-            {
-                address: this.config.contractAddress,
-            },
-            log => {
-                const parsed = this.interface.parseLog(log);
+    unsubscribe() {
+        this.contract.contract.removeAllListeners({ address: this.config.contractAddress });
+    }
 
-                switch (parsed.name) {
-                    case 'NewContract': {
-                        const swap = parseSwapEvent(parsed.values, log, this.config);
+    subscribe(onMessage: Function, _filter?: Filter) {
+        this.contract.contract.on({ address: this.config.contractAddress }, log => {
+            const parsed = this.interface.parseLog(log);
 
-                        onFilter(_filter?.new, swap, () => {
-                            if (_filter?.new?.sender?.toLowerCase() === swap.sender.toLowerCase()) {
-                                onMessage({ ...swap, isSender: true });
-                            } else {
-                                onMessage(swap);
-                            }
-                        });
+            switch (parsed.name) {
+                case 'NewContract': {
+                    const swap = parseSwapEvent(parsed.values, log, this.config);
 
-                        break;
-                    }
+                    onFilter(_filter?.new, swap, () => {
+                        if (_filter?.new?.sender?.toLowerCase() === swap.sender.toLowerCase()) {
+                            onMessage({ ...swap, isSender: true });
+                        } else {
+                            onMessage(swap);
+                        }
+                    });
 
-                    case 'Withdraw': {
-                        const withdraw = parseEvent('WITHDRAW', parsed.values, log, this.config);
-                        onFilter(_filter?.withdraw, withdraw, onMessage);
-                        break;
-                    }
+                    break;
+                }
 
-                    case 'Refund': {
-                        const refund = parseEvent('REFUND', parsed.values, log, this.config);
-                        onFilter(_filter?.refund, refund, onMessage);
-                        break;
-                    }
+                case 'Withdraw': {
+                    const withdraw = parseEvent('WITHDRAW', parsed.values, log, this.config);
+                    onFilter(_filter?.withdraw, withdraw, onMessage);
+                    break;
+                }
+
+                case 'Refund': {
+                    const refund = parseEvent('REFUND', parsed.values, log, this.config);
+                    onFilter(_filter?.refund, refund, onMessage);
+                    break;
                 }
             }
-        );
+        });
     }
 }
