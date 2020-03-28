@@ -1,0 +1,25 @@
+{
+    "rootDir": "",
+
+    "roots": [
+        "<rootDir>/packages/erc20/tests"
+    ],
+    "verbose": true,
+    "collectCoverage": true,
+    "coverageReporters": ["lcov", "json"],
+    "collectCoverageFrom": [
+        "**/src/**"
+    ],
+    "transform": {
+        "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.spec.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+        "ts",
+        "tsx",
+        "js",
+        "jsx",
+        "json",
+        "node"
+    ]
+}
