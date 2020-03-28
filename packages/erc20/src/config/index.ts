@@ -4,7 +4,7 @@ export default (token?: string, tokenConfig = TokenConfig, addressToToken = Addr
     return {
         explorer: 'https://ropsten.etherscan.io/tx/',
         providerUrl: 'https://ropsten.infura.io/v3/8fe4fc9626494d238879981936dbf144',
-        contractAddress: '0x66ea49fd943544d59e14d1bd9107217c7503906a',
+        contractAddress: '0x146ba82F8bFedbef77F52E45D3868c914bB4EF46',
         receiverAddress: '0xc555d8bc1B47F53F2b28fd2B3301aD94F7add17C',
         blockTime: 15,
         expiration,

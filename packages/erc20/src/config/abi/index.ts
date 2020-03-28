@@ -148,6 +148,81 @@ export default [
     },
     {
         constant: true,
+        inputs: [],
+        name: 'ACTIVE',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        payable: false,
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        constant: true,
+        inputs: [],
+        name: 'EXPIRED',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        payable: false,
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        constant: true,
+        inputs: [],
+        name: 'INVALID',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        payable: false,
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        constant: true,
+        inputs: [],
+        name: 'REFUNDED',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        payable: false,
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        constant: true,
+        inputs: [],
+        name: 'WITHDRAWN',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        payable: false,
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        constant: true,
         inputs: [
             {
                 internalType: 'bytes32',
@@ -173,14 +248,14 @@ export default [
                 type: 'uint256',
             },
             {
+                internalType: 'uint256',
+                name: 'status',
+                type: 'uint256',
+            },
+            {
                 internalType: 'bytes32',
                 name: 'hashLock',
                 type: 'bytes32',
-            },
-            {
-                internalType: 'enum HashTimeLock.SwapStatus',
-                name: 'status',
-                type: 'uint8',
             },
             {
                 internalType: 'address',
@@ -206,6 +281,48 @@ export default [
                 internalType: 'string',
                 name: 'outputAddress',
                 type: 'string',
+            },
+        ],
+        payable: false,
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        constant: true,
+        inputs: [
+            {
+                internalType: 'bytes32',
+                name: 'id',
+                type: 'bytes32',
+            },
+        ],
+        name: 'getSingleStatus',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: 'result',
+                type: 'uint256',
+            },
+        ],
+        payable: false,
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        constant: true,
+        inputs: [
+            {
+                internalType: 'bytes32[]',
+                name: 'ids',
+                type: 'bytes32[]',
+            },
+        ],
+        name: 'getStatus',
+        outputs: [
+            {
+                internalType: 'uint256[]',
+                name: '',
+                type: 'uint256[]',
             },
         ],
         payable: false,
@@ -271,24 +388,13 @@ export default [
                 type: 'bytes32',
             },
             {
-                internalType: 'bytes32',
-                name: 'secret',
-                type: 'bytes32',
-            },
-            {
                 internalType: 'address',
                 name: 'tokenAddress',
                 type: 'address',
             },
         ],
-        name: 'withdraw',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
+        name: 'refund',
+        outputs: [],
         payable: false,
         stateMutability: 'nonpayable',
         type: 'function',
@@ -302,157 +408,20 @@ export default [
                 type: 'bytes32',
             },
             {
+                internalType: 'bytes32',
+                name: 'secret',
+                type: 'bytes32',
+            },
+            {
                 internalType: 'address',
                 name: 'tokenAddress',
                 type: 'address',
             },
         ],
-        name: 'refund',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
+        name: 'withdraw',
+        outputs: [],
         payable: false,
         stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        constant: true,
-        inputs: [
-            {
-                internalType: 'bytes32',
-                name: 'id',
-                type: 'bytes32',
-            },
-        ],
-        name: 'getContract',
-        outputs: [
-            {
-                components: [
-                    {
-                        internalType: 'uint256',
-                        name: 'inputAmount',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'outputAmount',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'expiration',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'bytes32',
-                        name: 'hashLock',
-                        type: 'bytes32',
-                    },
-                    {
-                        internalType: 'enum HashTimeLock.SwapStatus',
-                        name: 'status',
-                        type: 'uint8',
-                    },
-                    {
-                        internalType: 'address',
-                        name: 'tokenAddress',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'address',
-                        name: 'sender',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'address',
-                        name: 'receiver',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'string',
-                        name: 'outputNetwork',
-                        type: 'string',
-                    },
-                    {
-                        internalType: 'string',
-                        name: 'outputAddress',
-                        type: 'string',
-                    },
-                ],
-                internalType: 'struct HashTimeLock.LockContract',
-                name: '',
-                type: 'tuple',
-            },
-        ],
-        payable: false,
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        constant: true,
-        inputs: [
-            {
-                internalType: 'bytes32',
-                name: 'id',
-                type: 'bytes32',
-            },
-        ],
-        name: 'contractExists',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
-        payable: false,
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        constant: true,
-        inputs: [
-            {
-                internalType: 'bytes32[]',
-                name: 'ids',
-                type: 'bytes32[]',
-            },
-        ],
-        name: 'getStatus',
-        outputs: [
-            {
-                internalType: 'uint8[]',
-                name: '',
-                type: 'uint8[]',
-            },
-        ],
-        payable: false,
-        stateMutability: 'view',
-        type: 'function',
-    },
-    {
-        constant: true,
-        inputs: [
-            {
-                internalType: 'bytes32',
-                name: 'id',
-                type: 'bytes32',
-            },
-        ],
-        name: 'getStatus',
-        outputs: [
-            {
-                internalType: 'uint8',
-                name: 'result',
-                type: 'uint8',
-            },
-        ],
-        payable: false,
-        stateMutability: 'view',
         type: 'function',
     },
 ];
