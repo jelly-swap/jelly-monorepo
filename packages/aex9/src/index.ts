@@ -1,6 +1,5 @@
-import { Providers } from '@jelly-swap/aeternity';
-
 import Contract from './contract';
+import Providers from './providers';
 import Config from './config';
 import Adapter from './adapter';
 import Event from './events';

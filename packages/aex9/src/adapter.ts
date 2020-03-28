@@ -7,7 +7,7 @@ import Config from './config';
 export default class AeternityAdapter implements JellyAdapter {
     private config: any;
 
-    constructor(config = Config()) {
+    constructor(token: string, config = Config(token)) {
         this.config = config;
     }
 
@@ -24,7 +24,7 @@ export default class AeternityAdapter implements JellyAdapter {
             outputNetwork: inputSwap.network,
             outputAddress: inputSwap.receiver,
             inputAmount: inputSwap.outputAmount,
-            tokenAddress: this.config.address,
+            tokenAddress: this.config.address.replace('ak', 'ct'),
         };
 
         const id = this.generateId(swap);
@@ -59,7 +59,7 @@ export default class AeternityAdapter implements JellyAdapter {
 
         return {
             ...swap,
-            tokenAddress,
+            tokenAddress: tokenAddress.replace('ak', 'ct'),
             expiration,
             hashLock: generateHashLock(swap.secret),
             inputAmount,
@@ -74,7 +74,8 @@ export default class AeternityAdapter implements JellyAdapter {
             swap.receiver +
             swap.inputAmount +
             fixHash(swap.hashLock, false).toUpperCase() +
-            swap.expiration;
+            swap.expiration +
+            swap.tokenAddress.replace('ct', 'ak');
 
         const id = '0x' + sha256(input).toString('hex');
         return id;

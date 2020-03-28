@@ -1,3 +1,5 @@
+import { fixHash } from '@jelly-swap/utils';
+
 import { w3cwebsocket } from 'websocket';
 import axios from 'axios';
 import JSONbig from 'json-bigint';
@@ -23,7 +25,13 @@ export default class Event {
         this.provider = contract.provider;
         this.webSocketClient = new w3cwebsocket(this.config.wsUrl);
         this.history = new Map();
-        this.cache = memoize(this._getPast, { maxAge: 30000 });
+        this.cache = memoize(this._getPast, {
+            maxAge: 30000,
+            promise: true,
+            normalizer: (a: any[]) => {
+                return JSON.stringify(a);
+            },
+        });
     }
 
     async getPast(type: string, filter?: Filter) {
@@ -125,16 +133,18 @@ export default class Event {
                 const txHash = data.payload.hash;
 
                 if (txHash) {
-                    const tx = await this.provider.getTxInfo(txHash);
-                    const result = ParseEvent(tx, filter);
+                    try {
+                        const tx = await this.provider.getTxInfo(txHash);
+                        const result = ParseEvent(tx, filter);
 
-                    if (result) {
-                        const key = `${result.eventName}_${txHash}`;
-                        if (!this.history.get(key)) {
-                            onMessage({ ...result, transactionHash: txHash });
-                            this.history.set(key, true);
+                        if (result) {
+                            const key = `${result.eventName}_${txHash}`;
+                            if (!this.history.get(key)) {
+                                onMessage({ ...result, transactionHash: txHash, id: fixHash(result.id) });
+                                this.history.set(key, true);
+                            }
                         }
-                    }
+                    } catch (err) {}
                 }
             }
         };
