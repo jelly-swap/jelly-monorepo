@@ -24,7 +24,7 @@
         "url": "https://github.com/jelly-swap/monorepo.git"
     },
     "dependencies": {
-        "@aeternity/aepp-sdk": "^7.1.1",
+        "@aeternity/aepp-sdk": "7.1.1",
         "@jelly-swap/types": "^0.1.32",
         "@jelly-swap/utils": "^0.1.32",
         "axios": "^0.19.0",
