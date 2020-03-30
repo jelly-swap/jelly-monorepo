@@ -84,28 +84,30 @@ export default class Event {
                 const refunds: RefundEvent[] = [];
 
                 JSONbig.parse(res.data).map((tx: any) => {
-                    const result = ParseEvent(tx.callinfo, filter, this.config);
+                    if (tx.callinfo) {
+                        const result = ParseEvent(tx.callinfo, filter, this.config);
 
-                    if (result) {
-                        const txIncluded = {
-                            ...result,
-                            transactionHash: tx.transaction_id,
-                        };
+                        if (result) {
+                            const txIncluded = {
+                                ...result,
+                                transactionHash: tx.transaction_id,
+                            };
 
-                        switch (result.eventName) {
-                            case 'NEW_CONTRACT': {
-                                swaps.push(txIncluded);
-                                break;
-                            }
+                            switch (result.eventName) {
+                                case 'NEW_CONTRACT': {
+                                    swaps.push(txIncluded);
+                                    break;
+                                }
 
-                            case 'REFUND': {
-                                refunds.push(txIncluded);
-                                break;
-                            }
+                                case 'REFUND': {
+                                    refunds.push(txIncluded);
+                                    break;
+                                }
 
-                            case 'WITHDRAW': {
-                                withdraws.push(txIncluded);
-                                break;
+                                case 'WITHDRAW': {
+                                    withdraws.push(txIncluded);
+                                    break;
+                                }
                             }
                         }
                     }
