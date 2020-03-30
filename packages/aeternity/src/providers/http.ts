@@ -1,4 +1,4 @@
-import { Node, RpcAepp, Universal, MemoryAccount } from '../sdk-browser';
+import { Node, RpcAepp, Universal, MemoryAccount } from '../sdk-node';
 
 import Config from '../config';
 import ContractSource from '../config/contractSource';

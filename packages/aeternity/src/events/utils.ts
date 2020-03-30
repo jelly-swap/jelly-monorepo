@@ -3,7 +3,7 @@ import { filter } from '@jelly-swap/utils';
 
 import BigNumber from 'bignumber.js';
 
-import { decodeBase64Check, addressFromDecimal } from '../sdk-browser';
+import { decodeBase64Check, addressFromDecimal } from '../sdk-node';
 
 BigNumber.config({ EXPONENTIAL_AT: 100, POW_PRECISION: 100 });
 
