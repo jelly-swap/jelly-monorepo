@@ -40,121 +40,6 @@ export default [
         type: 'function',
     },
     {
-        constant: false,
-        inputs: [
-            {
-                internalType: 'bytes32',
-                name: 'id',
-                type: 'bytes32',
-            },
-        ],
-        name: 'refund',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
-        payable: false,
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        constant: false,
-        inputs: [
-            {
-                internalType: 'bytes32',
-                name: 'id',
-                type: 'bytes32',
-            },
-            {
-                internalType: 'bytes32',
-                name: 'secret',
-                type: 'bytes32',
-            },
-        ],
-        name: 'withdraw',
-        outputs: [
-            {
-                internalType: 'bool',
-                name: '',
-                type: 'bool',
-            },
-        ],
-        payable: false,
-        stateMutability: 'nonpayable',
-        type: 'function',
-    },
-    {
-        anonymous: false,
-        inputs: [
-            {
-                indexed: true,
-                internalType: 'bytes32',
-                name: 'id',
-                type: 'bytes32',
-            },
-            {
-                indexed: false,
-                internalType: 'bytes32',
-                name: 'secret',
-                type: 'bytes32',
-            },
-            {
-                indexed: false,
-                internalType: 'bytes32',
-                name: 'hashLock',
-                type: 'bytes32',
-            },
-            {
-                indexed: true,
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                indexed: true,
-                internalType: 'address',
-                name: 'receiver',
-                type: 'address',
-            },
-        ],
-        name: 'Withdraw',
-        type: 'event',
-    },
-    {
-        anonymous: false,
-        inputs: [
-            {
-                indexed: true,
-                internalType: 'bytes32',
-                name: 'id',
-                type: 'bytes32',
-            },
-            {
-                indexed: false,
-                internalType: 'bytes32',
-                name: 'hashLock',
-                type: 'bytes32',
-            },
-            {
-                indexed: true,
-                internalType: 'address',
-                name: 'sender',
-                type: 'address',
-            },
-            {
-                indexed: true,
-                internalType: 'address',
-                name: 'receiver',
-                type: 'address',
-            },
-        ],
-        name: 'Refund',
-        type: 'event',
-    },
-    {
         anonymous: false,
         inputs: [
             {
@@ -216,7 +101,7 @@ export default [
         type: 'event',
     },
     {
-        constant: true,
+        constant: false,
         inputs: [
             {
                 internalType: 'bytes32',
@@ -224,12 +109,109 @@ export default [
                 type: 'bytes32',
             },
         ],
-        name: 'contractExists',
+        name: 'refund',
+        outputs: [],
+        payable: false,
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'bytes32',
+                name: 'id',
+                type: 'bytes32',
+            },
+            {
+                indexed: false,
+                internalType: 'bytes32',
+                name: 'hashLock',
+                type: 'bytes32',
+            },
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'receiver',
+                type: 'address',
+            },
+        ],
+        name: 'Refund',
+        type: 'event',
+    },
+    {
+        constant: false,
+        inputs: [
+            {
+                internalType: 'bytes32',
+                name: 'id',
+                type: 'bytes32',
+            },
+            {
+                internalType: 'bytes32',
+                name: 'secret',
+                type: 'bytes32',
+            },
+        ],
+        name: 'withdraw',
+        outputs: [],
+        payable: false,
+        stateMutability: 'nonpayable',
+        type: 'function',
+    },
+    {
+        anonymous: false,
+        inputs: [
+            {
+                indexed: true,
+                internalType: 'bytes32',
+                name: 'id',
+                type: 'bytes32',
+            },
+            {
+                indexed: false,
+                internalType: 'bytes32',
+                name: 'secret',
+                type: 'bytes32',
+            },
+            {
+                indexed: false,
+                internalType: 'bytes32',
+                name: 'hashLock',
+                type: 'bytes32',
+            },
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'sender',
+                type: 'address',
+            },
+            {
+                indexed: true,
+                internalType: 'address',
+                name: 'receiver',
+                type: 'address',
+            },
+        ],
+        name: 'Withdraw',
+        type: 'event',
+    },
+    {
+        constant: true,
+        inputs: [],
+        name: 'ACTIVE',
         outputs: [
             {
-                internalType: 'bool',
+                internalType: 'uint256',
                 name: '',
-                type: 'bool',
+                type: 'uint256',
             },
         ],
         payable: false,
@@ -263,14 +245,14 @@ export default [
                 type: 'uint256',
             },
             {
+                internalType: 'uint256',
+                name: 'status',
+                type: 'uint256',
+            },
+            {
                 internalType: 'bytes32',
                 name: 'hashLock',
                 type: 'bytes32',
-            },
-            {
-                internalType: 'enum HashTimeLock.SwapStatus',
-                name: 'status',
-                type: 'uint8',
             },
             {
                 internalType: 'address payable',
@@ -299,6 +281,21 @@ export default [
     },
     {
         constant: true,
+        inputs: [],
+        name: 'EXPIRED',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        payable: false,
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        constant: true,
         inputs: [
             {
                 internalType: 'bytes32',
@@ -306,59 +303,12 @@ export default [
                 type: 'bytes32',
             },
         ],
-        name: 'getContract',
+        name: 'getSingleStatus',
         outputs: [
             {
-                components: [
-                    {
-                        internalType: 'uint256',
-                        name: 'inputAmount',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'outputAmount',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'uint256',
-                        name: 'expiration',
-                        type: 'uint256',
-                    },
-                    {
-                        internalType: 'bytes32',
-                        name: 'hashLock',
-                        type: 'bytes32',
-                    },
-                    {
-                        internalType: 'enum HashTimeLock.SwapStatus',
-                        name: 'status',
-                        type: 'uint8',
-                    },
-                    {
-                        internalType: 'address payable',
-                        name: 'sender',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'address payable',
-                        name: 'receiver',
-                        type: 'address',
-                    },
-                    {
-                        internalType: 'string',
-                        name: 'outputNetwork',
-                        type: 'string',
-                    },
-                    {
-                        internalType: 'string',
-                        name: 'outputAddress',
-                        type: 'string',
-                    },
-                ],
-                internalType: 'struct HashTimeLock.LockContract',
-                name: '',
-                type: 'tuple',
+                internalType: 'uint256',
+                name: 'result',
+                type: 'uint256',
             },
         ],
         payable: false,
@@ -377,9 +327,9 @@ export default [
         name: 'getStatus',
         outputs: [
             {
-                internalType: 'uint8[]',
+                internalType: 'uint256[]',
                 name: '',
-                type: 'uint8[]',
+                type: 'uint256[]',
             },
         ],
         payable: false,
@@ -388,19 +338,43 @@ export default [
     },
     {
         constant: true,
-        inputs: [
-            {
-                internalType: 'bytes32',
-                name: 'id',
-                type: 'bytes32',
-            },
-        ],
-        name: 'getStatus',
+        inputs: [],
+        name: 'INVALID',
         outputs: [
             {
-                internalType: 'uint8',
-                name: 'result',
-                type: 'uint8',
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        payable: false,
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        constant: true,
+        inputs: [],
+        name: 'REFUNDED',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
+            },
+        ],
+        payable: false,
+        stateMutability: 'view',
+        type: 'function',
+    },
+    {
+        constant: true,
+        inputs: [],
+        name: 'WITHDRAWN',
+        outputs: [
+            {
+                internalType: 'uint256',
+                name: '',
+                type: 'uint256',
             },
         ],
         payable: false,
