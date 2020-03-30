@@ -30,9 +30,5 @@
         "axios": "^0.19.0",
         "bignumber.js": "^9.0.0"
     },
-    "devDependencies": {
-        "@types/axios": "^0.14.0",
-        "@types/bignumber.js": "^5.0.0"
-    },
     "gitHead": "8639449906eb7425eb2f910bcf0c8604730defd7"
 }
