@@ -3,7 +3,7 @@
     "private": true,
     "devDependencies": {
         "@types/jest": "^25.1.4",
-        "@types/node": "^12.12.17",
+        "@types/node": "^13.9.5",
         "jest": "^25.2.3",
         "lerna": "^3.19.0",
         "ts-jest": "^25.2.1",
