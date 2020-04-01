@@ -98,19 +98,19 @@ export default class Event {
             switch (parsed.name) {
                 case 'NewContract': {
                     const swap = parseSwapEvent(parsed.values, log);
-                    fillArrayAfterFilter(swaps, _filter.new, swap);
+                    fillArrayAfterFilter(swaps, _filter?.new, swap);
                     break;
                 }
 
                 case 'Withdraw': {
                     const withdraw = parseEvent('WITHDRAW', parsed.values, log);
-                    fillArrayAfterFilter(withdraws, _filter.withdraw, withdraw);
+                    fillArrayAfterFilter(withdraws, _filter?.withdraw, withdraw);
                     break;
                 }
 
                 case 'Refund': {
                     const refund = parseEvent('REFUND', parsed.values, log);
-                    fillArrayAfterFilter(refunds, _filter.refund, refund);
+                    fillArrayAfterFilter(refunds, _filter?.refund, refund);
                     break;
                 }
             }
@@ -130,8 +130,8 @@ export default class Event {
                 switch (parsed.name) {
                     case 'NewContract': {
                         const swap = parseSwapEvent(parsed.values, log);
-                        onFilter(_filter.new, swap, () => {
-                            if (_filter.new.sender?.toLowerCase() === swap.sender.toLowerCase()) {
+                        onFilter(_filter?.new, swap, () => {
+                            if (_filter?.new.sender?.toLowerCase() === swap.sender.toLowerCase()) {
                                 onMessage({ ...swap, isSender: true });
                             } else {
                                 onMessage(swap);
@@ -142,13 +142,13 @@ export default class Event {
 
                     case 'Withdraw': {
                         const withdraw = parseEvent('WITHDRAW', parsed.values, log);
-                        onFilter(_filter.withdraw, withdraw, onMessage);
+                        onFilter(_filter?.withdraw, withdraw, onMessage);
                         break;
                     }
 
                     case 'Refund': {
                         const refund = parseEvent('REFUND', parsed.values, log);
-                        onFilter(_filter.refund, refund, onMessage);
+                        onFilter(_filter?.refund, refund, onMessage);
                         break;
                     }
                 }
