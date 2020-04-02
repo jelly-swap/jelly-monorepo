@@ -13,7 +13,7 @@ const TOPICS = {
     REFUND: 'c4e6ebe500e9327588e3eb820645ed28c99741f75e762e01faada721269ebab5',
 };
 
-export default (tx: any, _filter: Filter): any => {
+export default (tx: any, _filter?: Filter): any => {
     const log = tx.log;
 
     if (log.length === 1) {
@@ -22,18 +22,27 @@ export default (tx: any, _filter: Filter): any => {
         switch (topic) {
             case TOPICS.NEW_SWAP: {
                 const t = formatNewSwap(log[0]);
-                if (filter(_filter.new, t)) {
-                    if (_filter.new.sender?.toLowerCase() === t?.sender?.toLowerCase()) {
-                        return { ...t, isSender: true };
+                if (_filter?.new) {
+                    if (filter(_filter.new, t)) {
+                        if (_filter.new.sender?.toLowerCase() === t?.sender?.toLowerCase()) {
+                            return { ...t, isSender: true };
+                        }
+                        return t;
                     }
+                } else {
                     return t;
                 }
+
                 break;
             }
 
             case TOPICS.REFUND: {
                 const t = formatRefundEventData(log[0]);
-                if (filter(_filter.refund, t)) {
+                if (_filter?.refund) {
+                    if (filter(_filter.refund, t)) {
+                        return t;
+                    }
+                } else {
                     return t;
                 }
 
@@ -42,7 +51,11 @@ export default (tx: any, _filter: Filter): any => {
 
             case TOPICS.WITHDRAW: {
                 const t = formatWithdrawEventData(log[0]);
-                if (filter(_filter.withdraw, t)) {
+                if (_filter?.withdraw) {
+                    if (filter(_filter.withdraw, t)) {
+                        return t;
+                    }
+                } else {
                     return t;
                 }
             }

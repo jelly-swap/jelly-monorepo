@@ -39,7 +39,7 @@ export default class Event {
 
         switch (type) {
             case 'new': {
-                return await this.getSwapsWithStatus(swaps, filter);
+                return await this.getSwapsWithStatus(swaps);
             }
 
             case 'withdraw': {
@@ -52,7 +52,7 @@ export default class Event {
 
             case 'all': {
                 return {
-                    swaps: await this.getSwapsWithStatus(swaps, filter),
+                    swaps: await this.getSwapsWithStatus(swaps),
                     refunds,
                     withdraws,
                 } as any;
@@ -64,7 +64,7 @@ export default class Event {
         }
     }
 
-    async getSwapsWithStatus(swaps: SwapEvent[], filter: Filter) {
+    async getSwapsWithStatus(swaps: SwapEvent[]) {
         const ids = swaps.map((s: SwapEvent) => s.id);
 
         const status = await this.contract.getStatus(ids);
@@ -74,7 +74,7 @@ export default class Event {
         });
     }
 
-    async _getPast(filter: Filter) {
+    async _getPast(filter?: Filter) {
         return axios
             .get(`${this.config.apiUrl}middleware/contracts/calls/address/${this.config.contractAddress}`, {
                 transformResponse: [(data: any) => data],
