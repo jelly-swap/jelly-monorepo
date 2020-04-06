@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 
-import { JellyContract, ContractSwap, ContractRefund, ContractWithdraw } from './types';
+import { JellyContract, ContractSwap, ContractRefund, ContractWithdraw, Options } from './types';
 
 import EventHandler from './events';
 
@@ -42,7 +42,8 @@ export default class EthereumContract implements JellyContract {
         return balance.toString();
     }
 
-    async newContract(swap: ContractSwap) {
+    async newContract(swap: ContractSwap, options?: Options) {
+        const overrideOptions = await this.extendOptions(options);
         const result = await this.contract.newContract(
             swap.outputAmount,
             swap.expiration,
@@ -50,23 +51,42 @@ export default class EthereumContract implements JellyContract {
             swap.receiver,
             swap.outputNetwork,
             swap.outputAddress,
-            swap.options
+            { ...overrideOptions, ...swap.options }
         );
         return result.hash;
     }
 
-    async withdraw(withdraw: ContractWithdraw) {
-        const result = await this.contract.withdraw(withdraw.id, withdraw.secret);
+    async withdraw(withdraw: ContractWithdraw, options?: Options) {
+        const overrideOptions = await this.extendOptions(options);
+        const result = await this.contract.withdraw(withdraw.id, withdraw.secret, overrideOptions);
         return result.hash;
     }
 
-    async refund(refund: ContractRefund) {
-        const result = await this.contract.refund(refund.id);
+    async refund(refund: ContractRefund, options?: Options) {
+        const overrideOptions = await this.extendOptions(options);
+        const result = await this.contract.refund(refund.id, overrideOptions);
         return result.hash;
     }
 
     async getStatus(ids: any[]) {
         // Set `from` in order to be able to call the function without a signer
         return await this.contract.getStatus(ids, { from: '0x0123456789012345678901234567890123456789' });
+    }
+
+    async getGas() {
+        const providerGas = await ethers.getDefaultProvider().getGasPrice();
+        return providerGas.mul(this.config.gasMultiplier || 1);
+    }
+
+    async extendOptions(options: Options) {
+        if (!options) {
+            options = {};
+        }
+
+        if (!options.gasPrice) {
+            options.gasPrice = await this.getGas();
+        }
+
+        return options;
     }
 }
