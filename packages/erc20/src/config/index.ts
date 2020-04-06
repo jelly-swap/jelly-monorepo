@@ -12,6 +12,7 @@ export default (token?: string, tokenConfig = TokenConfig, addressToToken = Addr
         cacheAge: 15000,
         pollingInterval: 15000,
         originBlock: 7487753,
+        gasMultiplier: 2,
 
         AddressToToken: addressToToken,
         TokenToAddress: (token: string) => {

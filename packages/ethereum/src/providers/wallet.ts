@@ -19,4 +19,8 @@ export default class WalletProvider extends Wallet {
     async getBalance(address: string) {
         return await this.provider.getBalance(address);
     }
+
+    async getGasPrice() {
+        return await this.provider.getGasPrice();
+    }
 }

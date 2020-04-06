@@ -1,9 +1,18 @@
 import { ContractSwap, ContractRefund, ContractWithdraw, JellyContract, UserInputSwap } from '@jelly-swap/types';
 
-export interface Erc20JellyContract extends Omit<JellyContract, 'getBalance' | 'newContract'> {
+export interface Erc20JellyContract extends Omit<JellyContract, 'getBalance' | 'newContract' | 'withdraw' | 'refund'> {
     getBalance(address: string, token: string): Promise<string | number>;
-    newContract(swap: ContractSwap, checkAllowance: boolean): Promise<string>;
+    newContract(swap: ContractSwap, options?: Options): Promise<string>;
+    withdraw(withdraw: Erc20ContractWithdraw, options?: Options): Promise<string>;
+    refund(refund: Erc20ContractRefund, options?: Options): Promise<string>;
 }
+
+export type Options = {
+    value?: any;
+    gasLimit?: any;
+    gasPrice?: any;
+    nonce?: any;
+};
 
 export interface Erc20ContractSwap extends ContractSwap {
     tokenAddress: string;

@@ -31,7 +31,7 @@ export default () => {
 
                 const input = adapter.formatInput(swap, receiver);
 
-                const result = await contract.newContract(input, true);
+                const result = await contract.newContract(input);
 
                 expect(result).toBeDefined();
             },
@@ -40,7 +40,7 @@ export default () => {
 
         it(
             'should receive swap event',
-            async done => {
+            async (done) => {
                 contract.subscribe((result: any) => {
                     swapEventResult = result;
 
@@ -72,7 +72,7 @@ export default () => {
 
         it(
             'should receive withdraw event',
-            async done => {
+            async (done) => {
                 contract.subscribe((result: any) => {
                     console.log('WITHDRAW EVENT: ', result);
 
