@@ -3,6 +3,7 @@ import { JellyContract, Provider, ContractSwap, ContractWithdraw, ContractRefund
 import EventHandler from './events';
 import { Config } from '.';
 import { getInputFromSwap, getInputFromWithdraw, getInputFromRefund } from './utils';
+import { mapStatus } from './events/utils';
 
 export default class AeternityContract implements JellyContract {
     public config: any;
@@ -52,6 +53,11 @@ export default class AeternityContract implements JellyContract {
 
     async getStatus(ids: any[]) {
         const result = await this.provider.callContract('get_many_status', [ids]);
-        return result?.decodedResult;
+
+        if (result?.decodedResult) {
+            return result.decodedResult.map((s: string) => mapStatus(s));
+        }
+
+        return [];
     }
 }

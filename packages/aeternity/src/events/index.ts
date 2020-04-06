@@ -5,7 +5,7 @@ import axios from 'axios';
 import JSONbig from 'json-bigint';
 import memoize from 'memoizee';
 
-import ParseEvent, { mapStatus } from './utils';
+import ParseEvent from './utils';
 
 import Config from '../config';
 
@@ -59,7 +59,7 @@ export default class Event {
             }
 
             default: {
-                throw new Error(`Ivalind event type. Available event types: 'new', 'withdraw', 'refund', 'all'`);
+                throw new Error(`Invalid event type. Available event types: 'new', 'withdraw', 'refund', 'all'`);
             }
         }
     }
@@ -70,7 +70,7 @@ export default class Event {
         const status = await this.contract.getStatus(ids);
 
         return swaps.map((s: any, index: number) => {
-            return { ...s, status: mapStatus(status[index]), id: '0x' + s.id };
+            return { ...s, status: status[index], id: '0x' + s.id };
         });
     }
 
