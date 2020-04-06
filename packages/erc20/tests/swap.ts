@@ -32,7 +32,7 @@ export default () => {
 
                 swapId = adapter.generateId(input);
 
-                const result = await contract.newContract(input, true);
+                const result = await contract.newContract(input);
 
                 expect(result).toBeDefined();
 
@@ -43,7 +43,7 @@ export default () => {
 
         it(
             'should receive swap event',
-            async done => {
+            async (done) => {
                 contract.subscribe((result: any) => {
                     swapEventResult = result;
 
