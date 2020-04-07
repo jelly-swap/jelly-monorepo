@@ -5,12 +5,13 @@ import ApiProvider from './api';
 export default class Event {
     private newContract: NewContractEvent;
     private withdraw: WithdrawEvent;
+    private provider: ApiProvider;
 
     constructor(apiProviderUrl: string) {
-        const provider = new ApiProvider(apiProviderUrl);
+        this.provider = new ApiProvider(apiProviderUrl);
 
-        this.newContract = new NewContractEvent(provider);
-        this.withdraw = new WithdrawEvent(provider);
+        this.newContract = new NewContractEvent(this.provider);
+        this.withdraw = new WithdrawEvent(this.provider);
     }
 
     async getPast(type: string, filter?: any, currentBlock?: string | number) {
@@ -36,5 +37,9 @@ export default class Event {
     async subscribe(onMessage: Function, filter?: Function) {
         this.newContract.subscribe(onMessage('NEW_CONTRACT'), filter('new'));
         this.withdraw.subscribe(onMessage('WITHDRAW'), filter('withdraw'));
+    }
+
+    async getStatus(ids: string[]) {
+        return await this.provider.getStatus(ids);
     }
 }

@@ -121,7 +121,7 @@ export default class BitcoinContract implements JellyContract {
         return result;
     }
 
-    getStatus(ids: any[]) {
-        throw new Error('Method not implemented.');
+    async getStatus(ids: any[]) {
+        return await this.eventHandler.getStatus(ids);
     }
 }

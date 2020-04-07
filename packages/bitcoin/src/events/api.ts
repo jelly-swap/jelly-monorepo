@@ -49,4 +49,8 @@ export default class ApiProvider {
         );
         return result;
     }
+
+    async getStatus(ids: string[]) {
+        return await this.client.post('/swap/status', { ids });
+    }
 }
