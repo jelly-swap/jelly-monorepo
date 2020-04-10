@@ -95,6 +95,7 @@ export default class HTLC {
 
         const swapPaymentVariants = getSwapPaymentVariants(swapOutput, network);
 
+        const initiationRawTx = await this.provider.getRawTransaction(initiationTxHash);
         const initiationTx = await this.provider.getTransaction(initiationTxHash);
 
         let swapVout;
@@ -146,10 +147,12 @@ export default class HTLC {
 
             const sig = await this.wallet.signP2SHTransaction(
                 tx,
+                initiationRawTx,
                 address,
                 swapVout,
                 isSegwit ? swapPaymentVariants.p2wsh.redeem.output : swapPaymentVariants.p2sh.redeem.output,
-                isSegwit
+                isSegwit,
+                expiration
             );
 
             const walletAddress = await this.wallet.getWalletAddress(address);

@@ -14,6 +14,10 @@ export default class BitcoinProvider {
         return response.height;
     }
 
+    async getRawTransaction(txHash: string) {
+        return await this.httpClient.getExternal(`https://blockstream.info/api/tx/${txHash}/hex`);
+    }
+
     async getTransaction(txHash: string) {
         return await this.httpClient.get(`/tx/${txHash}`);
     }
@@ -42,7 +46,7 @@ export default class BitcoinProvider {
         queries.push(addressQuery.slice(1, addressQuery.length));
 
         const utxoSets: any[] = await Promise.all(
-            queries.map(addrs => this.httpClient.get(`/address/unspent/${addrs}/${currentHeight}`))
+            queries.map((addrs) => this.httpClient.get(`/address/unspent/${addrs}/${currentHeight}`))
         );
 
         const utxos = [].concat.apply([], utxoSets);

@@ -180,7 +180,15 @@ export default class BtcWallet {
         return await this._sendTransaction([{ to, value }], data, feePerByte);
     }
 
-    async signP2SHTransaction(tx: any, address: string, vout: any, outputScript: any, segwit = false) {
+    async signP2SHTransaction(
+        tx: any,
+        rawTx: any,
+        address: any,
+        vout: any,
+        outputScript: any,
+        segwit = false,
+        expiration = 0
+    ) {
         const wallet = await this.getWalletAddress(address);
         const keyPair = await this.keyPair(wallet.derivationPath);
 
