@@ -30,7 +30,7 @@
         "bignumber.js": "^9.0.0",
         "bip39": "3.0.2",
         "bitcoinjs-lib": "5.1.6",
-        "coinselect": "3.1.11"
+        "coinselect": "3.1.12"
     },
     "gitHead": "8639449906eb7425eb2f910bcf0c8604730defd7"
 }
