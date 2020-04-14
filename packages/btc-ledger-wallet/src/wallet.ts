@@ -25,11 +25,16 @@ export default class BitcoinLedgerProvider {
     constructor(provider: any, network = Networks.bitcoin, addressType = 'bech32') {
         this.provider = provider;
         this.addressType = addressType;
-        this.derivationPath = `${ADDRESS_PREFIX[addressType]}'/${network.coinType}'/0'/`;
+        this.derivationPath = `${ADDRESS_PREFIX[addressType]}'/${network.coinType}'/0'`;
         this.network = network;
         this.ledgerKeyCache = {};
 
         this.ledger = new LedgerTransport(BtcLedger);
+    }
+
+    async getAddress(index: number, change: boolean) {
+        const result = await this.getAddresses(index, 1, change);
+        return result[0].address;
     }
 
     async getAddresses(startingIndex = 0, numAddresses = 1, change = false) {
@@ -71,18 +76,13 @@ export default class BitcoinLedgerProvider {
         throw new Error('ADDRESS_MISSING_IN_LEDGER');
     }
 
-    async getBalance(numAddressPerCall = 100) {
+    async getCurrentBlock(): Promise<number> {
+        return await this.provider.getCurrentBlock();
+    }
+
+    async getBalance(numAddressPerCall = 25) {
         let addressList = await this.getAddressList(numAddressPerCall);
-
-        const utxos = await this.provider.getUnspentTransactions(addressList);
-
-        const balance = utxos
-            .reduce((prev: BigNumber, curr: any) => {
-                return prev.plus(new BigNumber(curr.value));
-            }, new BigNumber(0))
-            .toNumber();
-
-        return balance;
+        return await this.provider.getBalance(addressList);
     }
 
     async getChangeAddresses(startingIndex = 0, numAddresses = 1) {
@@ -291,7 +291,7 @@ export default class BitcoinLedgerProvider {
     async _getWalletPublicKey(path: string) {
         const ledger = await this.ledger.getInstance();
         const format = this.addressType === 'p2sh-segwit' ? 'p2sh' : this.addressType;
-        return ledger.getWalletPublicKey(path, { format: format });
+        return await ledger.getWalletPublicKey(path, { format });
     }
 
     async getWalletPublicKey(path: string) {
@@ -305,14 +305,11 @@ export default class BitcoinLedgerProvider {
     }
 
     async getLedgerAddresses(startingIndex: number, numAddresses: number, change = false) {
-        const pubkey = await this.getWalletPublicKey(this.derivationPath);
-        const compressed = ECPair.fromPublicKey(Buffer.from(pubkey)).publicKey.toString('hex');
-
-        const node = bip32.fromPublicKey(
-            Buffer.from(compressed, 'hex'),
-            Buffer.from(pubkey.chainCode, 'hex'),
-            this.network
-        );
+        const result = await this.getWalletPublicKey(this.derivationPath);
+        const pubKeyBuffer = Buffer.from(result.publicKey, 'hex');
+        const chainCode = result.chainCode;
+        const compressed = ECPair.fromPublicKey(pubKeyBuffer).publicKey.toString('hex');
+        const node = bip32.fromPublicKey(Buffer.from(compressed, 'hex'), Buffer.from(chainCode, 'hex'), this.network);
 
         const addresses = [];
         const lastIndex = startingIndex + numAddresses;
@@ -322,7 +319,7 @@ export default class BitcoinLedgerProvider {
             const subPath = changeVal + '/' + currentIndex;
             const publicKey = node.derivePath(subPath).publicKey;
             const address = this.getAddressFromPublicKey(publicKey);
-            const path = this.derivationPath + subPath;
+            const path = `${this.derivationPath}/${subPath}`;
 
             addresses.push(new Address(address, path, publicKey, currentIndex, change));
         }
