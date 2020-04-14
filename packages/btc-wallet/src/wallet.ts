@@ -1,7 +1,9 @@
-import BigNumber from 'bignumber.js';
+import BitcoinProvider from '@jelly-swap/btc-provider';
+
 import { ECPair, payments, script, bip32, TransactionBuilder, Transaction } from 'bitcoinjs-lib';
 import { mnemonicToSeed } from 'bip39';
 import coinselect from 'coinselect';
+import BigNumber from 'bignumber.js';
 
 import { Network } from './types';
 import * as Config from './config';
@@ -10,13 +12,13 @@ import Networks from './networks';
 
 export default class BtcWallet {
     public network: Network;
-    public provider: any;
+    public provider: BitcoinProvider;
 
     private derivationPath: string;
     private mnemonic: string;
     private addressType: string;
 
-    constructor(network = Networks.testnet, mnemonic: string, addressType = 'bech32', provider: any) {
+    constructor(mnemonic: string, provider: BitcoinProvider, network = Networks.bitcoin, addressType = 'bech32') {
         if (!Config.AddressTypes.includes(addressType)) {
             throw new Error(`Address type must be one of ${Config.AddressTypes.join(',')}`);
         }
@@ -25,11 +27,13 @@ export default class BtcWallet {
             throw new Error('INVALID_MNEMONIC');
         }
 
-        this.derivationPath = `${Config.AddressTypeToPrefix[addressType]}'/${network.coinType}'/0'/`;
-        this.network = network;
         this.mnemonic = mnemonic;
-        this.addressType = addressType;
         this.provider = provider;
+
+        this.network = network;
+        this.addressType = addressType;
+
+        this.derivationPath = `${Config.AddressTypeToPrefix[addressType]}'/${network.coinType}'/0'/`;
     }
 
     async node() {
@@ -41,6 +45,10 @@ export default class BtcWallet {
         const node = await this.node();
         const wif = node.derivePath(derivationPath).toWIF();
         return ECPair.fromWIF(wif, this.network);
+    }
+
+    async getCurrentBlock(): Promise<number> {
+        return await this.provider.getCurrentBlock();
     }
 
     async getAddress(index: number, change: boolean) {
@@ -101,16 +109,7 @@ export default class BtcWallet {
 
     async getBalance(numAddressPerCall = 25) {
         let addressList = await this.getAddressList(numAddressPerCall);
-
-        const utxos = await this.provider.getUnspentTransactions(addressList);
-
-        const balance = utxos
-            .reduce((prev: BigNumber, curr: any) => {
-                return prev.plus(new BigNumber(curr.value));
-            }, new BigNumber(0))
-            .toNumber();
-
-        return balance;
+        return await this.provider.getBalance(addressList);
     }
 
     async getChangeAddresses(startingIndex = 0, numAddresses = 1) {
