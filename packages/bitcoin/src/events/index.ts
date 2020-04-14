@@ -1,3 +1,5 @@
+import { Filter } from '@jelly-swap/types';
+
 import NewContractEvent from './newContract';
 import WithdrawEvent from './withdraw';
 import ApiProvider from './api';
@@ -7,6 +9,8 @@ export default class Event {
     private withdraw: WithdrawEvent;
     private provider: ApiProvider;
 
+    private interval: any;
+
     constructor(apiProviderUrl: string) {
         this.provider = new ApiProvider(apiProviderUrl);
 
@@ -14,14 +18,14 @@ export default class Event {
         this.withdraw = new WithdrawEvent(this.provider);
     }
 
-    async getPast(type: string, filter?: any, currentBlock?: string | number) {
+    async getPast(type: string, filter: Filter) {
         switch (type) {
             case 'new': {
-                return await this.newContract.getPast(filter);
+                return await this.newContract.getPast(filter.new);
             }
 
             case 'withdraw': {
-                return await this.withdraw.getPast(filter);
+                return await this.withdraw.getPast(filter.withdraw);
             }
 
             case 'refund': {
@@ -34,9 +38,24 @@ export default class Event {
         }
     }
 
-    async subscribe(onMessage: Function, filter?: Function) {
-        this.newContract.subscribe(onMessage('NEW_CONTRACT'), filter('new'));
-        this.withdraw.subscribe(onMessage('WITHDRAW'), filter('withdraw'));
+    async subscribe(onMessage: Function, filter: Filter) {
+        const initialLastBlock = Number(await this.provider.lastBlock());
+
+        this.newContract.lastBlock = initialLastBlock;
+        this.withdraw.lastBlock = initialLastBlock;
+
+        this.interval = setInterval(async () => {
+            const lastBlock = Number(await this.provider.lastBlock());
+
+            await this.newContract.subscribe(onMessage, filter.new, lastBlock);
+            await this.withdraw.subscribe(onMessage, filter.withdraw, lastBlock);
+        }, 2 * 1000);
+    }
+
+    async unsubscribe() {
+        if (this.interval) {
+            clearInterval(this.interval);
+        }
     }
 
     async getStatus(ids: string[]) {
