@@ -17,7 +17,7 @@ export default class NewContractEvent {
         if (this.lastBlock !== lastBlock) {
             const swaps = await this.provider[type](address, lastBlock);
 
-            if (swaps.length > 0) {
+            if (swaps instanceof Array && swaps.length > 0) {
                 swaps.map((swap: any) => {
                     if (swap.blockHeight !== -1) {
                         if (compareAddress(swap.sender, address)) {
@@ -42,7 +42,7 @@ export default class NewContractEvent {
 
         const swaps = await this.provider[type](address, startBlock, endBlock);
 
-        if (swaps.length > 0) {
+        if (swaps instanceof Array && swaps.length > 0) {
             return swaps.reduce((result: any[], event: any) => {
                 if (event.blockHeight !== -1) {
                     if (compareAddress(event.sender, address)) {

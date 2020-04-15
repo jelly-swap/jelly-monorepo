@@ -17,7 +17,7 @@ export default class WithdrawEvent {
         if (this.lastBlock !== lastBlock) {
             const withdraws = await this.provider[type](address, lastBlock);
 
-            if (withdraws.length > 0) {
+            if (withdraws instanceof Array && withdraws.length > 0) {
                 withdraws.map((withdraw: any) => onMessage({ ...withdraw, eventName: 'WITHDRAW' }));
             }
 
