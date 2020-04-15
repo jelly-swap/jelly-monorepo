@@ -49,7 +49,7 @@ export default class Event {
 
             await this.newContract.subscribe(onMessage, filter.new, lastBlock);
             await this.withdraw.subscribe(onMessage, filter.withdraw, lastBlock);
-        }, 2 * 1000);
+        }, 20 * 1000);
     }
 
     async unsubscribe() {
