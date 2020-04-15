@@ -1,5 +1,5 @@
 {
-    "name": "btc-ledger-wallet",
+    "name": "@jelly-swap/btc-ledger-wallet",
     "version": "0.1.39",
     "description": "BTC Ledger implementation for browser usage.",
     "author": "kraykov <raykov@weichain.tech>",
