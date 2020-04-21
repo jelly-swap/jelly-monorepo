@@ -61,7 +61,7 @@ export const getSwapPaymentVariants = (swapOutput: any, network: any) => {
 };
 
 export const calculateFee = (numInputs: number, numOutputs: number, feePerByte: number) => {
-    return (numInputs * 148 + numOutputs * 34 + 10) * feePerByte; // TODO: fix this magic :X
+		return ((numInputs * 148) + (numOutputs * 34) + 10) * feePerByte
 };
 
 const getPubKeyHash = (address: string) => {
