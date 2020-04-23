@@ -1,18 +1,20 @@
-import { Types, Address, Networks } from '@jelly-swap/btc-wallet';
 import { BitcoinProvider } from '@jelly-swap/btc-provider';
-import BtcLedger from '@ledgerhq/hw-app-btc';
+import { BitcoinWallet, UnusedAddress, BitcoinAddress, UsedUnusedAddressesType } from '@jelly-swap/types';
+
+import { bip32, address, payments, ECPair } from 'bitcoinjs-lib';
 
 import coinselect from 'coinselect';
-
 import { BigNumber } from 'bignumber.js';
-import { bip32, address, payments, ECPair } from 'bitcoinjs-lib';
+
+import { Types, Address, Networks } from '@jelly-swap/btc-wallet';
+import BtcLedger from '@ledgerhq/hw-app-btc';
 
 import LedgerTransport from './transport';
 import { serializeTransactionOutputs, getAmountBuffer } from './utils';
 
 const ADDRESS_PREFIX = { legacy: 44, 'p2sh-segwit': 49, bech32: 84 } as any;
 
-export default class BitcoinLedgerProvider {
+export default class BitcoinLedgerWallet implements BitcoinWallet {
     private provider: BitcoinProvider;
     private network: Types.Network;
 
@@ -33,17 +35,17 @@ export default class BitcoinLedgerProvider {
         this.ledger = new LedgerTransport(BtcLedger);
     }
 
-    async getAddress(index: number, change: boolean) {
+    async getAddress(index: number, change: boolean): Promise<string> {
         const result = await this.getAddresses(index, 1, change);
         return result[0].address;
     }
 
-    async getAddresses(startingIndex = 0, numAddresses = 1, change = false) {
+    async getAddresses(startingIndex = 0, numAddresses = 1, change = false): Promise<BitcoinAddress[]> {
         return this.getLedgerAddresses(startingIndex, numAddresses, change);
     }
 
-    async getAddressList(numAddressPerCall = 25) {
-        let addressList: any[] = [];
+    async getAddressList(numAddressPerCall = 25): Promise<BitcoinAddress[]> {
+        let addressList: BitcoinAddress[] = [];
 
         const changeAddresses = await this.getChangeAddresses(0, numAddressPerCall);
         addressList = addressList.concat(changeAddresses);
@@ -54,7 +56,7 @@ export default class BitcoinLedgerProvider {
         return addressList;
     }
 
-    async getWalletAddress(address: string, maxAddresses = 1000, addressesPerCall = 50) {
+    async getWalletAddress(address: string, maxAddresses = 1000, addressesPerCall = 50): Promise<BitcoinAddress> {
         let index = 0;
         let change = false;
 
@@ -81,31 +83,31 @@ export default class BitcoinLedgerProvider {
         return await this.provider.getCurrentBlock();
     }
 
-    async getBalance(numAddressPerCall = 25) {
+    async getBalance(numAddressPerCall = 25): Promise<number> {
         let addressList = await this.getAddressList(numAddressPerCall);
         return await this.provider.getBalance(addressList);
     }
 
-    async getChangeAddresses(startingIndex = 0, numAddresses = 1) {
+    async getChangeAddresses(startingIndex = 0, numAddresses = 1): Promise<BitcoinAddress[]> {
         return await this.getAddresses(startingIndex, numAddresses, true);
     }
 
-    async getNonChangeAddresses(startingIndex = 0, numAddresses = 1) {
+    async getNonChangeAddresses(startingIndex = 0, numAddresses = 1): Promise<BitcoinAddress[]> {
         return await this.getAddresses(startingIndex, numAddresses, false);
     }
 
-    async getUsedAddresses(numAddressPerCall = 25) {
+    async getUsedAddresses(numAddressPerCall = 25): Promise<BitcoinAddress[]> {
         return await this.getUsedUnusedAddresses(numAddressPerCall).then(({ usedAddresses }) => usedAddresses);
     }
 
-    async getUnusedAddress(change = false, numAddressPerCall = 25) {
+    async getUnusedAddress(change = false, numAddressPerCall = 25): Promise<BitcoinAddress> {
         const key = change ? 'change' : 'nonChange';
         return await this.getUsedUnusedAddresses(numAddressPerCall).then(({ unusedAddress }) => unusedAddress[key]);
     }
 
-    async getUsedUnusedAddresses(numAddressPerCall = 25) {
-        const usedAddresses = [];
-        const unusedAddress: any = { change: null, nonChange: null };
+    async getUsedUnusedAddresses(numAddressPerCall = 25): Promise<UsedUnusedAddressesType> {
+        const usedAddresses: BitcoinAddress[] = [];
+        const unusedAddress: UnusedAddress = { change: null, nonChange: null };
 
         let addressList = await this.getAddressList(numAddressPerCall);
 
@@ -137,19 +139,19 @@ export default class BitcoinLedgerProvider {
         return { usedAddresses, unusedAddress };
     }
 
-    async getUnusedChangeAddress(numAddressPerCall = 25) {
+    async getUnusedChangeAddress(numAddressPerCall = 25): Promise<BitcoinAddress> {
         return await this.getUnusedAddress(true, numAddressPerCall);
     }
 
-    async getUnusedNonChangeAddress(numAddressPerCall = 25) {
+    async getUnusedNonChangeAddress(numAddressPerCall = 25): Promise<BitcoinAddress> {
         return await this.getUnusedAddress(false, numAddressPerCall);
     }
 
-    async buildTransaction(to: string, value: number | string, data: any, feePerByte?: number | string) {
+    async buildTransaction(to: string, value: number, data: any, feePerByte?: number): Promise<string> {
         return this._buildTransaction([{ to, value }], data, feePerByte);
     }
 
-    async sendTransaction(to: string, value: number | string, data: any, feePerByte?: number | string) {
+    async sendTransaction(to: string, value: number, data: any, feePerByte?: number): Promise<string> {
         return this._sendTransaction([{ to, value }], data, feePerByte);
     }
 
@@ -161,7 +163,7 @@ export default class BitcoinLedgerProvider {
         outputScript: any,
         segwit = false,
         expiration = 0
-    ) {
+    ): Promise<Buffer> {
         const app = await this.ledger.getInstance();
         const walletAddress = await this.getWalletAddress(address);
 
@@ -188,7 +190,7 @@ export default class BitcoinLedgerProvider {
         return sig;
     }
 
-    getAddressFromPublicKey(publicKey: Buffer) {
+    getAddressFromPublicKey(publicKey: Buffer): string {
         if (this.addressType === 'legacy') {
             return payments.p2pkh({
                 pubkey: publicKey,
@@ -244,7 +246,7 @@ export default class BitcoinLedgerProvider {
         throw new Error('NOT_ENOUGHT_BALANCE');
     }
 
-    getInputs(utxos: any, amount: Number, feePerByte: any) {
+    getInputs(utxos: any, amount: number, feePerByte: any) {
         const { inputs, outputs, fee } = coinselect(utxos, [{ id: 'main', value: amount }], feePerByte);
 
         if (inputs && outputs) {
@@ -290,7 +292,7 @@ export default class BitcoinLedgerProvider {
         return key;
     }
 
-    async getLedgerAddresses(startingIndex: number, numAddresses: number, change = false) {
+    async getLedgerAddresses(startingIndex: number, numAddresses: number, change = false): Promise<BitcoinAddress[]> {
         const result = await this.getWalletPublicKey(this.derivationPath);
         const pubKeyBuffer = Buffer.from(result.publicKey, 'hex');
         const chainCode = result.chainCode;
@@ -313,7 +315,7 @@ export default class BitcoinLedgerProvider {
         return addresses;
     }
 
-    async _buildTransaction(outputs: any, data: any, feePerByte?: any) {
+    async _buildTransaction(outputs: any, data: any, feePerByte?: number): Promise<string> {
         const ledger = await this.ledger.getInstance();
 
         const totalValue = outputs
@@ -386,7 +388,7 @@ export default class BitcoinLedgerProvider {
         );
     }
 
-    async _sendTransaction(outputs: any, data: any, feePerByte?: number | string) {
+    async _sendTransaction(outputs: any, data: any, feePerByte?: number) {
         const signedTransaction = await this._buildTransaction(outputs, data, feePerByte);
         return await this.provider.sendRawTransaction(signedTransaction, data);
     }
