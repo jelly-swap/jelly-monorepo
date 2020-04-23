@@ -397,16 +397,6 @@
   resolved "https://registry.yarnpkg.com/@istanbuljs/schema/-/schema-0.1.2.tgz#26520bf09abe4a5644cd5414e37125a8954241dd"
   integrity sha512-tsAQNx32a8CoFhjhijUIhI4kccIAgmGhy8LZMZgGfmXcpMbPRUqn5LWmgRttILi6yeGmBJd2xsPkFMs0PzgPCw==
 
-"@jelly-swap/btc-wallet@^0.1.33":
-  version "0.1.33"
-  resolved "https://registry.yarnpkg.com/@jelly-swap/btc-wallet/-/btc-wallet-0.1.33.tgz#9481df59a287beffb818b15cf0ed0cdaff62af73"
-  integrity sha512-0W0kpeCOv8pMPuPyKEBRlUclCv3xyvn8o4qe+ExowxYOLYUEEeFoYJWrjvRTKSIOmTPp13lfkInL4tktHaawjQ==
-  dependencies:
-    bignumber.js "^9.0.0"
-    bip39 "3.0.2"
-    bitcoinjs-lib "5.1.6"
-    coinselect "3.1.11"
-
 "@jest/console@^25.4.0":
   version "25.4.0"
   resolved "https://registry.yarnpkg.com/@jest/console/-/console-25.4.0.tgz#e2760b532701137801ba824dcff6bc822c961bac"
