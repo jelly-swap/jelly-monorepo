@@ -153,7 +153,7 @@ export default class HTLC {
                 swapVout,
                 isSegwit ? swapPaymentVariants.p2wsh.redeem.output : swapPaymentVariants.p2sh.redeem.output,
                 isSegwit,
-                expiration
+                isWithdraw ? 0 : expiration
             );
 
             const walletAddress = await this.wallet.getWalletAddress(address);
