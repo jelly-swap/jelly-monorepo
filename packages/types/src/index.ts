@@ -113,3 +113,12 @@ export interface Filter {
     withdraw?: EventFilter;
     refund?: EventFilter;
 }
+
+export {
+    BitcoinProvider,
+    BitcoinWallet,
+    BitcoinNetwork,
+    BitcoinAddress,
+    UnusedAddress,
+    UsedUnusedAddressesType,
+} from './BitcoinTypes';

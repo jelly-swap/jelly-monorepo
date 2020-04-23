@@ -1,55 +1,56 @@
-import BigNumber from 'bignumber.js';
-import { ECPair, payments, script, bip32, TransactionBuilder, Transaction } from 'bitcoinjs-lib';
-import { mnemonicToSeed } from 'bip39';
+import {
+    BitcoinWallet,
+    BitcoinProvider,
+    BitcoinNetwork,
+    BitcoinAddress,
+    UnusedAddress,
+    UsedUnusedAddressesType,
+} from '@jelly-swap/types';
+
+import { Address, Networks } from '@jelly-swap/btc-utils';
+
+import { bip32, ECPair, payments, script, TransactionBuilder, Transaction } from 'bitcoinjs-lib';
 import coinselect from 'coinselect';
 
-import { Network } from './types';
-import * as Config from './config';
-import Address from './Address';
-import Networks from './networks';
+import BigNumber from 'bignumber.js';
 
-export default class BtcWallet {
-    public network: Network;
-    public provider: any;
+import { mnemonicToSeed } from 'bip39';
+
+import * as Config from './config';
+
+export default class BitcoinWebWallet implements BitcoinWallet {
+    public network: BitcoinNetwork;
+    public provider: BitcoinProvider;
 
     private derivationPath: string;
-    private mnemonic: string;
     private addressType: string;
 
-    constructor(network = Networks.testnet, mnemonic: string, addressType = 'bech32', provider: any) {
-        if (!Config.AddressTypes.includes(addressType)) {
-            throw new Error(`Address type must be one of ${Config.AddressTypes.join(',')}`);
-        }
+    private mnemonic: string;
 
-        if (!mnemonic) {
-            throw new Error('INVALID_MNEMONIC');
-        }
-
+    constructor(mnemonic: string, provider: BitcoinProvider, network = Networks.bitcoin, addressType = 'bech32') {
+        this.provider = provider;
+        this.addressType = addressType;
         this.derivationPath = `${Config.AddressTypeToPrefix[addressType]}'/${network.coinType}'/0'/`;
         this.network = network;
+
         this.mnemonic = mnemonic;
-        this.addressType = addressType;
-        this.provider = provider;
+
+        if (!mnemonic) {
+            throw new Error('MISSING_MNEMONIC');
+        }
     }
 
-    async node() {
-        const seed = await mnemonicToSeed(this.mnemonic);
-        return bip32.fromSeed(seed, this.network);
+    async getCurrentBlock(): Promise<number> {
+        return await this.provider.getCurrentBlock();
     }
 
-    async keyPair(derivationPath: string): Promise<any> {
-        const node = await this.node();
-        const wif = node.derivePath(derivationPath).toWIF();
-        return ECPair.fromWIF(wif, this.network);
-    }
-
-    async getAddress(index: number, change: boolean) {
+    async getAddress(index: number, change: boolean): Promise<string> {
         const node = await this.node();
         const address = this._getAddress(node, index, change);
         return address.address;
     }
 
-    async getAddresses(startingIndex = 0, numAddresses = 1, change = false) {
+    async getAddresses(startingIndex = 0, numAddresses = 1, change = false): Promise<BitcoinAddress[]> {
         const node = await this.node();
 
         const addresses = [];
@@ -63,7 +64,7 @@ export default class BtcWallet {
         return addresses;
     }
 
-    async getAddressList(numAddressPerCall = 25) {
+    async getAddressList(numAddressPerCall = 25): Promise<BitcoinAddress[]> {
         let addressList: any[] = [];
 
         const changeAddresses = await this.getChangeAddresses(0, numAddressPerCall);
@@ -75,7 +76,7 @@ export default class BtcWallet {
         return addressList;
     }
 
-    async getWalletAddress(address: string, maxAddresses = 1000, addressesPerCall = 50) {
+    async getWalletAddress(address: string, maxAddresses = 1000, addressesPerCall = 50): Promise<BitcoinAddress> {
         let index = 0;
         let change = false;
 
@@ -99,40 +100,31 @@ export default class BtcWallet {
         throw new Error('ADDRESS_MISSING_IN_WALLET');
     }
 
-    async getBalance(numAddressPerCall = 25) {
+    async getBalance(numAddressPerCall = 25): Promise<number> {
         let addressList = await this.getAddressList(numAddressPerCall);
-
-        const utxos = await this.provider.getUnspentTransactions(addressList);
-
-        const balance = utxos
-            .reduce((prev: BigNumber, curr: any) => {
-                return prev.plus(new BigNumber(curr.value));
-            }, new BigNumber(0))
-            .toNumber();
-
-        return balance;
+        return await this.provider.getBalance(addressList);
     }
 
-    async getChangeAddresses(startingIndex = 0, numAddresses = 1) {
+    async getChangeAddresses(startingIndex = 0, numAddresses = 1): Promise<BitcoinAddress[]> {
         return await this.getAddresses(startingIndex, numAddresses, true);
     }
 
-    async getNonChangeAddresses(startingIndex = 0, numAddresses = 1) {
+    async getNonChangeAddresses(startingIndex = 0, numAddresses = 1): Promise<BitcoinAddress[]> {
         return await this.getAddresses(startingIndex, numAddresses, false);
     }
 
-    async getUsedAddresses(numAddressPerCall = 25) {
+    async getUsedAddresses(numAddressPerCall = 25): Promise<BitcoinAddress[]> {
         return await this.getUsedUnusedAddresses(numAddressPerCall).then(({ usedAddresses }) => usedAddresses);
     }
 
-    async getUnusedAddress(change = false, numAddressPerCall = 25) {
+    async getUnusedAddress(change = false, numAddressPerCall = 25): Promise<BitcoinAddress> {
         const key = change ? 'change' : 'nonChange';
         return await this.getUsedUnusedAddresses(numAddressPerCall).then(({ unusedAddress }) => unusedAddress[key]);
     }
 
-    async getUsedUnusedAddresses(numAddressPerCall = 25) {
+    async getUsedUnusedAddresses(numAddressPerCall = 25): Promise<UsedUnusedAddressesType> {
         const usedAddresses = [];
-        const unusedAddress: any = { change: null, nonChange: null };
+        const unusedAddress: UnusedAddress = { change: null, nonChange: null };
 
         let addressList = await this.getAddressList(numAddressPerCall);
 
@@ -164,23 +156,31 @@ export default class BtcWallet {
         return { usedAddresses, unusedAddress };
     }
 
-    async getUnusedChangeAddress(numAddressPerCall = 25) {
+    async getUnusedChangeAddress(numAddressPerCall = 25): Promise<BitcoinAddress> {
         return await this.getUnusedAddress(true, numAddressPerCall);
     }
 
-    async getUnusedNonChangeAddress(numAddressPerCall = 25) {
+    async getUnusedNonChangeAddress(numAddressPerCall = 25): Promise<BitcoinAddress> {
         return await this.getUnusedAddress(false, numAddressPerCall);
     }
 
-    async buildTransaction(to: string, value: number | string, data: any, feePerByte?: number | string) {
+    async buildTransaction(to: string, value: number, data: any, feePerByte?: number): Promise<string> {
         return await this._buildTransaction([{ to, value }], data, feePerByte);
     }
 
-    async sendTransaction(to: string, value: number | string, data: any, feePerByte?: number | string) {
+    async sendTransaction(to: string, value: number | string, data: any, feePerByte?: number): Promise<string> {
         return await this._sendTransaction([{ to, value }], data, feePerByte);
     }
 
-    async signP2SHTransaction(tx: any, address: string, vout: any, outputScript: any, segwit = false) {
+    async signP2SHTransaction(
+        tx: any,
+        rawTx: any,
+        address: any,
+        vout: any,
+        outputScript: any,
+        segwit = false,
+        expiration = 0
+    ): Promise<Buffer> {
         const wallet = await this.getWalletAddress(address);
         const keyPair = await this.keyPair(wallet.derivationPath);
 
@@ -196,7 +196,74 @@ export default class BtcWallet {
         return sig;
     }
 
-    getScriptType() {
+    private async getInputsForAmount(amount: number, feePerByte?: number, numAddressPerCall = 25) {
+        let addrList = await this.getAddressList(numAddressPerCall);
+
+        const utxos = await this.provider.getUnspentTransactions(addrList);
+
+        const updatedUtxos = utxos.map((utxo: any) => {
+            const addr = addrList.find((a) => a.equals(utxo.address));
+            return {
+                ...utxo,
+                value: new BigNumber(utxo.amount).times(1e8).toNumber(),
+                derivationPath: addr.derivationPath,
+            };
+        });
+
+        if (!feePerByte) {
+            feePerByte = await this.provider.getFeePerByte();
+        }
+
+        const result = this.getInputs(updatedUtxos, amount, feePerByte);
+
+        if (result.inputs) {
+            return result;
+        } else {
+            // if user tries to use the whole available balance
+            const fixedAmount = new BigNumber(amount).minus(result.fee).toNumber();
+            const fixedResult = this.getInputs(updatedUtxos, fixedAmount, feePerByte);
+            if (fixedResult.inputs) {
+                return fixedResult;
+            }
+        }
+
+        throw new Error('NOT_ENOUGHT_BALANCE');
+    }
+
+    private getInputs(utxos: any, amount: number, feePerByte: any) {
+        const { inputs, outputs, fee } = coinselect(utxos, [{ id: 'main', value: amount }], feePerByte);
+
+        if (inputs && outputs) {
+            let change = outputs.find((output: any) => output.id !== 'main');
+
+            if (change) {
+                if (change.length) {
+                    change = change[0].value;
+                }
+            }
+
+            return { inputs, change, fee, amount };
+        }
+
+        return { fee, amount };
+    }
+
+    private getAddressFromPublicKey(publicKey: Buffer): string {
+        return this.getPaymentVariantFromPublicKey(publicKey).address;
+    }
+
+    private async node(): Promise<bip32.BIP32Interface> {
+        const seed = await mnemonicToSeed(this.mnemonic);
+        return bip32.fromSeed(seed, this.network);
+    }
+
+    private async keyPair(derivationPath: string): Promise<any> {
+        const node = await this.node();
+        const wif = node.derivePath(derivationPath).toWIF();
+        return ECPair.fromWIF(wif, this.network);
+    }
+
+    private getScriptType(): string {
         if (this.addressType === 'legacy') {
             return 'p2pkh';
         } else if (this.addressType === 'p2sh-segwit') {
@@ -206,11 +273,7 @@ export default class BtcWallet {
         }
     }
 
-    getAddressFromPublicKey(publicKey: any) {
-        return this.getPaymentVariantFromPublicKey(publicKey).address;
-    }
-
-    getPaymentVariantFromPublicKey(publicKey: any) {
+    private getPaymentVariantFromPublicKey(publicKey: Buffer): payments.Payment {
         if (this.addressType === 'legacy') {
             return payments.p2pkh({
                 pubkey: publicKey,
@@ -232,59 +295,7 @@ export default class BtcWallet {
         }
     }
 
-    async getInputsForAmount(amount: number | string, feePerByte?: number | string, numAddressPerCall = 25) {
-        let addrList = await this.getAddressList(numAddressPerCall);
-
-        const utxos = await this.provider.getUnspentTransactions(addrList);
-
-        const updatedUtxos = utxos.map((utxo: any) => {
-            const addr = addrList.find(a => a.equals(utxo.address));
-            return {
-                ...utxo,
-                value: new BigNumber(utxo.amount).times(1e8).toNumber(),
-                derivationPath: addr.derivationPath,
-            };
-        });
-
-        if (!feePerByte) {
-            feePerByte = await this.provider.getFeePerByte();
-        }
-
-        const result = this.getInputs(updatedUtxos, Number(amount), feePerByte);
-
-        if (result.inputs) {
-            return result;
-        } else {
-            // if user tries to use the whole available balance
-            const fixedAmount = new BigNumber(amount).minus(result.fee).toNumber();
-            const fixedResult = this.getInputs(updatedUtxos, Number(fixedAmount), feePerByte);
-            if (fixedResult.inputs) {
-                return fixedResult;
-            }
-        }
-
-        throw new Error('NOT_ENOUGHT_BALANCE');
-    }
-
-    getInputs(utxos: any, amount: Number, feePerByte: any) {
-        const { inputs, outputs, fee } = coinselect(utxos, [{ id: 'main', value: amount }], feePerByte);
-
-        if (inputs && outputs) {
-            let change = outputs.find((output: any) => output.id !== 'main');
-
-            if (change) {
-                if (change.length) {
-                    change = change[0].value;
-                }
-            }
-
-            return { inputs, change, fee, amount };
-        }
-
-        return { fee, amount };
-    }
-
-    _getAddress(node: bip32.BIP32Interface, index: number, change: boolean) {
+    private _getAddress(node: bip32.BIP32Interface, index: number, change: boolean): BitcoinAddress {
         const changeVal = change ? '1' : '0';
 
         const subPath = changeVal + '/' + index;
@@ -298,7 +309,7 @@ export default class BtcWallet {
         return new Address(address, path, publicKey, index, change);
     }
 
-    async _buildTransaction(outputs: any, data: any, feePerByte?: any) {
+    private async _buildTransaction(outputs: any, data: any, feePerByte?: number): Promise<string> {
         const network = this.network;
 
         const totalValue = outputs
@@ -378,7 +389,7 @@ export default class BtcWallet {
         return raw;
     }
 
-    async _sendTransaction(outputs: any, data: any, feePerByte?: number | string) {
+    private async _sendTransaction(outputs: any, data: any, feePerByte?: number): Promise<string> {
         const signedTransaction = await this._buildTransaction(outputs, data, feePerByte);
         return await this.provider.sendRawTransaction(signedTransaction, data);
     }

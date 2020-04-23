@@ -1,27 +1,27 @@
-import { TransactionBuilder, payments as BitcoinPayments, script as BitcoinScript } from 'bitcoinjs-lib';
+import { BitcoinWallet, BitcoinProvider, BitcoinNetwork } from '@jelly-swap/types';
 import { fixHash, sha256 } from '@jelly-swap/utils';
 
-import BtcWallet from '@jelly-swap/btc-wallet';
-import BtcProvider from '@jelly-swap/btc-provider';
+import { TransactionBuilder, payments as BitcoinPayments, script as BitcoinScript } from 'bitcoinjs-lib';
 
-import { getSwapInput, getSwapOutput, getSwapPaymentVariants, calculateFee } from './utils';
 import { BtcSwapEvent, RefundEvent } from '../types';
+import { getSwapInput, getSwapOutput, getSwapPaymentVariants, calculateFee } from './utils';
 
 export default class HTLC {
-    private network: any;
-    private wallet: BtcWallet;
-    private provider: BtcProvider;
+    private network: BitcoinNetwork;
+    private wallet: BitcoinWallet;
+    private provider: BitcoinProvider;
     private mode: string;
 
-    constructor(wallet: BtcWallet, network: any, mode = 'p2wsh') {
-        this.network = network;
+    constructor(wallet: BitcoinWallet, mode = 'p2wsh') {
         this.wallet = wallet;
-        this.provider = wallet.provider;
         this.mode = mode;
+
+        this.network = wallet.network;
+        this.provider = wallet.provider;
     }
 
     async newSwap(
-        value: string | number,
+        value: number,
         recipientAddress: string,
         refundAddress: string,
         hashLock: string,
@@ -95,6 +95,7 @@ export default class HTLC {
 
         const swapPaymentVariants = getSwapPaymentVariants(swapOutput, network);
 
+        const initiationRawTx = await this.provider.getRawTransaction(initiationTxHash);
         const initiationTx = await this.provider.getTransaction(initiationTxHash);
 
         let swapVout;
@@ -146,10 +147,12 @@ export default class HTLC {
 
             const sig = await this.wallet.signP2SHTransaction(
                 tx,
+                initiationRawTx,
                 address,
                 swapVout,
                 isSegwit ? swapPaymentVariants.p2wsh.redeem.output : swapPaymentVariants.p2sh.redeem.output,
-                isSegwit
+                isSegwit,
+                isWithdraw ? 0 : expiration
             );
 
             const walletAddress = await this.wallet.getWalletAddress(address);

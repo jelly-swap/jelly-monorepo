@@ -11,6 +11,19 @@ export default class BitcoinProvider {
         });
     }
 
+    async getExternal(url: string) {
+        try {
+            const response = await Axios.get(url);
+            return response.data;
+        } catch (err) {
+            if (err.response) {
+                return err.response.data;
+            } else {
+                return err;
+            }
+        }
+    }
+
     async get(url: string) {
         try {
             const response = await this.axios.get(url);

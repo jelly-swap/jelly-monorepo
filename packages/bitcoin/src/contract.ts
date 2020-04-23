@@ -1,6 +1,4 @@
-import BtcWallet, { Networks } from '@jelly-swap/btc-wallet';
-import BtcProvider from '@jelly-swap/btc-provider';
-import { safeAccess } from '@jelly-swap/utils';
+import { BitcoinWallet } from '@jelly-swap/types';
 
 import { JellyContract, ContractSwap, BtcContractRefund, BtcContractWithdraw } from './types';
 
@@ -10,43 +8,32 @@ import EventHandler from './events';
 
 export default class BitcoinContract implements JellyContract {
     public config: any;
-    public provider: BtcProvider;
 
     private contract: HTLC;
-    private wallet: BtcProvider | BtcWallet;
+    private wallet: BitcoinWallet;
     private eventHandler: EventHandler;
 
-    constructor(wallet: BtcProvider | BtcWallet, config = Config(), network = Networks.testnet) {
+    constructor(wallet: BitcoinWallet, config = Config()) {
+        this.wallet = wallet;
         this.config = config;
-
-        if (wallet instanceof BtcWallet) {
-            this.wallet = wallet;
-            this.contract = new HTLC(wallet, network);
-            this.provider = safeAccess(wallet, ['provider']);
-        } else {
-            this.provider = wallet;
-        }
-
+        this.contract = new HTLC(wallet);
         this.eventHandler = new EventHandler(this.config.apiProviderUrl);
     }
 
-    subscribe(onMessage: Function, filter?: Function): void {
+    subscribe(onMessage: Function, filter?: any): void {
         this.eventHandler.subscribe(onMessage, filter);
     }
 
-    async getPastEvents(type: string, filter: Function) {
+    async getPastEvents(type: string, filter: any) {
         return await this.eventHandler.getPast(type, filter);
     }
 
     async getCurrentBlock(): Promise<string | number> {
-        return await this.provider.getBlockHeight();
+        return await this.wallet.getCurrentBlock();
     }
 
     async getBalance(_address: string): Promise<string | number> {
-        if (this.wallet instanceof BtcWallet) {
-            return await this.wallet.getBalance();
-        }
-        return 0;
+        return await this.wallet.getBalance();
     }
 
     async newContract(swap: ContractSwap): Promise<string> {
