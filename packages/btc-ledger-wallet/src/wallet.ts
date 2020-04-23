@@ -8,6 +8,7 @@ import { BigNumber } from 'bignumber.js';
 import { bip32, address, payments, ECPair } from 'bitcoinjs-lib';
 
 import LedgerTransport from './transport';
+import { serializeTransactionOutputs, getAmountBuffer } from './utils';
 
 const ADDRESS_PREFIX = { legacy: 44, 'p2sh-segwit': 49, bech32: 84 } as any;
 
@@ -165,25 +166,25 @@ export default class BitcoinLedgerProvider {
         const walletAddress = await this.getWalletAddress(address);
 
         if (!segwit) {
-            tx.setInputScript(vout.n, outputScript); // TODO: is this ok for p2sh-segwit??
+            tx.setInputScript(vout.mintIndex, outputScript);
         }
 
         const ledgerInputTx = await app.splitTransaction(rawTx, true);
         const ledgerTx = await app.splitTransaction(tx.toHex(), true);
-        const ledgerOutputs = (await app.serializeTransactionOutputs(ledgerTx)).toString('hex');
+        const ledgerOutputs = serializeTransactionOutputs(ledgerTx.outputs).toString('hex');
+
         const ledgerSig = await app.signP2SHTransaction(
-            [[ledgerInputTx, vout.n, outputScript.toString('hex'), 0]],
+            [[ledgerInputTx, vout.mintIndex, outputScript.toString('hex'), 0]],
             [walletAddress.derivationPath],
-            ledgerOutputs.toString('hex'),
+            ledgerOutputs,
             expiration,
             undefined, // SIGHASH_ALL
             segwit,
             2
         );
 
-        const finalSig = segwit ? ledgerSig[0] : ledgerSig[0] + '01'; // Is this a ledger bug? Why non segwit signs need the sighash appended?
+        const finalSig = segwit ? ledgerSig[0] : ledgerSig[0] + '01';
         const sig = Buffer.from(finalSig, 'hex');
-
         return sig;
     }
 
@@ -261,29 +262,14 @@ export default class BitcoinLedgerProvider {
         return { fee, amount };
     }
 
-    padHexStart(hex: string, length: number) {
-        let len = length || hex.length;
-        len += len % 2;
-
-        return hex.padStart(len, '0');
-    }
-
-    getAmountBuffer(amount: number) {
-        let hexAmount = new BigNumber(Math.round(amount)).toString(16);
-
-        hexAmount = this.padHexStart(hexAmount, 16);
-        const valueBuffer = Buffer.from(hexAmount, 'hex');
-        return valueBuffer.reverse();
-    }
-
     async getLedgerInputs(utxos: any[]) {
         const ledger = await this.ledger.getInstance();
 
         return Promise.all(
             utxos.map(async (u) => {
-                const hex = await this.provider.getRawTransaction(u.txid);
+                const hex = await this.provider.getRawTransaction(u.mintTxid);
                 const tx = ledger.splitTransaction(hex, true);
-                return [tx, u.vout];
+                return [tx, u.mintIndex];
             })
         );
     }
@@ -330,21 +316,27 @@ export default class BitcoinLedgerProvider {
     async _buildTransaction(outputs: any, data: any, feePerByte?: any) {
         const ledger = await this.ledger.getInstance();
 
+        const totalValue = outputs
+            .reduce((prev: BigNumber, curr: any) => {
+                return prev.plus(new BigNumber(curr.value));
+            }, new BigNumber(0))
+            .toNumber();
+
         const unusedAddress = await this.getUnusedAddress(true);
-        const { inputs, change, amount } = await this.getInputsForAmount(outputs);
+        const { inputs, change, amount } = await this.getInputsForAmount(totalValue, feePerByte);
         let amountWithoutFee = amount;
 
         const ledgerInputs = await this.getLedgerInputs(inputs);
         const paths = inputs.map((utxo: any) => utxo.derivationPath);
 
-        const ledgerOutputs = [];
+        let ledgerOutputs = [];
         // Add metadata
         if (data) {
             const metadata = Buffer.from(`J_${data.eventName}`, 'utf8');
             const embed = payments.embed({ data: [metadata] });
 
             ledgerOutputs.push({
-                amount: this.getAmountBuffer(0),
+                amount: getAmountBuffer(0),
                 script: embed.output,
             });
 
@@ -354,7 +346,7 @@ export default class BitcoinLedgerProvider {
             }
         }
 
-        ledgerOutputs.concat(
+        ledgerOutputs = ledgerOutputs.concat(
             outputs.map((output: any) => {
                 let amount;
 
@@ -366,7 +358,7 @@ export default class BitcoinLedgerProvider {
                 }
 
                 return {
-                    amount: this.getAmountBuffer(amount),
+                    amount: getAmountBuffer(amount),
                     script: address.toOutputScript(output.to, this.network),
                 };
             })
@@ -374,12 +366,12 @@ export default class BitcoinLedgerProvider {
 
         if (change) {
             ledgerOutputs.push({
-                amount: this.getAmountBuffer(change.value),
-                script: address.toOutputScript(unusedAddress, this.network),
+                amount: getAmountBuffer(change.value),
+                script: address.toOutputScript(unusedAddress.address, this.network),
             });
         }
 
-        const serializedOutputs = ledger.serializeTransactionOutputs({ outputs }).toString('hex');
+        const serializedOutputs = serializeTransactionOutputs(ledgerOutputs).toString('hex');
 
         return ledger.createPaymentTransactionNew(
             ledgerInputs,
