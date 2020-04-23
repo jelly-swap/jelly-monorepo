@@ -1,28 +1,33 @@
-import { BitcoinProvider } from '@jelly-swap/btc-provider';
-import { BitcoinWallet, UnusedAddress, BitcoinAddress, UsedUnusedAddressesType } from '@jelly-swap/types';
+import {
+    BitcoinWallet,
+    BitcoinProvider,
+    BitcoinNetwork,
+    UnusedAddress,
+    BitcoinAddress,
+    UsedUnusedAddressesType,
+} from '@jelly-swap/types';
 
-import { bip32, address, payments, ECPair } from 'bitcoinjs-lib';
+import { Address, Networks } from '@jelly-swap/btc-utils';
 
+import { bip32, ECPair, payments } from 'bitcoinjs-lib';
 import coinselect from 'coinselect';
+
 import { BigNumber } from 'bignumber.js';
 
-import { Types, Address, Networks } from '@jelly-swap/btc-wallet';
 import BtcLedger from '@ledgerhq/hw-app-btc';
-
 import LedgerTransport from './transport';
 import { serializeTransactionOutputs, getAmountBuffer } from './utils';
 
 const ADDRESS_PREFIX = { legacy: 44, 'p2sh-segwit': 49, bech32: 84 } as any;
 
 export default class BitcoinLedgerWallet implements BitcoinWallet {
-    private provider: BitcoinProvider;
-    private network: Types.Network;
+    public provider: BitcoinProvider;
+    public network: BitcoinNetwork;
 
     private derivationPath: string;
     private addressType: string;
 
     private ledgerKeyCache: any;
-
     private ledger: LedgerTransport;
 
     constructor(provider: any, network = Networks.bitcoin, addressType = 'bech32') {
@@ -30,9 +35,13 @@ export default class BitcoinLedgerWallet implements BitcoinWallet {
         this.addressType = addressType;
         this.derivationPath = `${ADDRESS_PREFIX[addressType]}'/${network.coinType}'/0'`;
         this.network = network;
-        this.ledgerKeyCache = {};
 
+        this.ledgerKeyCache = {};
         this.ledger = new LedgerTransport(BtcLedger);
+    }
+
+    async getCurrentBlock(): Promise<number> {
+        return await this.provider.getCurrentBlock();
     }
 
     async getAddress(index: number, change: boolean): Promise<string> {
@@ -77,10 +86,6 @@ export default class BitcoinLedgerWallet implements BitcoinWallet {
         }
 
         throw new Error('ADDRESS_MISSING_IN_LEDGER');
-    }
-
-    async getCurrentBlock(): Promise<number> {
-        return await this.provider.getCurrentBlock();
     }
 
     async getBalance(numAddressPerCall = 25): Promise<number> {
@@ -190,29 +195,7 @@ export default class BitcoinLedgerWallet implements BitcoinWallet {
         return sig;
     }
 
-    getAddressFromPublicKey(publicKey: Buffer): string {
-        if (this.addressType === 'legacy') {
-            return payments.p2pkh({
-                pubkey: publicKey,
-                network: this.network,
-            }).address;
-        } else if (this.addressType === 'p2sh-segwit') {
-            return payments.p2sh({
-                redeem: payments.p2wpkh({
-                    pubkey: publicKey,
-                    network: this.network,
-                }),
-                network: this.network,
-            }).address;
-        } else if (this.addressType === 'bech32') {
-            return payments.p2wpkh({
-                pubkey: publicKey,
-                network: this.network,
-            }).address;
-        }
-    }
-
-    async getInputsForAmount(amount: number | string, feePerByte?: number | string, numAddressPerCall = 25) {
+    private async getInputsForAmount(amount: number | string, feePerByte?: number | string, numAddressPerCall = 25) {
         let addrList = await this.getAddressList(numAddressPerCall);
 
         const utxos = await this.provider.getUnspentTransactions(addrList);
@@ -246,7 +229,7 @@ export default class BitcoinLedgerWallet implements BitcoinWallet {
         throw new Error('NOT_ENOUGHT_BALANCE');
     }
 
-    getInputs(utxos: any, amount: number, feePerByte: any) {
+    private getInputs(utxos: any, amount: number, feePerByte: any) {
         const { inputs, outputs, fee } = coinselect(utxos, [{ id: 'main', value: amount }], feePerByte);
 
         if (inputs && outputs) {
@@ -264,7 +247,29 @@ export default class BitcoinLedgerWallet implements BitcoinWallet {
         return { fee, amount };
     }
 
-    async getLedgerInputs(utxos: any[]) {
+    private getAddressFromPublicKey(publicKey: Buffer): string {
+        if (this.addressType === 'legacy') {
+            return payments.p2pkh({
+                pubkey: publicKey,
+                network: this.network,
+            }).address;
+        } else if (this.addressType === 'p2sh-segwit') {
+            return payments.p2sh({
+                redeem: payments.p2wpkh({
+                    pubkey: publicKey,
+                    network: this.network,
+                }),
+                network: this.network,
+            }).address;
+        } else if (this.addressType === 'bech32') {
+            return payments.p2wpkh({
+                pubkey: publicKey,
+                network: this.network,
+            }).address;
+        }
+    }
+
+    private async getLedgerInputs(utxos: any[]) {
         const ledger = await this.ledger.getInstance();
 
         return Promise.all(
@@ -276,7 +281,7 @@ export default class BitcoinLedgerWallet implements BitcoinWallet {
         );
     }
 
-    async _getWalletPublicKey(path: string) {
+    private async _getWalletPublicKey(path: string) {
         const ledger = await this.ledger.getInstance();
         const format = this.addressType === 'p2sh-segwit' ? 'p2sh' : this.addressType;
         return await ledger.getWalletPublicKey(path, { format });
@@ -292,7 +297,11 @@ export default class BitcoinLedgerWallet implements BitcoinWallet {
         return key;
     }
 
-    async getLedgerAddresses(startingIndex: number, numAddresses: number, change = false): Promise<BitcoinAddress[]> {
+    private async getLedgerAddresses(
+        startingIndex: number,
+        numAddresses: number,
+        change = false
+    ): Promise<BitcoinAddress[]> {
         const result = await this.getWalletPublicKey(this.derivationPath);
         const pubKeyBuffer = Buffer.from(result.publicKey, 'hex');
         const chainCode = result.chainCode;
@@ -315,7 +324,7 @@ export default class BitcoinLedgerWallet implements BitcoinWallet {
         return addresses;
     }
 
-    async _buildTransaction(outputs: any, data: any, feePerByte?: number): Promise<string> {
+    private async _buildTransaction(outputs: any, data: any, feePerByte?: number): Promise<string> {
         const ledger = await this.ledger.getInstance();
 
         const totalValue = outputs
@@ -388,7 +397,7 @@ export default class BitcoinLedgerWallet implements BitcoinWallet {
         );
     }
 
-    async _sendTransaction(outputs: any, data: any, feePerByte?: number) {
+    private async _sendTransaction(outputs: any, data: any, feePerByte?: number) {
         const signedTransaction = await this._buildTransaction(outputs, data, feePerByte);
         return await this.provider.sendRawTransaction(signedTransaction, data);
     }

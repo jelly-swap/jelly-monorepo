@@ -1,11 +1,17 @@
-import { Types, Address, Networks } from '@jelly-swap/btc-utils';
-import BitcoinProvider from '@jelly-swap/btc-provider';
+import {
+    BitcoinWallet,
+    BitcoinProvider,
+    BitcoinNetwork,
+    BitcoinAddress,
+    UnusedAddress,
+    UsedUnusedAddressesType,
+} from '@jelly-swap/types';
 
-import { BitcoinWallet, UnusedAddress, BitcoinAddress, UsedUnusedAddressesType } from '@jelly-swap/types';
+import { Address, Networks } from '@jelly-swap/btc-utils';
 
-import { ECPair, payments, script, bip32, TransactionBuilder, Transaction } from 'bitcoinjs-lib';
-
+import { bip32, ECPair, payments, script, TransactionBuilder, Transaction } from 'bitcoinjs-lib';
 import coinselect from 'coinselect';
+
 import BigNumber from 'bignumber.js';
 
 import { mnemonicToSeed } from 'bip39';
@@ -13,29 +19,25 @@ import { mnemonicToSeed } from 'bip39';
 import * as Config from './config';
 
 export default class BitcoinWebWallet implements BitcoinWallet {
-    public network: Types.Network;
+    public network: BitcoinNetwork;
     public provider: BitcoinProvider;
 
     private derivationPath: string;
-    private mnemonic: string;
     private addressType: string;
 
-    constructor(mnemonic: string, provider: BitcoinProvider, network = Networks.bitcoin, addressType = 'bech32') {
-        if (!Config.AddressTypes.includes(addressType)) {
-            throw new Error(`Address type must be one of ${Config.AddressTypes.join(',')}`);
-        }
+    private mnemonic: string;
 
-        if (!mnemonic) {
-            throw new Error('INVALID_MNEMONIC');
-        }
+    constructor(mnemonic: string, provider: BitcoinProvider, network = Networks.bitcoin, addressType = 'bech32') {
+        this.provider = provider;
+        this.addressType = addressType;
+        this.derivationPath = `${Config.AddressTypeToPrefix[addressType]}'/${network.coinType}'/0'/`;
+        this.network = network;
 
         this.mnemonic = mnemonic;
-        this.provider = provider;
 
-        this.network = network;
-        this.addressType = addressType;
-
-        this.derivationPath = `${Config.AddressTypeToPrefix[addressType]}'/${network.coinType}'/0'/`;
+        if (!mnemonic) {
+            throw new Error('MISSING_MNEMONIC');
+        }
     }
 
     async getCurrentBlock(): Promise<number> {
@@ -194,53 +196,6 @@ export default class BitcoinWebWallet implements BitcoinWallet {
         return sig;
     }
 
-    private async node(): Promise<bip32.BIP32Interface> {
-        const seed = await mnemonicToSeed(this.mnemonic);
-        return bip32.fromSeed(seed, this.network);
-    }
-
-    private async keyPair(derivationPath: string): Promise<any> {
-        const node = await this.node();
-        const wif = node.derivePath(derivationPath).toWIF();
-        return ECPair.fromWIF(wif, this.network);
-    }
-
-    private getScriptType(): string {
-        if (this.addressType === 'legacy') {
-            return 'p2pkh';
-        } else if (this.addressType === 'p2sh-segwit') {
-            return 'p2sh-p2wpkh';
-        } else if (this.addressType === 'bech32') {
-            return 'p2wpkh';
-        }
-    }
-
-    private getAddressFromPublicKey(publicKey: Buffer): string {
-        return this.getPaymentVariantFromPublicKey(publicKey).address;
-    }
-
-    private getPaymentVariantFromPublicKey(publicKey: Buffer): payments.Payment {
-        if (this.addressType === 'legacy') {
-            return payments.p2pkh({
-                pubkey: publicKey,
-                network: this.network,
-            });
-        } else if (this.addressType === 'p2sh-segwit') {
-            return payments.p2sh({
-                redeem: payments.p2wpkh({
-                    pubkey: publicKey,
-                    network: this.network,
-                }),
-                network: this.network,
-            });
-        } else if (this.addressType === 'bech32') {
-            return payments.p2wpkh({
-                pubkey: publicKey,
-                network: this.network,
-            });
-        }
-    }
-
     private async getInputsForAmount(amount: number, feePerByte?: number, numAddressPerCall = 25) {
         let addrList = await this.getAddressList(numAddressPerCall);
 
@@ -291,6 +246,53 @@ export default class BitcoinWebWallet implements BitcoinWallet {
         }
 
         return { fee, amount };
+    }
+
+    private getAddressFromPublicKey(publicKey: Buffer): string {
+        return this.getPaymentVariantFromPublicKey(publicKey).address;
+    }
+
+    private async node(): Promise<bip32.BIP32Interface> {
+        const seed = await mnemonicToSeed(this.mnemonic);
+        return bip32.fromSeed(seed, this.network);
+    }
+
+    private async keyPair(derivationPath: string): Promise<any> {
+        const node = await this.node();
+        const wif = node.derivePath(derivationPath).toWIF();
+        return ECPair.fromWIF(wif, this.network);
+    }
+
+    private getScriptType(): string {
+        if (this.addressType === 'legacy') {
+            return 'p2pkh';
+        } else if (this.addressType === 'p2sh-segwit') {
+            return 'p2sh-p2wpkh';
+        } else if (this.addressType === 'bech32') {
+            return 'p2wpkh';
+        }
+    }
+
+    private getPaymentVariantFromPublicKey(publicKey: Buffer): payments.Payment {
+        if (this.addressType === 'legacy') {
+            return payments.p2pkh({
+                pubkey: publicKey,
+                network: this.network,
+            });
+        } else if (this.addressType === 'p2sh-segwit') {
+            return payments.p2sh({
+                redeem: payments.p2wpkh({
+                    pubkey: publicKey,
+                    network: this.network,
+                }),
+                network: this.network,
+            });
+        } else if (this.addressType === 'bech32') {
+            return payments.p2wpkh({
+                pubkey: publicKey,
+                network: this.network,
+            });
+        }
     }
 
     private _getAddress(node: bip32.BIP32Interface, index: number, change: boolean): BitcoinAddress {
