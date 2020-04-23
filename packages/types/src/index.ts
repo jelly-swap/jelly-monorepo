@@ -114,4 +114,11 @@ export interface Filter {
     refund?: EventFilter;
 }
 
-export { BitcoinWallet, BitcoinAddress, UnusedAddress, UsedUnusedAddressesType } from './BitcoinTypes';
+export {
+    BitcoinProvider,
+    BitcoinWallet,
+    BitcoinNetwork,
+    BitcoinAddress,
+    UnusedAddress,
+    UsedUnusedAddressesType,
+} from './BitcoinTypes';
