@@ -27,8 +27,6 @@
         "access": "public"
     },
     "dependencies": {
-        "@jelly-swap/btc-provider": "^0.1.33",
-        "@jelly-swap/btc-wallet": "^0.1.33",
         "@jelly-swap/types": "^0.1.33",
         "@jelly-swap/utils": "^0.1.33",
         "bignumber.js": "^9.0.0",

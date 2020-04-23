@@ -1,19 +1,18 @@
-import { TransactionBuilder, payments as BitcoinPayments, script as BitcoinScript } from 'bitcoinjs-lib';
+import { BitcoinWallet, BitcoinProvider, BitcoinNetwork } from '@jelly-swap/types';
 import { fixHash, sha256 } from '@jelly-swap/utils';
 
-import BtcWallet from '@jelly-swap/btc-wallet';
-import BtcProvider from '@jelly-swap/btc-provider';
+import { TransactionBuilder, payments as BitcoinPayments, script as BitcoinScript } from 'bitcoinjs-lib';
 
-import { getSwapInput, getSwapOutput, getSwapPaymentVariants, calculateFee } from './utils';
 import { BtcSwapEvent, RefundEvent } from '../types';
+import { getSwapInput, getSwapOutput, getSwapPaymentVariants, calculateFee } from './utils';
 
 export default class HTLC {
-    private network: any;
-    private wallet: BtcWallet;
-    private provider: BtcProvider;
+    private network: BitcoinNetwork;
+    private wallet: BitcoinWallet;
+    private provider: BitcoinProvider;
     private mode: string;
 
-    constructor(wallet: BtcWallet, mode = 'p2wsh') {
+    constructor(wallet: BitcoinWallet, mode = 'p2wsh') {
         this.wallet = wallet;
         this.mode = mode;
 
@@ -22,7 +21,7 @@ export default class HTLC {
     }
 
     async newSwap(
-        value: string | number,
+        value: number,
         recipientAddress: string,
         refundAddress: string,
         hashLock: string,

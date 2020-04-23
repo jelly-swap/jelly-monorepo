@@ -1,4 +1,4 @@
-import BtcWallet from '@jelly-swap/btc-wallet';
+import { BitcoinWallet } from '@jelly-swap/types';
 
 import { JellyContract, ContractSwap, BtcContractRefund, BtcContractWithdraw } from './types';
 
@@ -10,10 +10,10 @@ export default class BitcoinContract implements JellyContract {
     public config: any;
 
     private contract: HTLC;
-    private wallet: BtcWallet;
+    private wallet: BitcoinWallet;
     private eventHandler: EventHandler;
 
-    constructor(wallet: BtcWallet, config = Config()) {
+    constructor(wallet: BitcoinWallet, config = Config()) {
         this.wallet = wallet;
         this.config = config;
         this.contract = new HTLC(wallet);
