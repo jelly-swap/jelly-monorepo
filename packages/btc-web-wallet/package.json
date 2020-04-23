@@ -1,6 +1,6 @@
 {
     "name": "@jelly-swap/btc-web-wallet",
-    "version": "0.1.33",
+    "version": "0.1.40",
     "description": "BTC Wallet implementation for browser usage.",
     "author": "kraykov <raykov@weichain.tech>",
     "homepage": "https://github.com/jelly-swap/monorepo#readme",
@@ -27,8 +27,8 @@
         "url": "https://github.com/jelly-swap/monorepo/issues"
     },
     "dependencies": {
-        "@jelly-swap/btc-utils": "^0.1.39",
-        "@jelly-swap/types": "^0.1.33",
+        "@jelly-swap/btc-utils": "^0.1.40",
+        "@jelly-swap/types": "^0.1.40",
         "bignumber.js": "^9.0.0",
         "bip39": "3.0.2",
         "bitcoinjs-lib": "5.1.6",
