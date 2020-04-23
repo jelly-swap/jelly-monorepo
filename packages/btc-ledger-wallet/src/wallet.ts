@@ -9,7 +9,7 @@ import {
 
 import { Address, Networks } from '@jelly-swap/btc-utils';
 
-import { bip32, ECPair, payments } from 'bitcoinjs-lib';
+import { bip32, ECPair, payments, address } from 'bitcoinjs-lib';
 import coinselect from 'coinselect';
 
 import { BigNumber } from 'bignumber.js';
