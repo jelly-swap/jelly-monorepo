@@ -1,4 +1,5 @@
 import { SwapEvent, WithdrawEvent, RefundEvent, Filter } from '@jelly-swap/types';
+import { filterSingle } from '@jelly-swap/utils';
 
 import { utils } from 'ethers';
 import { Log } from 'ethers/providers';
@@ -60,13 +61,13 @@ export default class Event {
         }
     }
 
-    async getSwapsWithStatus(swaps: SwapEvent[], filter: Filter) {
+    async getSwapsWithStatus(swaps: SwapEvent[], _filter: Filter) {
         const ids = swaps.map((s: any) => s.id);
 
         const status = await this.contract.getStatus(ids);
 
         return swaps.map((s: any, index: number) => {
-            if (filter?.new?.sender?.toLowerCase() === s.sender.toLowerCase()) {
+            if (filterSingle(_filter?.new?.sender, s.sender)) {
                 return { ...s, status: Number(status[index].toString()), isSender: true };
             }
             return { ...s, status: Number(status[index].toString()) };
@@ -117,7 +118,7 @@ export default class Event {
     }
 
     subscribe(onMessage: Function, _filter?: Filter) {
-        this.contract.contract.on({ address: this.config.contractAddress }, log => {
+        this.contract.contract.on({ address: this.config.contractAddress }, (log) => {
             const parsed = this.interface.parseLog(log);
 
             switch (parsed.name) {
@@ -125,7 +126,7 @@ export default class Event {
                     const swap = parseSwapEvent(parsed.values, log, this.config);
 
                     onFilter(_filter?.new, swap, () => {
-                        if (_filter?.new?.sender?.toLowerCase() === swap.sender.toLowerCase()) {
+                        if (filterSingle(_filter?.new?.sender, swap.sender)) {
                             onMessage({ ...swap, isSender: true });
                         } else {
                             onMessage(swap);
