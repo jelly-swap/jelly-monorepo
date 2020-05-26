@@ -7308,9 +7308,9 @@ trongrid@^1.2.4:
     babel-runtime "^6.26.0"
 
 tronweb@^2.8.1:
-  version "2.10.1"
-  resolved "https://registry.yarnpkg.com/tronweb/-/tronweb-2.10.1.tgz#f30354d3bcc99b6e7bcbec5ea7635c781b1a50df"
-  integrity sha512-FAXmpZa6oidvy6HssbF1WnnGaqiJuJXGx7UmccgurTt1IRyySQzaIz+m3gXhhtIzJx9hFYgBQgzbFp6fglFw/w==
+  version "2.10.2"
+  resolved "https://registry.yarnpkg.com/tronweb/-/tronweb-2.10.2.tgz#ecdb92e01023c101df5f3981638c1242a997a510"
+  integrity sha512-k3DT5W5GVX/9lSLp7yE8vlyz8AfZLHbDBRif1qEZ5RJLTFlddb0ERnc9OqKzDO/kL2dBjB8kCV/7nW2RXaps8A==
   dependencies:
     "@babel/runtime" "^7.0.0"
     axios "^0.19.0"
