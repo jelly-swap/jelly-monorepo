@@ -16,6 +16,20 @@ export const filter = (f: any, o: any) => {
         : null;
 };
 
+export const filterSingle = (f: any, o: any) => {
+    if (!f) {
+        return null;
+    }
+
+    if (f instanceof Array) {
+        return f.some((v: any) => {
+            return o?.toLowerCase() === v?.toLowerCase();
+        });
+    } else {
+        return o?.toLowerCase() === f?.toLowerCase();
+    }
+};
+
 export const safeAccess = (object: any, path: string[]) => {
     return object
         ? path.reduce(
@@ -27,9 +41,7 @@ export const safeAccess = (object: any, path: string[]) => {
 };
 
 export function getExpiration(time = 24, timeUnit = 'hours' as unitOfTime.DurationConstructor, unix = true) {
-    const expiration = moment(moment.now())
-        .add(time, timeUnit)
-        .valueOf();
+    const expiration = moment(moment.now()).add(time, timeUnit).valueOf();
 
     if (unix) {
         return Math.floor(expiration / 1000);
