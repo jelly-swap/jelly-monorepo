@@ -30,7 +30,7 @@
         "@jelly-swap/types": "^0.1.40",
         "@jelly-swap/utils": "^0.1.41",
         "bignumber.js": "^9.0.0",
-        "bitcoinjs-lib": "5.1.6"
+        "bitcoinjs-lib": "5.1.9"
     },
     "gitHead": "8639449906eb7425eb2f910bcf0c8604730defd7"
 }
