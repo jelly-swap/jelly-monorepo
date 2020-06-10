@@ -2,7 +2,7 @@
     "name": "jelly-monorepo",
     "private": true,
     "devDependencies": {
-        "@types/jest": "^25.1.4",
+        "@types/jest": "^26.0.0",
         "@types/node": "^12.12.17",
         "jest": "^25.2.3",
         "lerna": "^3.19.0",
