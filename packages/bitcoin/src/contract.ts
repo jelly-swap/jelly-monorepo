@@ -8,9 +8,9 @@ import EventHandler from './events';
 
 export default class BitcoinContract implements JellyContract {
     public config: any;
+    public wallet: BitcoinWallet;
 
     private contract: HTLC;
-    private wallet: BitcoinWallet;
     private eventHandler: EventHandler;
 
     constructor(wallet: BitcoinWallet, config = Config()) {
