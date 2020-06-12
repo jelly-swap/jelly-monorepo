@@ -152,6 +152,10 @@ export default class BitcoinLedgerWallet implements BitcoinWallet {
         return await this.getUnusedAddress(false, numAddressPerCall);
     }
 
+    async signMessage(message: string, from: string): Promise<string> {
+        return 'Not implemented';
+    }
+
     async buildTransaction(to: string, value: number, data: any, feePerByte?: number): Promise<string> {
         return this._buildTransaction([{ to, value }], data, feePerByte);
     }

@@ -73,6 +73,8 @@ export interface BitcoinWallet {
 
     getUsedUnusedAddresses(numAddressPerCall?: number): Promise<UsedUnusedAddressesType>;
 
+    signMessage(message: string, from: string): Promise<string>;
+
     buildTransaction(to: string, value: number, data: any, feePerByte?: number): Promise<string>;
 
     sendTransaction(to: string, value: number, data: any, feePerByte?: number): Promise<string>;

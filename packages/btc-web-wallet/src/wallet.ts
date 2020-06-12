@@ -9,6 +9,7 @@ import {
 
 import { Address, Networks } from '@jelly-swap/btc-utils';
 
+import * as bitcoinMessage from 'bitcoinjs-message';
 import { bip32, ECPair, payments, script, TransactionBuilder, Transaction } from 'bitcoinjs-lib';
 import coinselect from 'coinselect';
 
@@ -162,6 +163,19 @@ export default class BitcoinWebWallet implements BitcoinWallet {
 
     async getUnusedNonChangeAddress(numAddressPerCall = 25): Promise<BitcoinAddress> {
         return await this.getUnusedAddress(false, numAddressPerCall);
+    }
+
+    async signMessage(message: string, from: string) {
+        const address = await this.getWalletAddress(from);
+        const keyPair = await this.keyPair(address.derivationPath);
+        const signature = bitcoinMessage.sign(
+            message,
+            keyPair.privateKey,
+            keyPair.compressed,
+            '\u0018Bitcoin Signed Message:\n',
+            { segwitType: 'p2wpkh' }
+        );
+        return signature.toString('base64');
     }
 
     async buildTransaction(to: string, value: number, data: any, feePerByte?: number): Promise<string> {
