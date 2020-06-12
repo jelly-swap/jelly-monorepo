@@ -1,6 +1,6 @@
 {
     "name": "@jelly-swap/aex9",
-    "version": "0.1.41",
+    "version": "0.1.42",
     "description": "Aeternity's AEX9 token standart implementation",
     "author": "kraykov <raykov@weichain.tech>",
     "homepage": "https://jelly.market/",
@@ -24,8 +24,8 @@
         "url": "https://github.com/jelly-swap/monorepo.git"
     },
     "dependencies": {
-        "@jelly-swap/aeternity": "^0.1.41",
-        "@jelly-swap/types": "^0.1.40",
+        "@jelly-swap/aeternity": "^0.1.42",
+        "@jelly-swap/types": "^0.1.42",
         "@jelly-swap/utils": "^0.1.41",
         "axios": "^0.19.0",
         "bignumber.js": "^9.0.0",
