@@ -357,7 +357,9 @@ export default class BitcoinLedgerWallet implements BitcoinWallet {
 
             // replace the inputAmount of the metadata with amount - fee in case the whole balance is used.
             if (amountWithoutFee) {
+                const ratio = new BigNumber(data.outputAmount).dividedBy(new BigNumber(data.inputAmount));
                 data.inputAmount = amountWithoutFee;
+                data.outputAmount = ratio.multipliedBy(new BigNumber(amountWithoutFee)).toString();
             }
         }
 
