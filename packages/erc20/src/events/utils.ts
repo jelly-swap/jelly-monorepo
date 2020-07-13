@@ -25,10 +25,15 @@ export const fillArrayAfterFilter = (array: any[], _filter: EventFilter, data: a
 
 export const parseSwapEvent = (swap: any, log: Log, config: any) => {
     const tokenAddress = swap.tokenAddress.toLowerCase();
-    const network = config.AddressToToken[tokenAddress].network;
+
+    const token = config.AddressToToken[tokenAddress];
+
+    if (!token) {
+        throw new Error(`Unsupported ERC20: ${tokenAddress}`);
+    }
 
     return {
-        network,
+        network: token.network,
         eventName: 'NEW_CONTRACT',
         ...swap,
         tokenAddress,
@@ -41,10 +46,15 @@ export const parseSwapEvent = (swap: any, log: Log, config: any) => {
 
 export const parseEvent = (eventName: string, data: any, log: Log, config: any) => {
     const tokenAddress = data.tokenAddress.toLowerCase();
-    const network = config.AddressToToken[tokenAddress].network;
+
+    const token = config.AddressToToken[tokenAddress];
+
+    if (!token) {
+        throw new Error(`Unsupported ERC20: ${tokenAddress}`);
+    }
 
     return {
-        network,
+        network: token.network,
         eventName,
         ...data,
         tokenAddress,

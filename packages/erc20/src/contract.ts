@@ -21,7 +21,7 @@ export default class Erc20Contract implements Erc20JellyContract {
         this.provider = provider;
         this.signer = provider.getSigner ? provider.getSigner() : provider;
         this.contract = new ethers.Contract(config.contractAddress, ABI, this.signer);
-        this.provider.pollingInterval = config.pollingInterval || Config().pollingInterval;
+        this.provider.pollingInterval = config.pollingInterval;
 
         this.eventHandler = new EventHandler(this, config);
     }
@@ -42,19 +42,25 @@ export default class Erc20Contract implements Erc20JellyContract {
         return await this.provider.getBlockNumber();
     }
 
-    async getBalance(address: string, token: string): Promise<string | number> {
-        const tokenAddress = this.config.TokenToAddress(token);
-        const tokenContract = this.getTokenContract(tokenAddress);
-        return await tokenContract.balanceOf(address, { from: address });
+    async getBalance(userAddress: string, token: string): Promise<string | number> {
+        const { address } = this.config.NameToTokenConfig[token];
+        const tokenContract = this.getTokenContract(address);
+        return await tokenContract.balanceOf(userAddress, { from: userAddress });
     }
 
     async newContract(swap: Erc20ContractSwap, options?: Options): Promise<string> {
+        const token = this.config.NameToTokenConfig[swap.network];
+
+        if (!token) {
+            throw new Error(`Unsupported ERC20: ${swap.network}`);
+        }
+
         const overrideOptions = await this.extendOptions(options);
 
         const contractAddress = this.config.contractAddress;
-        const { inputAmount, sender, tokenAddress } = swap;
+        const { inputAmount, sender } = swap;
 
-        const tokenContract = this.getTokenContract(tokenAddress);
+        const tokenContract = this.getTokenContract(token.address);
 
         const allowance = await tokenContract.allowance(sender, contractAddress);
 
@@ -66,7 +72,7 @@ export default class Erc20Contract implements Erc20JellyContract {
                 swap.outputAmount,
                 swap.expiration,
                 swap.hashLock,
-                tokenAddress,
+                token.address,
                 swap.receiver,
                 swap.outputNetwork,
                 swap.outputAddress,
@@ -79,7 +85,7 @@ export default class Erc20Contract implements Erc20JellyContract {
                 swap.outputAmount,
                 swap.expiration,
                 swap.hashLock,
-                tokenAddress,
+                token.address,
                 swap.receiver,
                 swap.outputNetwork,
                 swap.outputAddress,
@@ -90,20 +96,28 @@ export default class Erc20Contract implements Erc20JellyContract {
     }
 
     async withdraw(withdraw: Erc20ContractWithdraw, options?: Options): Promise<string> {
+        const token = this.config.NameToTokenConfig[withdraw.network];
+
+        if (!token) {
+            throw new Error(`Unsupported ERC20: ${withdraw.network}`);
+        }
+
         const overrideOptions = await this.extendOptions(options);
 
-        const result = await this.contract.withdraw(
-            withdraw.id,
-            withdraw.secret,
-            withdraw.tokenAddress,
-            overrideOptions
-        );
+        const result = await this.contract.withdraw(withdraw.id, withdraw.secret, token.address, overrideOptions);
         return result.hash;
     }
 
     async refund(refund: Erc20ContractRefund, options?: Options): Promise<string> {
+        const token = this.config.NameToTokenConfig[refund.network];
+
+        if (!token) {
+            throw new Error(`Unsupported ERC20: ${refund.network}`);
+        }
+
         const overrideOptions = await this.extendOptions(options);
-        const result = await this.contract.refund(refund.id, refund.tokenAddress, overrideOptions);
+
+        const result = await this.contract.refund(refund.id, token.address, overrideOptions);
         return result.hash;
     }
 
