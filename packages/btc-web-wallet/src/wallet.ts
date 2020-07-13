@@ -352,7 +352,7 @@ export default class BitcoinWebWallet implements BitcoinWallet {
             if (amountWithoutFee) {
                 const ratio = new BigNumber(data.outputAmount).dividedBy(new BigNumber(data.inputAmount));
                 data.inputAmount = amountWithoutFee;
-                data.outputAmount = ratio.multipliedBy(new BigNumber(amountWithoutFee)).toString();
+                data.outputAmount = ratio.multipliedBy(new BigNumber(amountWithoutFee)).toFixed(0).toString();
             }
         }
 
