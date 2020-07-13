@@ -1,13 +1,13 @@
 import { utils } from 'ethers';
 import { getExpiration, generateHashLock } from '@jelly-swap/utils';
 
-import { JellyAdapter, Erc20ContractSwap, Erc20UserInputSwap } from './types';
+import { Erc20ContractSwap, Erc20UserInputSwap, Erc20Adapter } from './types';
 import Config from './config';
 
-export default class Erc20Adapter implements JellyAdapter {
+export default class Adapter implements Erc20Adapter {
     private config: any;
 
-    constructor(token: string, config = Config(token)) {
+    constructor(config = Config()) {
         this.config = config;
     }
 
@@ -15,6 +15,11 @@ export default class Erc20Adapter implements JellyAdapter {
         const expiration = getExpiration(this.config.expiration, 'second', this.config.unix);
 
         const network = inputSwap.outputNetwork;
+        const token = this.config.NameToTokenConfig[network];
+
+        if (!token) {
+            throw new Error(`Unsupported ERC20: ${network}`);
+        }
 
         const result = {
             network,
@@ -26,7 +31,7 @@ export default class Erc20Adapter implements JellyAdapter {
             outputNetwork: inputSwap.network,
             outputAddress: inputSwap.receiver,
             inputAmount: inputSwap.outputAmount,
-            tokenAddress: this.config.address,
+            tokenAddress: token.address,
         };
 
         const id = this.generateId(result);
@@ -46,27 +51,44 @@ export default class Erc20Adapter implements JellyAdapter {
         return address;
     }
 
-    parseToNative(amount: string): string | number {
-        return utils.parseUnits(amount, this.config.decimals).toString();
+    parseToNative(amount: string, network: string): string | number {
+        const token = this.config.NameToTokenConfig[network];
+        if (!token) {
+            throw new Error(`Unsupported ERC20: ${network}`);
+        }
+
+        return utils.parseUnits(amount, token.decimals).toString();
     }
 
-    parseFromNative(amount: string): string | number {
-        return utils.formatUnits(amount, this.config.decimals);
+    parseFromNative(amount: string, network: string): string | number {
+        const token = this.config.NameToTokenConfig[network];
+        if (!token) {
+            throw new Error(`Unsupported ERC20: ${network}`);
+        }
+
+        return utils.formatUnits(amount, token.decimals);
     }
 
     formatInput(data: Erc20UserInputSwap, receiver = this.config.receiverAddress): Erc20ContractSwap {
-        const inputAmount = utils.parseUnits(String(data.inputAmount), this.config.decimals).toString();
+        const { network, secret } = data;
+
+        const token = this.config.NameToTokenConfig[network];
+
+        if (!token) {
+            throw new Error(`Unsupported ERC20: ${network}`);
+        }
+
+        const inputAmount = utils.parseUnits(String(data.inputAmount), token.decimals).toString();
         const expiration = getExpiration(this.config.expiration, 'second', this.config.unix);
-        const tokenAddress = data.tokenAddress || this.config.address;
 
         return {
             ...data,
-            tokenAddress,
+            tokenAddress: token.address,
             expiration,
-            hashLock: generateHashLock(data.secret),
+            hashLock: generateHashLock(secret),
             inputAmount,
             receiver,
-            network: this.config.network,
+            network,
         };
     }
 
