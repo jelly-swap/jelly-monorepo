@@ -1,5 +1,6 @@
 import { utils } from 'ethers';
-import { Unit } from '@harmony-js/utils';
+import { Unit, isBech32Address } from '@harmony-js/utils';
+import { toBech32, fromBech32 } from '@harmony-js/crypto';
 import { generateHashLock, getExpiration } from '@jelly-swap/utils';
 
 import Config from './config';
@@ -26,7 +27,7 @@ export default class HarmonyAdapter implements JellyAdapter {
             outputNetwork: inputSwap.network,
             outputAddress: inputSwap.receiver,
             inputAmount,
-            options: { value: inputAmount },
+            options: { value: new Unit(inputAmount).toHex() },
         };
 
         const id = this.generateId(swap);
@@ -35,9 +36,12 @@ export default class HarmonyAdapter implements JellyAdapter {
     }
 
     generateId = (swap: ContractSwap) => {
+        const sender = this.parseOutputAddress(swap.sender);
+        const receiver = this.parseOutputAddress(swap.receiver);
+
         return utils.soliditySha256(
             ['address', 'address', 'uint256', 'bytes32', 'uint256'],
-            [swap.sender, swap.receiver, swap.inputAmount, swap.hashLock, swap.expiration]
+            [sender, receiver, swap.inputAmount, swap.hashLock, swap.expiration]
         );
     };
 
@@ -46,10 +50,15 @@ export default class HarmonyAdapter implements JellyAdapter {
     };
 
     parseAddress = (address: any) => {
-        return address.toLowerCase();
+        if (address) {
+            return toBech32(address);
+        }
     };
 
     parseOutputAddress = (address: any) => {
+        if (isBech32Address(address)) {
+            return fromBech32(address);
+        }
         return address;
     };
 
@@ -62,7 +71,7 @@ export default class HarmonyAdapter implements JellyAdapter {
     };
 
     formatInput = (data: UserInputSwap, receiver = this.config.receiverAddress) => {
-        const value = this.parseToNative(data.inputAmount);
+        const value = new Unit(data.inputAmount).asOne().toHex();
         const expiration = getExpiration(this.config.expiration, 'second', this.config.unix);
 
         return {

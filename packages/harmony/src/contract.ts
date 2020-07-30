@@ -7,6 +7,7 @@ import { JellyContract, ContractSwap, ContractRefund, ContractWithdraw, Options 
 
 import Config from './config';
 import ABI from './config/abi';
+import { Unit } from '@harmony-js/utils';
 
 export default class HarmonyContract implements JellyContract {
     public config: any;
@@ -35,7 +36,10 @@ export default class HarmonyContract implements JellyContract {
 
     async getBalance(address: string) {
         const balance = await this.blockchain.getBalance({ address });
-        return balance.toString();
+        if (balance.result) {
+            return new Unit(balance.result).toWeiString();
+        }
+        return 0;
     }
 
     async newContract(swap: ContractSwap, options?: Options) {
@@ -52,19 +56,19 @@ export default class HarmonyContract implements JellyContract {
             )
             .send({ ...overrideOptions, ...swap.options });
 
-        return result;
+        return result?.transaction?.id || 'FAILED';
     }
 
     async withdraw(withdraw: ContractWithdraw, options?: Options) {
         const overrideOptions = await this.getOptions(options);
         const result = await this.contract.methods.withdraw(withdraw.id, withdraw.secret).send(overrideOptions);
-        return result;
+        return result?.transaction?.id || 'FAILED';
     }
 
     async refund(refund: ContractRefund, options?: Options) {
         const overrideOptions = await this.getOptions(options);
         const result = await this.contract.methods.refund(refund.id).send(overrideOptions);
-        return result;
+        return result?.transaction?.id || 'FAILED';
     }
 
     async getStatus(ids: any[]) {
@@ -77,9 +81,15 @@ export default class HarmonyContract implements JellyContract {
             return {
                 gasLimit: new BN('500000'),
                 gasPrice: new BN('10000000000'),
+                waitConfirm: false,
             };
         }
 
-        return options;
+        return {
+            ...options,
+            gasLimit: options.gasLimit || new BN('500000'),
+            gasPrice: options.gasPrice || new BN('10000000000'),
+            waitConfirm: false,
+        };
     }
 }
