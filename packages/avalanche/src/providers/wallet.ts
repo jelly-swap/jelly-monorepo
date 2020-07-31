@@ -4,8 +4,8 @@ import { FilterByBlock } from 'ethers/providers/abstract-provider';
 import JsonRpcProvider from './jsonRpc';
 
 export default class WalletProvider extends Wallet {
-    constructor(privateKey: string, providerUrl: string) {
-        super(privateKey, new JsonRpcProvider(providerUrl));
+    constructor(privateKey: string, config) {
+        super(privateKey, new JsonRpcProvider(config));
     }
 
     async getLogs(filter: Filter | FilterByBlock) {
