@@ -394,16 +394,16 @@
     "@harmony-js/transaction" "^0.1.45"
     "@harmony-js/utils" "^0.1.45"
 
-"@harmony-js/account@0.1.50":
-  version "0.1.50"
-  resolved "https://registry.yarnpkg.com/@harmony-js/account/-/account-0.1.50.tgz#3d006887346fb9c645b70831437b717d7bb1241b"
-  integrity sha512-BL4TLllzg5j6CFxNs8K8Y5m8cp2kjC5zDJD3r1V0T0I0XcCTtLFAKQK4X5ZsPKR2acByxGuyxocdCN+pBSPyTQ==
+"@harmony-js/account@0.1.51", "@harmony-js/account@^0.1.51":
+  version "0.1.51"
+  resolved "https://registry.yarnpkg.com/@harmony-js/account/-/account-0.1.51.tgz#eac501b469b11edb7ef51eff44505d275abc0bee"
+  integrity sha512-LOu0vYi9X/oFp7m9ksYU66fhNnro7t8SASmYV+1RkbwCeqJZCBmTf/acJTmdWykGFga2+SgYFIntILEysAhjew==
   dependencies:
-    "@harmony-js/core" "0.1.50"
+    "@harmony-js/core" "0.1.51"
     "@harmony-js/crypto" "0.1.48"
-    "@harmony-js/network" "0.1.48"
-    "@harmony-js/staking" "0.1.48"
-    "@harmony-js/transaction" "0.1.48"
+    "@harmony-js/network" "0.1.51"
+    "@harmony-js/staking" "0.1.51"
+    "@harmony-js/transaction" "0.1.51"
     "@harmony-js/utils" "0.1.48"
 
 "@harmony-js/contract@0.1.46":
@@ -417,15 +417,15 @@
     "@harmony-js/transaction" "^0.1.45"
     "@harmony-js/utils" "^0.1.45"
 
-"@harmony-js/contract@0.1.50":
-  version "0.1.50"
-  resolved "https://registry.yarnpkg.com/@harmony-js/contract/-/contract-0.1.50.tgz#2f775ddab98352640d24d3e809e5b5ae0c7c2c94"
-  integrity sha512-NvfIY0jh3pQDs4BMooU+qSNGditvvLcXajXC/2Niwexx2utU7ti1OBQ9rhA8fygy7opk+YnyooOtUJyzbcwCvw==
+"@harmony-js/contract@0.1.51", "@harmony-js/contract@^0.1.51":
+  version "0.1.51"
+  resolved "https://registry.yarnpkg.com/@harmony-js/contract/-/contract-0.1.51.tgz#4233524b288b7e030b5dc416f1b937de96e41b4e"
+  integrity sha512-3ofQAHBFMJz4yNLIOTJxKuVYXQb2rbCdzh2kOuljCyJHFxMyNJoKxO77iIAztPvnJ6ft4hNC+RV3Yz2trafljQ==
   dependencies:
     "@harmony-js/account" "0.1.46"
     "@harmony-js/crypto" "0.1.48"
-    "@harmony-js/network" "0.1.48"
-    "@harmony-js/transaction" "0.1.48"
+    "@harmony-js/network" "0.1.51"
+    "@harmony-js/transaction" "0.1.51"
     "@harmony-js/utils" "0.1.48"
 
 "@harmony-js/core@0.1.46":
@@ -441,17 +441,17 @@
     "@harmony-js/transaction" "^0.1.45"
     "@harmony-js/utils" "^0.1.45"
 
-"@harmony-js/core@0.1.50":
-  version "0.1.50"
-  resolved "https://registry.yarnpkg.com/@harmony-js/core/-/core-0.1.50.tgz#71bc34710fa31a906206a87ab3a74dcd60eb1524"
-  integrity sha512-T46qxuiPhXtoKH72oWq5kJZUn/XK9mn612jVR3aUvU8JyYoylprLTMG/RmNtkfpR8xzKvaa/bNvxNEX1+HQSVQ==
+"@harmony-js/core@0.1.51", "@harmony-js/core@^0.1.51":
+  version "0.1.51"
+  resolved "https://registry.yarnpkg.com/@harmony-js/core/-/core-0.1.51.tgz#3cc5e17e8fbd7bd9541967d1a075bed561671cad"
+  integrity sha512-JdfYzsIfemNHOoj28TGqdGFsktXrdszaBYh0XsqAhrVjIk0cOOqv29WXNOI7n9FxOTTYt6060ULbXCJ22l5sqQ==
   dependencies:
-    "@harmony-js/account" "0.1.50"
-    "@harmony-js/contract" "0.1.50"
+    "@harmony-js/account" "0.1.51"
+    "@harmony-js/contract" "0.1.51"
     "@harmony-js/crypto" "0.1.48"
-    "@harmony-js/network" "0.1.48"
-    "@harmony-js/staking" "0.1.48"
-    "@harmony-js/transaction" "0.1.48"
+    "@harmony-js/network" "0.1.51"
+    "@harmony-js/staking" "0.1.51"
+    "@harmony-js/transaction" "0.1.51"
     "@harmony-js/utils" "0.1.48"
 
 "@harmony-js/crypto@0.1.48", "@harmony-js/crypto@^0.1.45", "@harmony-js/crypto@^0.1.48":
@@ -471,7 +471,7 @@
     scrypt-shim "github:web3-js/scrypt-shim"
     uuid "^3.3.2"
 
-"@harmony-js/network@0.1.48", "@harmony-js/network@^0.1.45", "@harmony-js/network@^0.1.48":
+"@harmony-js/network@0.1.48", "@harmony-js/network@^0.1.45":
   version "0.1.48"
   resolved "https://registry.yarnpkg.com/@harmony-js/network/-/network-0.1.48.tgz#efed8bc07af681b3dbfa71863056a266fcbe4ab3"
   integrity sha512-YLfANca+Nz+YdXShjil+jWMlGDSrsfV+tWfnP17wTldBAupSHfoxsANGGb9JiZW3LjZICIYVnBBSf5+WvSTIvg==
@@ -481,7 +481,28 @@
     mitt "^1.2.0"
     websocket "^1.0.28"
 
-"@harmony-js/staking@0.1.48", "@harmony-js/staking@^0.1.45":
+"@harmony-js/network@0.1.51", "@harmony-js/network@^0.1.51":
+  version "0.1.51"
+  resolved "https://registry.yarnpkg.com/@harmony-js/network/-/network-0.1.51.tgz#d14b1c5c195989c8c0be5da469b87b978c73c22f"
+  integrity sha512-wA26DtF5QynvceshF+loTWIevGNhkGWQsvxMlU3+tMgvdhbIbeOAYpdPLaDoxVp5Ri59FMRo7VMNXNDb+OCoHQ==
+  dependencies:
+    "@harmony-js/utils" "0.1.48"
+    cross-fetch "^3.0.2"
+    mitt "^1.2.0"
+    websocket "^1.0.28"
+
+"@harmony-js/staking@0.1.51":
+  version "0.1.51"
+  resolved "https://registry.yarnpkg.com/@harmony-js/staking/-/staking-0.1.51.tgz#58450affa7ce58d741fc9806fa1ff8c64be6ee3c"
+  integrity sha512-PHJ+n+UYwHY1mWraSDou037ux3FRlT40Vlph9+EiHx0hvHJSCffpDSeF6V4OPgNGTjCxkGiA2Nx+iC0CRkIpPw==
+  dependencies:
+    "@harmony-js/crypto" "0.1.48"
+    "@harmony-js/network" "0.1.51"
+    "@harmony-js/transaction" "0.1.51"
+    "@harmony-js/utils" "0.1.48"
+    text-encoding "^0.7.0"
+
+"@harmony-js/staking@^0.1.45":
   version "0.1.48"
   resolved "https://registry.yarnpkg.com/@harmony-js/staking/-/staking-0.1.48.tgz#1b9adfe365f296abfe9665010af2cd331cbd6274"
   integrity sha512-+OnJrad9XZoTtjC5Apxy4zBEeyVV0xpSnMSsHEZVHCz0OhayWPgCtw+qSM4RyW2iCOrJwNy2fK3MH/KaIsa9Sg==
@@ -499,6 +520,15 @@
   dependencies:
     "@harmony-js/crypto" "0.1.48"
     "@harmony-js/network" "0.1.48"
+    "@harmony-js/utils" "0.1.48"
+
+"@harmony-js/transaction@0.1.51":
+  version "0.1.51"
+  resolved "https://registry.yarnpkg.com/@harmony-js/transaction/-/transaction-0.1.51.tgz#a05ac05e065fe07e72c00f617607be78da8f734d"
+  integrity sha512-3hPzaw+rWVbQJlu4AnKJTNsdxGdnzm+J+plnMtVeEQRWHG97vJbXZAApfZa1/QoV3Of8FTF9jqkBdgV3+Aw83w==
+  dependencies:
+    "@harmony-js/crypto" "0.1.48"
+    "@harmony-js/network" "0.1.51"
     "@harmony-js/utils" "0.1.48"
 
 "@harmony-js/utils@0.1.48", "@harmony-js/utils@^0.1.45", "@harmony-js/utils@^0.1.48":
