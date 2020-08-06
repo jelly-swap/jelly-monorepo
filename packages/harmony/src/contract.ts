@@ -31,7 +31,8 @@ export default class HarmonyContract implements JellyContract {
     async getPastEvents(type: string, filter: any, fromBlock?: string | number, toBlock?: string | number) {}
 
     async getCurrentBlock() {
-        return await this.blockchain.getBlockNumber();
+        const blockNumber = await this.blockchain.getBlockNumber();
+        return blockNumber.result || 0;
     }
 
     async getBalance(address: string) {
