@@ -79,7 +79,7 @@ export default class HarmonyAdapter implements JellyAdapter {
             expiration,
             hashLock: generateHashLock(data.secret),
             inputAmount: value,
-            receiver,
+            receiver: this.parseOutputAddress(receiver),
             network: this.config.network,
             options: { value },
         };
