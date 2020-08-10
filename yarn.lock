@@ -522,7 +522,7 @@
     "@harmony-js/network" "0.1.48"
     "@harmony-js/utils" "0.1.48"
 
-"@harmony-js/transaction@0.1.51":
+"@harmony-js/transaction@0.1.51", "@harmony-js/transaction@^0.1.51":
   version "0.1.51"
   resolved "https://registry.yarnpkg.com/@harmony-js/transaction/-/transaction-0.1.51.tgz#a05ac05e065fe07e72c00f617607be78da8f734d"
   integrity sha512-3hPzaw+rWVbQJlu4AnKJTNsdxGdnzm+J+plnMtVeEQRWHG97vJbXZAApfZa1/QoV3Of8FTF9jqkBdgV3+Aw83w==
