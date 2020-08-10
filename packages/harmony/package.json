@@ -1,6 +1,6 @@
 {
     "name": "@jelly-swap/harmony",
-    "version": "0.1.45",
+    "version": "0.1.47",
     "description": "JellySwap TypeScript implementation for Harmony.",
     "author": "kraykov <raykov@weichain.tech>",
     "homepage": "https://github.com/jelly-swap/jelly-monorepo#readme",
