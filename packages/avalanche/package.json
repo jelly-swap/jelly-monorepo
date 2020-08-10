@@ -1,0 +1,36 @@
+{
+    "name": "@jelly-swap/avalanche",
+    "version": "0.1.46",
+    "description": "JellySwap TypeScript implementation for AVA.",
+    "author": "kraykov <raykov@weichain.tech>",
+    "homepage": "https://github.com/jelly-swap/jelly-monorepo#readme",
+    "license": "ISC",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "directories": {
+        "dist": "dist"
+    },
+    "files": [
+        "dist"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/jelly-swap/jelly-monorepo.git"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "build": "tsc"
+    },
+    "bugs": {
+        "url": "https://github.com/jelly-swap/jelly-monorepo/issues"
+    },
+    "dependencies": {
+        "@jelly-swap/types": "^0.1.42",
+        "@jelly-swap/utils": "^0.1.41",
+        "ethers": "^4.0.40",
+        "web3": "^1.2.11"
+    },
+    "gitHead": "8639449906eb7425eb2f910bcf0c8604730defd7"
+}
