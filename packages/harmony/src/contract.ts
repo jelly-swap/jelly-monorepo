@@ -57,19 +57,33 @@ export default class HarmonyContract implements JellyContract {
             )
             .send({ ...overrideOptions, ...swap.options });
 
-        return result?.transaction?.id || 'FAILED';
+        if (result?.transaction?.txStatus === 'REJECTED') {
+            throw new Error('TX REJECTED');
+        }
+
+        return result?.transaction?.id;
     }
 
     async withdraw(withdraw: ContractWithdraw, options?: Options) {
         const overrideOptions = await this.getOptions(options);
         const result = await this.contract.methods.withdraw(withdraw.id, withdraw.secret).send(overrideOptions);
-        return result?.transaction?.id || 'FAILED';
+
+        if (result?.transaction?.txStatus === 'REJECTED') {
+            throw new Error('TX REJECTED');
+        }
+
+        return result?.transaction?.id;
     }
 
     async refund(refund: ContractRefund, options?: Options) {
         const overrideOptions = await this.getOptions(options);
         const result = await this.contract.methods.refund(refund.id).send(overrideOptions);
-        return result?.transaction?.id || 'FAILED';
+
+        if (result?.transaction?.txStatus === 'REJECTED') {
+            throw new Error('TX REJECTED');
+        }
+
+        return result?.transaction?.id;
     }
 
     async getStatus(ids: any[]) {
