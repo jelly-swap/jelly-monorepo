@@ -67,7 +67,6 @@ export default class HttpProvider implements Provider {
 
     async callContract(method: string, args: any[], options?: any) {
         await this.setup();
-        console.log(method, args, options);
         return await this.contract.methods[method](...args, options);
     }
 
