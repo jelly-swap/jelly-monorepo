@@ -12,10 +12,6 @@ export default class AeternityContract implements JellyContract {
         this.provider = provider;
     }
 
-    async subscribe(onMessage: Function, filter: any) {}
-
-    async getPastEvents(type: string, filter: any) {}
-
     async getCurrentBlock() {
         return await this.provider.getCurrentBlock();
     }
