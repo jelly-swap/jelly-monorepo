@@ -1,6 +1,5 @@
 import { JellyContract, Provider, ContractSwap, ContractWithdraw, ContractRefund } from './types';
 
-import EventHandler from './events';
 import { Config } from '.';
 import { getInputFromSwap, getInputFromWithdraw, getInputFromRefund } from './utils';
 
@@ -8,21 +7,14 @@ export default class AeternityContract implements JellyContract {
     public config: any;
     public provider: any;
 
-    private eventHandler: EventHandler;
-
     constructor(provider: Provider, config = Config()) {
         this.config = config;
         this.provider = provider;
-        this.eventHandler = new EventHandler(this, this.config);
     }
 
-    async subscribe(onMessage: Function, filter: any) {
-        this.eventHandler.subscribe(onMessage, filter);
-    }
+    async subscribe(onMessage: Function, filter: any) {}
 
-    async getPastEvents(type: string, filter: any) {
-        return await this.eventHandler.getPast(type, filter);
-    }
+    async getPastEvents(type: string, filter: any) {}
 
     async getCurrentBlock() {
         return await this.provider.getCurrentBlock();
@@ -48,10 +40,5 @@ export default class AeternityContract implements JellyContract {
     async refund(refund: ContractRefund, options = { waitMined: false }) {
         const result = await this.provider.callContract('refund', getInputFromRefund(refund), options);
         return result;
-    }
-
-    async getStatus(ids: any[]) {
-        const result = await this.provider.callContract('get_many_status', [ids]);
-        return result?.decodedResult;
     }
 }

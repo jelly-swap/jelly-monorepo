@@ -1,11 +1,11 @@
 export default `@compiler >= 4
 include "List.aes"
 
-contract JellyHTLC = 
+contract JellyHTLC =
 
   record state = { swaps : map(hash, swap) }
 
-  datatype status = INVALID | ACTIVE | REFUNDED | WITHDRAWN | EXPIRED 
+  datatype status = INVALID | ACTIVE | REFUNDED | WITHDRAWN | EXPIRED
 
   record swap = {
     input_amount : int,
@@ -26,7 +26,7 @@ contract JellyHTLC =
   stateful payable entrypoint new_swap : (int, int, hash, address, string, string) => unit
   stateful entrypoint withdraw         : (hash, hash)                              => unit
   stateful entrypoint refund           : (hash)                                    => unit
-  
+
   entrypoint get_one_status            : (hash)                                    => status
   entrypoint get_many_status           : (list(hash))                              => list(status)
   entrypoint generate_id               : (address, address, int, hash, int)        => hash

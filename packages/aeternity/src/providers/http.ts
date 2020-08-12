@@ -1,4 +1,4 @@
-import { Node, RpcAepp, Universal, MemoryAccount } from '../sdk-browser';
+import { Node, RpcAepp, Universal, MemoryAccount } from '../sdk-node';
 
 import Config from '../config';
 import ContractSource from '../config/contractSource';
@@ -39,7 +39,7 @@ export default class HttpProvider implements Provider {
 
         this.client = await RpcAepp({
             name: 'JellySwap',
-            nodes: [{ name: 'testnet', instance: node }],
+            nodes: [{ name: this.config.nodeName, instance: node }],
             compilerUrl: this.config.compilerUrl,
 
             onNetworkChange: (network: any) => {
@@ -67,6 +67,7 @@ export default class HttpProvider implements Provider {
 
     async callContract(method: string, args: any[], options?: any) {
         await this.setup();
+        console.log(method, args, options);
         return await this.contract.methods[method](...args, options);
     }
 
