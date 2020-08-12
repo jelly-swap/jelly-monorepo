@@ -4,28 +4,17 @@ import { JellyContract, ContractSwap, BtcContractRefund, BtcContractWithdraw } f
 
 import Config from './config';
 import HTLC from './htlc';
-import EventHandler from './events';
 
 export default class BitcoinContract implements JellyContract {
     public config: any;
     public wallet: BitcoinWallet;
 
     private contract: HTLC;
-    private eventHandler: EventHandler;
 
     constructor(wallet: BitcoinWallet, config = Config()) {
         this.wallet = wallet;
         this.config = config;
         this.contract = new HTLC(wallet);
-        this.eventHandler = new EventHandler(this.config.apiProviderUrl);
-    }
-
-    subscribe(onMessage: Function, filter?: any): void {
-        this.eventHandler.subscribe(onMessage, filter);
-    }
-
-    async getPastEvents(type: string, filter: any) {
-        return await this.eventHandler.getPast(type, filter);
     }
 
     async getCurrentBlock(): Promise<string | number> {
@@ -106,9 +95,5 @@ export default class BitcoinContract implements JellyContract {
         );
 
         return result;
-    }
-
-    async getStatus(ids: any[]) {
-        return await this.eventHandler.getStatus(ids);
     }
 }
