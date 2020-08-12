@@ -2,8 +2,6 @@ import { ethers } from 'ethers';
 
 import { Erc20JellyContract, Erc20ContractSwap, Erc20ContractRefund, Erc20ContractWithdraw, Options } from './types';
 
-import EventHandler from './events';
-
 import Config from './config';
 import ABI from './config/abi';
 import ERC20ABI from './config/abi/erc20';
@@ -13,7 +11,6 @@ export default class Erc20Contract implements Erc20JellyContract {
     public contract: ethers.Contract;
     public provider: ethers.providers.BaseProvider;
 
-    private eventHandler: EventHandler;
     private signer: any;
 
     constructor(provider: any, config = Config()) {
@@ -22,20 +19,6 @@ export default class Erc20Contract implements Erc20JellyContract {
         this.signer = provider.getSigner ? provider.getSigner() : provider;
         this.contract = new ethers.Contract(config.contractAddress, ABI, this.signer);
         this.provider.pollingInterval = config.pollingInterval;
-
-        this.eventHandler = new EventHandler(this, config);
-    }
-
-    unsubscribe() {
-        this.eventHandler.unsubscribe();
-    }
-
-    subscribe(onMessage: Function, filter?: any): void {
-        this.eventHandler.subscribe(onMessage, filter);
-    }
-
-    async getPastEvents(type: string, filter: any, fromBlock?: string | number, toBlock?: string | number) {
-        return await this.eventHandler.getPast(type, filter, fromBlock, toBlock);
     }
 
     async getCurrentBlock(): Promise<string | number> {
@@ -119,10 +102,6 @@ export default class Erc20Contract implements Erc20JellyContract {
 
         const result = await this.contract.refund(refund.id, token.address, overrideOptions);
         return result.hash;
-    }
-
-    async getStatus(ids: any[]) {
-        return await this.contract.getStatus(ids, { from: '0x0123456789012345678901234567890123456789' });
     }
 
     getTokenContract(tokenAddress: string) {
