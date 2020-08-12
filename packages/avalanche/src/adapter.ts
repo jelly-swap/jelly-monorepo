@@ -44,7 +44,7 @@ export default class EthereumAdapter implements JellyAdapter {
     };
 
     parseAddress = (address: any) => {
-        return address.toLowerCase();
+        return address;
     };
 
     parseOutputAddress = (address: any) => {

@@ -80,10 +80,6 @@ export interface JellyAdapter {
 }
 
 export interface JellyContract {
-    subscribe(onMessage: Function, filter?: Function): void;
-
-    getPastEvents(type: string, filter: Function): any;
-
     getCurrentBlock(): Promise<string | number>;
 
     getBalance(address: string): Promise<string | number>;
@@ -93,8 +89,6 @@ export interface JellyContract {
     withdraw(withdraw: ContractWithdraw): Promise<string>;
 
     refund(refund: ContractRefund): Promise<string>;
-
-    getStatus(ids: any[]): any;
 }
 
 type Options = {

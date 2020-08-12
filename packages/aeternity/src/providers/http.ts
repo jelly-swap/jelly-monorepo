@@ -39,7 +39,7 @@ export default class HttpProvider implements Provider {
 
         this.client = await RpcAepp({
             name: 'JellySwap',
-            nodes: [{ name: 'testnet', instance: node }],
+            nodes: [{ name: this.config.nodeName, instance: node }],
             compilerUrl: this.config.compilerUrl,
 
             onNetworkChange: (network: any) => {

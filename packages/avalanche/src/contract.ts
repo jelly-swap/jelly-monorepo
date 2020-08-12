@@ -18,10 +18,6 @@ export default class AvaContract implements JellyContract {
         this.provider = provider;
     }
 
-    async subscribe(onMessage: Function, filter?: any) {}
-
-    async getPastEvents(type: string, filter: any, fromBlock?: string | number, toBlock?: string | number) {}
-
     async getCurrentBlock() {
         return await this.provider.getBlockNumber();
     }
@@ -57,8 +53,6 @@ export default class AvaContract implements JellyContract {
         const result = await this.contract.refund(refund.id, overrideOptions);
         return result.hash;
     }
-
-    async getStatus(ids: any[]) {}
 
     async getGas() {
         const providerGas = await ethers.getDefaultProvider().getGasPrice();

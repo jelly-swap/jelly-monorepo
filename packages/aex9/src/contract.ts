@@ -4,7 +4,6 @@ import { Aex9JellyContract, Aex9ContractSwap, Aex9ContractWithdraw, Aex9Contract
 
 import Aex9Source from './config/aex9';
 
-import EventHandler from './events';
 import { Config } from '.';
 import { getInputFromSwap, getInputFromWithdraw, getInputFromRefund } from './utils';
 
@@ -13,20 +12,9 @@ export default class AeternityContract implements Aex9JellyContract {
     public config: any;
     public provider: any;
 
-    private eventHandler: EventHandler;
-
     constructor(provider: any, config = Config()) {
         this.config = config;
         this.provider = provider;
-        this.eventHandler = new EventHandler(this, this.config);
-    }
-
-    async subscribe(onMessage: Function, filter: any) {
-        this.eventHandler.subscribe(onMessage, filter);
-    }
-
-    async getPastEvents(type: string, filter: any) {
-        return await this.eventHandler.getPast(type, filter);
     }
 
     async getCurrentBlock() {
@@ -69,11 +57,6 @@ export default class AeternityContract implements Aex9JellyContract {
 
     async refund(refund: Aex9ContractRefund, options = { waitMined: false }) {
         return await this.provider.callContract('refund', getInputFromRefund(refund), options);
-    }
-
-    async getStatus(ids: any[]) {
-        const result = await this.provider.callContract('get_many_status', [ids]);
-        return result?.decodedResult;
     }
 
     async getTokenContract(tokenAddress: string) {

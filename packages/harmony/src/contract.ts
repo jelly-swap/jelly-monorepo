@@ -26,10 +26,6 @@ export default class HarmonyContract implements JellyContract {
         this.contract = factory.createContract(ABI, config.contractAddress);
     }
 
-    async subscribe(onMessage: Function, filter?: any) {}
-
-    async getPastEvents(type: string, filter: any, fromBlock?: string | number, toBlock?: string | number) {}
-
     async getCurrentBlock() {
         const blockNumber = await this.blockchain.getBlockNumber();
         return blockNumber.result || 0;
@@ -84,11 +80,6 @@ export default class HarmonyContract implements JellyContract {
         }
 
         return result?.transaction?.id;
-    }
-
-    async getStatus(ids: any[]) {
-        const options = this.getOptions();
-        return await this.contract.methods['getStatus(bytes32[])'](ids).call(options);
     }
 
     async getOptions(options?: Options) {

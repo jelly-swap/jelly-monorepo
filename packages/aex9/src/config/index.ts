@@ -10,6 +10,7 @@ export default (token?: string, tokenConfig = TokenConfig, addressToToken = Addr
         contractAddress: 'ct_2875ChttfbnyTNoUPNrLViMzRr2LAGj5n1YrjND82JzuNDkuoN',
         receiverAddress: 'ak_471dYUrQ8EAtmzwuKDw4VBGQdnEcP5YF563WG4yR9Wvfp5tRp',
         blockTime: 5,
+        nodeName: 'testnet',
         expiration,
         unix: false,
         apiUrl: 'https://testnet.aeternal.io/',

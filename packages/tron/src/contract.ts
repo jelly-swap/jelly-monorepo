@@ -1,7 +1,6 @@
 import { JellyContract, ContractWithdraw, ContractRefund } from '@jelly-swap/types';
 import { safeAccess } from '@jelly-swap/utils';
 
-import EventHandler from './events';
 import Config from './config';
 import { TronContractSwap } from './types';
 
@@ -10,12 +9,10 @@ export default class TronContract implements JellyContract {
     public provider: any;
 
     private contract: any;
-    private eventHandler: EventHandler;
 
     constructor(provider: any, config = Config()) {
         this.config = config;
         this.provider = provider;
-        this.eventHandler = new EventHandler(this, config);
     }
 
     async setup() {
@@ -24,14 +21,6 @@ export default class TronContract implements JellyContract {
                 this.contract = await this.provider.tronWeb.contract().at(this.config.contractAddress);
             }
         }
-    }
-
-    async subscribe(onMessage: Function, filter?: Function) {
-        this.eventHandler.subscribe(onMessage, filter);
-    }
-
-    async getPastEvents(type: string, filter: Function) {
-        return await this.eventHandler.getPast(type, filter);
     }
 
     async getCurrentBlock(): Promise<string | number> {
@@ -82,10 +71,5 @@ export default class TronContract implements JellyContract {
         });
 
         return result;
-    }
-
-    async getStatus(ids: any[]) {
-        await this.setup();
-        return await this.contract.getStatus(ids).call();
     }
 }
