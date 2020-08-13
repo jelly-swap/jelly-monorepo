@@ -13,8 +13,10 @@
         "packages/*"
     ],
     "scripts": {
+        "create-version": "lerna version --no-push --no-git-tag-version && lerna clean --yes && lerna bootstrap",
         "build": "lerna run build",
         "publish": "lerna run tsc && lerna publish",
         "clean": "lerna clean --yes && for d in packages/*/dist; do if [ -d $d ]; then echo removing $d; rm -r $d; fi; done"
-    }
+    },
+    "version": "0.0.0"
 }
