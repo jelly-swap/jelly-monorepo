@@ -75,3 +75,5 @@ export const fixHash = (hash: string, prefix = true) => {
 };
 
 export { sha256 } from './crypto';
+
+export { version } from '../../../package.json';

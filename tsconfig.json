@@ -7,6 +7,7 @@
         "removeComments": true,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
+        "resolveJsonModule": true,
         "target": "es6",
         "sourceMap": true,
         "lib": ["es2017", "es7", "es6", "dom"],

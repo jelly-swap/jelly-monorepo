@@ -116,3 +116,5 @@ export {
     UnusedAddress,
     UsedUnusedAddressesType,
 } from './BitcoinTypes';
+
+export { version } from '../../../package.json';
