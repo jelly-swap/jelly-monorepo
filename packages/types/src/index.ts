@@ -117,4 +117,4 @@ export {
     UsedUnusedAddressesType,
 } from './BitcoinTypes';
 
-export { version } from '../../../package.json';
+export { version } from '../package.json';

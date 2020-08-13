@@ -1,6 +1,5 @@
 {
     "name": "jelly-monorepo",
-    "version": "0.1.49",
     "private": true,
     "devDependencies": {
         "@types/jest": "^25.1.4",
