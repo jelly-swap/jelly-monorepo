@@ -5,13 +5,14 @@
     "author": "kraykov <raykov@weichain.tech>",
     "homepage": "https://jelly.market/",
     "license": "ISC",
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "main": "./dist/src/index.js",
+    "types": "./dist/src/index.d.ts",
     "directories": {
         "dist": "dist"
     },
     "files": [
-        "dist"
+        "dist",
+        "src"
     ],
     "publishConfig": {
         "access": "public"
