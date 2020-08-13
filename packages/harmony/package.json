@@ -38,5 +38,6 @@
         "@harmony-js/utils": "^0.1.48",
         "@jelly-swap/types": "^0.1.49",
         "@jelly-swap/utils": "^0.1.49"
-    }
+    },
+    "gitHead": "4e3750cd5954cbfdee15c416fcc93140110ee0c4"
 }

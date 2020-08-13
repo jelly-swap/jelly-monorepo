@@ -40,5 +40,5 @@
         "@types/websocket": "^1.0.0",
         "tslint-config-prettier": "^1.18.0"
     },
-    "gitHead": "8639449906eb7425eb2f910bcf0c8604730defd7"
+    "gitHead": "4e3750cd5954cbfdee15c416fcc93140110ee0c4"
 }
