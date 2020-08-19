@@ -1,6 +1,6 @@
 {
     "name": "@jelly-swap/btc-provider",
-    "version": "0.1.49",
+    "version": "0.1.50",
     "description": "BTC Provider implementation for browser usage.",
     "author": "kraykov <raykov@weichain.tech>",
     "homepage": "https://github.com/jelly-swap/monorepo#readme",
