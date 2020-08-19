@@ -8,7 +8,7 @@ import Config from '../config';
 export default class WalletProvider extends Wallet {
     private transactionFactory: TransactionFactory;
 
-    constructor(providerUrl = Config().providerUrl, chainId = ChainID.HmyTestnet, privateKey?: string) {
+    constructor(providerUrl = Config().providerUrl, chainId = Config().chainId, privateKey?: string) {
         const messenger = new Messenger(new HttpProvider(providerUrl), ChainType.Harmony, chainId);
         super(messenger);
 

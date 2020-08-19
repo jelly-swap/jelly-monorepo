@@ -10,5 +10,6 @@ export default (expiration = 10800) => {
         expiration,
         decimals: 18,
         unix: true,
+        chainId: 2,
     };
 };
