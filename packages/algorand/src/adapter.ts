@@ -4,33 +4,73 @@ import BigNumber from 'bignumber.js';
 import { JellyAdapter, ContractSwap, UserInputSwap } from './types';
 import Config from './config';
 
-export default class BitcoinAdapter implements JellyAdapter {
+export default class AlgoAdapter implements JellyAdapter {
     private config: any;
+
 
     constructor(config = Config()) {
         this.config = config;
     }
 
     createSwapFromInput(inputSwap: ContractSwap, sender = this.config.receiverAddress): ContractSwap {
-        const inputAmount = inputSwap.outputAmount;
+        //ToODO fix expiration format
         const expiration = getExpiration(this.config.expiration, 'second', this.config.unix);
 
-        const swap: ContractSwap = {
+        const result = {
             network: inputSwap.outputNetwork,
             outputAmount: inputSwap.inputAmount,
             expiration,
-            sender,
             hashLock: inputSwap.hashLock,
+            sender,
             receiver: inputSwap.outputAddress,
+            refundAddress: sender,
             outputNetwork: inputSwap.network,
             outputAddress: inputSwap.receiver,
-            inputAmount,
-            options: { value: Number(inputSwap.outputAmount) },
+            inputAmount: Number(inputSwap.outputAmount),
         };
 
-        const id = this.generateId(swap);
+        const id = this.generateId(result);
 
-        return { ...swap, id };
+        return { ...result, id };
+    }
+
+    addressValid = (address: string): boolean => {
+        return true;
+    };
+
+    parseAddress = (address: string): string => {
+        return address;
+    };
+
+    parseOutputAddress = (address: string): string => {
+        return address;
+    };
+
+    parseToNative(amount: string | number): string | number {
+        return new BigNumber(amount).multipliedBy(new BigNumber(10).exponentiatedBy(Config().decimals)).toString();
+    }
+
+    parseFromNative(amount: string): string | number {
+        return new BigNumber(amount).dividedBy(new BigNumber(10).exponentiatedBy(Config().decimals)).toString();
+    }
+
+    formatInput(data: any, receiver = this.config.receiverAddress, currentBlock: number): ContractSwap {
+        try {
+            const inputAmount = this.parseToNative(data.inputAmount);
+            const hashLock = this.generateHashLock(data.secret);
+            const expiration = currentBlock + Math.floor(this.config.expiration / this.config.blockTimeSeconds);
+
+            return {
+                ...data,
+                inputAmount,
+                hashLock,
+                receiver,
+                network: 'ALGO',
+                expiration,
+            };
+        } catch (err) {
+            return err;
+        }
     }
 
     generateId(swap: ContractSwap): string {
@@ -44,39 +84,7 @@ export default class BitcoinAdapter implements JellyAdapter {
         return '0x' + sha256(idData).toString('hex');
     }
 
-    addressValid = (address: any) => {
-        return true;
-    };
-
-    parseAddress = (address: any) => {
-        return address;
-    };
-
-    parseOutputAddress = (address: any) => {
-        return address;
-    };
-
-    parseToNative = (amount: any) => {
-        return new BigNumber(amount).multipliedBy(new BigNumber(10).exponentiatedBy(8)).toString();
-    };
-
-    parseFromNative = (amount: any) => {
-        return new BigNumber(amount).dividedBy(new BigNumber(10).exponentiatedBy(8)).toString();
-    };
-
-    formatInput = (data: UserInputSwap, receiver = this.config.receiverAddress) => {
-        const inputAmount = this.parseToNative(data.inputAmount);
-        const hashLock = generateHashLock(data.secret);
-
-        const expiration = getExpiration(this.config.expiration, 'second', this.config.unix);
-
-        return {
-            ...data,
-            inputAmount,
-            hashLock,
-            receiver,
-            network: 'ALGO',
-            expiration,
-        };
-    };
+    generateHashLock(image: string) {
+        return sha256(image);
+    }
 }

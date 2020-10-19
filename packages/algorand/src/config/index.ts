@@ -1,13 +1,17 @@
 export default (expiration = 10800) => {
     return {
         network: 'ALGO',
-        explorer: 'https://testnet.algoexplorer.io/',
-        providerUrl: 'https://testnet-algorand.api.purestake.io/ps2',
-        receiverAddress: 'NIESDL437QEKQTAPN7YMIYSK2VBISDENSWVATQCYMLT2FCCYBFJ2DFHUPA',
+        explorer: 'https://algoexplorer.io/',
+        providerUrl: 'https://mainnet-algorand.api.purestake.io/ps2',
+        receiverAddress: '',
         expiration,
         decimals: 6,
         unix: true,
-        apiKey: 'vMRVuy8jHPawChzNOx4mM8Btl5SghQ4N710gtACD',
-        baseServer: 'https://testnet-algorand.api.purestake.io/ps2',
+        apiKey: 'YOUR_API_KEY',
+        baseServer: 'https://mainnet-algorand.api.purestake.io/ps2',
+        apiProviderUrl: 'https://spacejelly.network/algo/api/v1/algo',
+        blockTimeSeconds: 4,
+        maxFee: 2000,
+        zeroAddress: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ',
     };
 };

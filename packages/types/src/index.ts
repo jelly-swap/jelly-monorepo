@@ -74,7 +74,7 @@ export interface JellyAdapter {
 
     parseFromNative(amount: string): string | number;
 
-    formatInput(data: UserInputSwap, receiver: string): ContractSwap;
+    formatInput(data: UserInputSwap, receiver: string, blockNumber?: number): ContractSwap;
 
     generateId(swap: ContractSwap): string;
 }

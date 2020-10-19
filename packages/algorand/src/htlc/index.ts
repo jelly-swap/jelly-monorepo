@@ -1,72 +1,69 @@
-// const algosdk = require('algosdk');
-const htlcTemplate = require('algosdk/src/logicTemplates/htlc');
-
-import algosdk from 'algosdk';
-
 import Config from '../config';
-import { fundHTLCContract, createHashImg } from './utils';
+import { fundHTLCContract, formatNote} from './utils';
+import { fixHash, sha256, generateHashLock } from '@jelly-swap/utils';
+import { RefundEvent } from '../types';
+import {HttpClient} from '../providers';
+import algosdk from 'algosdk';
 
 export default class HTLC {
     algodClient: any;
+    wallet: any;
+    htlcTemplate = require('algosdk/src/logicTemplates/htlc');
+    config: any;
 
-    constructor() {
-        this.algodClient = new algosdk.Algodv2(Config().apiKey, Config().baseServer, '');
+    constructor(wallet: any, config = Config()) {
+        this.config = config;
+        this.algodClient = new HttpClient({ 'X-API-Key': this.config.apiKey }, this.config.baseServer);
+        this.wallet = wallet;
     }
 
-    public async create(
-        ownerMnemonic: string = 'rather immense option enroll relief gather main thing two alone blind strike equal govern sail color program mad slab normal journey trial vacant absent helmet',
-        receiverMnemonic: string = 'wheel harsh foster exclude desert wear puppy lake budget solution transfer syrup mother clay glide boil tourist kite narrow kind woman crouch satisfy abandon one',
-        secret: string,
-        amount: number = 1000000
+    public async newSwap(
+        value: number,
+        recipientAddress: string,
+        refundAddress: string,
+        hashLock: string,
+        expiration: number = this.config.expiration,
+        metadata: any
     ) {
         try {
-            const params = await this.algodClient.getTransactionParams().do();
-            const senderWallet = algosdk.mnemonicToSecretKey(ownerMnemonic);
-            const receiverWallet = algosdk.mnemonicToSecretKey(receiverMnemonic);
-
-            const owner = senderWallet.addr;
-            const receiver = receiverWallet.addr;
+            const params = await this.algodClient.getTransactionParams();
             const hashFn = 'sha256';
-            const hashImg = createHashImg(secret);
+            const htlc = new this.htlcTemplate.HTLC(refundAddress, recipientAddress, hashFn, hashLock, expiration, this.config.maxFee);
 
-            const expiryRound = 9445278 + 10005;
-            const maxFee = 1000;
-
-            const htlc = new htlcTemplate.HTLC(owner, receiver, hashFn, hashImg, expiryRound, maxFee);
-
-            fundHTLCContract(params, htlc, senderWallet, amount, this.algodClient);
+            return fundHTLCContract(params, htlc, this.wallet, value, this.algodClient, metadata);
         } catch (error) {
             console.log(error);
         }
     }
 
-    public async withdraw(owner: any, receiver: any, secret: any, entropy: string) {
+    public async withdraw(
+        initiationTxHash: string,
+        recipientAddress: string,
+        refundAddress: string,
+        expiration: number,
+        secret: string,
+        metadata: any,
+        secretHash?: any
+    ) {
         try {
-            const params = await this.algodClient.getTransactionParams().do();
-
+            const params = await this.algodClient.getTransactionParams();
             const hashFn = 'sha256';
-            const hashImg = createHashImg(entropy);
-            const secret = Buffer.from(
-                'd8a928b2043db77e340b523547bf16cb4aa483f0645fe0a290ed1f20aab76257',
-                'hex'
-            ).toString('base64');
+            if (!secretHash) {
+                secretHash = sha256(secret);
+            }
 
-            const maxFee = 1000;
-
-            const htlc = new htlcTemplate.HTLC(
-                owner,
-                receiver,
+            const htlc = new this.htlcTemplate.HTLC(
+                refundAddress,
+                recipientAddress,
                 hashFn,
-                Buffer.from('c6889fb2b4af9fcc69a6cfd74a48163a17d662d4d32d0321a5aacb23ac0babc8', 'hex').toString(
-                    'base64'
-                ),
-                9445278 + 10005,
-                maxFee
+                secretHash,
+                expiration,
+                this.config.maxFee
             );
 
             const txn = {
                 from: htlc.getAddress(),
-                to: receiver,
+                to: Config().zeroAddress,
                 fee: 1,
                 type: 'pay',
                 amount: 0,
@@ -74,16 +71,78 @@ export default class HTLC {
                 lastRound: params.lastRound,
                 genesisID: params.genesisID,
                 genesisHash: params.genesisHash,
-                closeRemainderTo: receiver,
+                closeRemainderTo: recipientAddress,
+                note: formatNote(metadata),
             };
+            const args = [];
+            args.push(secret);
+            const lsig = algosdk.makeLogicSig(htlc.getProgram(), args);
+            const rawSignedTxn = algosdk.signLogicSigTransaction(txn, lsig);
 
-            const actualTxn = htlcTemplate.signTransactionWithHTLCUnlock(htlc.getProgram(), txn, secret);
-
-            console.log('Withdraw TX: ', actualTxn);
-            let tx = await this.algodClient.sendRawTransaction(actualTxn.blob).do();
-            console.log('TX Hash: ', tx);
+            let tx = (await this.algodClient.sendRawTransaction(rawSignedTxn.blob));
+            return tx.txId;
         } catch (error) {
             console.log('Error withdrawing', error);
+        }
+    }
+
+    async refund(
+        initiationTxHash: string,
+        recipientAddress: string,
+        refundAddress: string,
+        expiration: number,
+        secretHash: any,
+        metadata: RefundEvent) {
+        try {
+            const params = await this.algodClient.getTransactionParams();
+            const hashFn = 'sha256';
+
+            const htlc = new this.htlcTemplate.HTLC(
+                refundAddress,
+                recipientAddress,
+                hashFn,
+                secretHash,
+                expiration,
+                this.config.maxFee
+            );
+
+            const txn = {
+                from: htlc.getAddress(),
+                to: Config().zeroAddress,
+                fee: 1,
+                type: 'pay',
+                amount: 0,
+                firstRound: params.firstRound,
+                lastRound: params.lastRound,
+                genesisID: params.genesisID,
+                genesisHash: params.genesisHash,
+                closeRemainderTo: refundAddress,
+                note: formatNote(metadata),
+            };
+            const lsig = algosdk.makeLogicSig(htlc.getProgram(), ['refund']);
+            const rawSignedTxn = algosdk.signLogicSigTransaction(txn, lsig);
+
+            let tx = (await this.algodClient.sendRawTransaction(rawSignedTxn.blob));
+            return tx.txId;
+        } catch (error) {
+            console.log('Error refunding', error);
+        }
+
+    }
+
+    async getCurrentBlock(): Promise<string | number>  {
+        try {
+            return await this.algodClient.getCurrentBlock()
+        } catch (err) {
+            return err;
+        }
+    }
+
+    async getBalance(_address: string): Promise<string | number>  {
+        try {
+            return await this.algodClient.accountInformation(_address)
+        } catch (err) {
+            return err;
         }
     }
 }

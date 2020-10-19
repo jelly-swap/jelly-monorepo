@@ -1,23 +1,17 @@
 import algosdk from 'algosdk';
-import createHash from 'create-hash';
-
-export const createHashImg = (entropy: string) => {
-    const secretKey = createHash('sha256').update(entropy).digest();
-
-    return Buffer.from(secretKey as any, 'hex').toString('base64');
-};
 
 export const fundHTLCContract = async (
     params: any,
     htlc: any,
     senderWallet: any,
     amount = 1000000,
-    algodClient: any
+    algodClient: any,
+    metadata: string,
 ) => {
-    let note = algosdk.encodeObj('J_NEW_CONTRACT');
+    const note = formatNote(metadata);
 
-    let txn = algosdk.makePaymentTxnWithSuggestedParams(
-        senderWallet.addr,
+    const txn = algosdk.makePaymentTxnWithSuggestedParams(
+        senderWallet.address,
         htlc.getAddress(),
         amount,
         undefined,
@@ -25,13 +19,17 @@ export const fundHTLCContract = async (
         params
     );
 
-    let signedTxn = txn.signTxn(senderWallet.sk);
+    const signedTxn = txn.signTxn(senderWallet.privateKey);
 
     try {
-        const tx = await algodClient.sendRawTransaction(signedTxn).do();
-
+        const tx = await algodClient.sendRawTransaction(signedTxn);
         return tx.txId;
     } catch (error) {
         console.log('Error funding HTLC  contract', error);
     }
 };
+
+
+export const formatNote = (note: any) => {
+    return algosdk.encodeObj(note);
+}
