@@ -1,9 +1,8 @@
 import Config from '../config';
 import { AlgorandProvider, AlgorandWallet } from '@jelly-swap/types';
-import { fundHTLCContract, formatNote} from './utils';
-import { fixHash, sha256, generateHashLock } from '@jelly-swap/utils';
+import { fundHTLCContract, formatNote } from './utils';
+import { sha256 } from '@jelly-swap/utils';
 import { RefundEvent } from '../types';
-import {HttpClient} from '../providers';
 import algosdk from 'algosdk';
 
 export default class HTLC {
@@ -34,6 +33,7 @@ export default class HTLC {
             return fundHTLCContract(params, htlc, this.wallet, value, this.provider, metadata);
         } catch (error) {
             console.log(error);
+            throw error;
         }
     }
 
@@ -84,6 +84,7 @@ export default class HTLC {
             return tx;
         } catch (error) {
             console.log('Error withdrawing', error);
+            throw error;
         }
     }
 
@@ -127,11 +128,12 @@ export default class HTLC {
             return tx;
         } catch (error) {
             console.log('Error refunding', error);
+            throw error;
         }
 
     }
 
-    async getCurrentBlock(): Promise<string | number>  {
+    async getCurrentBlock(): Promise<string | number> {
         try {
             return await this.provider.getCurrentBlock()
         } catch (err) {
@@ -139,7 +141,7 @@ export default class HTLC {
         }
     }
 
-    async getBalance(_address: string): Promise<string | number>  {
+    async getBalance(_address: string): Promise<string | number> {
         try {
             return await this.provider.getBalance(_address);
         } catch (err) {

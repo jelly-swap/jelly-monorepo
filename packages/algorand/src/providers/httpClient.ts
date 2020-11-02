@@ -11,7 +11,7 @@ export default class HttpClient {
             const params = await this.algodClient.getTransactionParams().do();
             return params.firstRound;
         } catch (err) {
-            return err;
+            throw err;
         }
     }
 
@@ -20,7 +20,7 @@ export default class HttpClient {
             const balance = await this.algodClient.accountInformation(_address).do();
             return balance.amount;
         } catch (err) {
-            return err;
+            throw err;
         }
     }
 
@@ -28,7 +28,7 @@ export default class HttpClient {
         try {
             return await this.algodClient.getTransactionParams().do();
         } catch (err) {
-            return err;
+            throw err;
         }
     }
 

@@ -26,6 +26,7 @@ export const fundHTLCContract = async (
         return tx;
     } catch (error) {
         console.log('Error funding HTLC contract', error);
+        throw error;
     }
 };
 

@@ -1,12 +1,11 @@
-import { generateHashLock, getExpiration, sha256 } from '@jelly-swap/utils';
+import { sha256 } from '@jelly-swap/utils';
 import BigNumber from 'bignumber.js';
 
-import { JellyAdapter, ContractSwap, UserInputSwap } from './types';
+import { JellyAdapter, ContractSwap } from './types';
 import Config from './config';
 
 export default class AlgoAdapter implements JellyAdapter {
     private config: any;
-
 
     constructor(config = Config()) {
         this.config = config;
@@ -46,11 +45,11 @@ export default class AlgoAdapter implements JellyAdapter {
     };
 
     parseToNative(amount: string | number): string | number {
-        return new BigNumber(amount).multipliedBy(new BigNumber(10).exponentiatedBy(Config().decimals)).toString();
+        return new BigNumber(amount).multipliedBy(new BigNumber(10).exponentiatedBy(this.config.decimals)).toString();
     }
 
     parseFromNative(amount: string): string | number {
-        return new BigNumber(amount).dividedBy(new BigNumber(10).exponentiatedBy(Config().decimals)).toString();
+        return new BigNumber(amount).dividedBy(new BigNumber(10).exponentiatedBy(this.config.decimals)).toString();
     }
 
     formatInput(data: any, receiver = this.config.receiverAddress, currentBlock?: number): ContractSwap {

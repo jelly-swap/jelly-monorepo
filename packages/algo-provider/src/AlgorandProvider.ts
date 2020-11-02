@@ -1,4 +1,3 @@
-import BigNumber from 'bignumber.js';
 import memoize from 'memoizee';
 
 import HttpClient from './HttpClient';
@@ -23,8 +22,7 @@ export default class AlgorandProvider {
     }
 
     async _getCurrentBlock() {
-        const response = await this.httpClient.get(`/block/tip`);
-        return response;
+        return await this.httpClient.get(`/block/tip`);
     }
 
     async getTransaction(txHash: string) {

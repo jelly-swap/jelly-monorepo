@@ -10,7 +10,5 @@ export default class MnemonicWallet {
         this.address = keyPair.addr;
         this.privateKey = keyPair.sk;
         this.provider = provider;
-
-
     }
 }
