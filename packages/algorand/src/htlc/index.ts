@@ -1,4 +1,5 @@
 import Config from '../config';
+import { AlgorandProvider, AlgorandWallet } from '@jelly-swap/types';
 import { fundHTLCContract, formatNote} from './utils';
 import { fixHash, sha256, generateHashLock } from '@jelly-swap/utils';
 import { RefundEvent } from '../types';
@@ -6,15 +7,15 @@ import {HttpClient} from '../providers';
 import algosdk from 'algosdk';
 
 export default class HTLC {
-    algodClient: any;
-    wallet: any;
+    provider: AlgorandProvider;
+    wallet: AlgorandWallet;
     htlcTemplate = require('algosdk/src/logicTemplates/htlc');
     config: any;
 
     constructor(wallet: any, config = Config()) {
         this.config = config;
-        this.algodClient = new HttpClient({ 'X-API-Key': this.config.apiKey }, this.config.baseServer);
         this.wallet = wallet;
+        this.provider = wallet.provider;
     }
 
     public async newSwap(
@@ -26,11 +27,11 @@ export default class HTLC {
         metadata: any
     ) {
         try {
-            const params = await this.algodClient.getTransactionParams();
+            const params = await this.provider.getTransactionParams();
             const hashFn = 'sha256';
             const htlc = new this.htlcTemplate.HTLC(refundAddress, recipientAddress, hashFn, hashLock, expiration, this.config.maxFee);
 
-            return fundHTLCContract(params, htlc, this.wallet, value, this.algodClient, metadata);
+            return fundHTLCContract(params, htlc, this.wallet, value, this.provider, metadata);
         } catch (error) {
             console.log(error);
         }
@@ -46,7 +47,7 @@ export default class HTLC {
         secretHash?: any
     ) {
         try {
-            const params = await this.algodClient.getTransactionParams();
+            const params = await this.provider.getTransactionParams();
             const hashFn = 'sha256';
             if (!secretHash) {
                 secretHash = sha256(secret);
@@ -79,8 +80,8 @@ export default class HTLC {
             const lsig = algosdk.makeLogicSig(htlc.getProgram(), args);
             const rawSignedTxn = algosdk.signLogicSigTransaction(txn, lsig);
 
-            let tx = (await this.algodClient.sendRawTransaction(rawSignedTxn.blob));
-            return tx.txId;
+            let tx = (await this.provider.sendRawTransaction(rawSignedTxn.blob, metadata));
+            return tx;
         } catch (error) {
             console.log('Error withdrawing', error);
         }
@@ -94,7 +95,7 @@ export default class HTLC {
         secretHash: any,
         metadata: RefundEvent) {
         try {
-            const params = await this.algodClient.getTransactionParams();
+            const params = await this.provider.getTransactionParams();
             const hashFn = 'sha256';
 
             const htlc = new this.htlcTemplate.HTLC(
@@ -122,8 +123,8 @@ export default class HTLC {
             const lsig = algosdk.makeLogicSig(htlc.getProgram(), ['refund']);
             const rawSignedTxn = algosdk.signLogicSigTransaction(txn, lsig);
 
-            let tx = (await this.algodClient.sendRawTransaction(rawSignedTxn.blob));
-            return tx.txId;
+            let tx = (await this.provider.sendRawTransaction(rawSignedTxn.blob, metadata));
+            return tx;
         } catch (error) {
             console.log('Error refunding', error);
         }
@@ -132,7 +133,7 @@ export default class HTLC {
 
     async getCurrentBlock(): Promise<string | number>  {
         try {
-            return await this.algodClient.getCurrentBlock()
+            return await this.provider.getCurrentBlock()
         } catch (err) {
             return err;
         }
@@ -140,7 +141,7 @@ export default class HTLC {
 
     async getBalance(_address: string): Promise<string | number>  {
         try {
-            return await this.algodClient.accountInformation(_address)
+            return await this.provider.getBalance(_address);
         } catch (err) {
             return err;
         }

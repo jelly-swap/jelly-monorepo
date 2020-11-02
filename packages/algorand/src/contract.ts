@@ -1,4 +1,5 @@
 import { JellyContract, ContractSwap, AlgoContractRefund, AlgoContractWithdraw } from './types';
+import { AlgorandWallet } from '@jelly-swap/types';
 
 import Config from './config';
 import HTLC from './htlc';
@@ -8,7 +9,7 @@ export default class AlgoContract implements JellyContract {
 
     private contract: HTLC;
 
-    constructor(wallet: any, config = Config()) {
+    constructor(wallet: AlgorandWallet, config = Config()) {
         this.config = config;
         this.contract = new HTLC(wallet, config);
     }
@@ -23,7 +24,7 @@ export default class AlgoContract implements JellyContract {
 
     async newContract(swap: ContractSwap): Promise<string> {
         const metadata = {
-            eventName: 'NEW_CONTRACT',
+            eventName: 'J_NEW_CONTRACT',
             id: swap.id,
             sender: swap.sender,
             receiver: swap.receiver,
@@ -51,7 +52,7 @@ export default class AlgoContract implements JellyContract {
 
     async withdraw(withdraw: AlgoContractWithdraw): Promise<string> {
         const metadata = {
-            eventName: 'WITHDRAW',
+            eventName: 'J_WITHDRAW',
             id: withdraw.id,
             hashLock: withdraw.hashLock,
             sender: withdraw.sender,
@@ -74,7 +75,7 @@ export default class AlgoContract implements JellyContract {
 
     async refund(refund: AlgoContractRefund): Promise<string> {
         const metadata = {
-            eventName: 'REFUND',
+            eventName: 'J_REFUND',
             id: refund.id,
             sender: refund.sender,
             receiver: refund.receiver,

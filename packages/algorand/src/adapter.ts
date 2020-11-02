@@ -12,9 +12,8 @@ export default class AlgoAdapter implements JellyAdapter {
         this.config = config;
     }
 
-    createSwapFromInput(inputSwap: ContractSwap, sender = this.config.receiverAddress): ContractSwap {
-        //ToODO fix expiration format
-        const expiration = getExpiration(this.config.expiration, 'second', this.config.unix);
+    createSwapFromInput(inputSwap: ContractSwap, sender = this.config.receiverAddress, currentBlock?: number): ContractSwap {
+        const expiration = currentBlock + Math.floor(this.config.expiration / this.config.blockTimeSeconds);
 
         const result = {
             network: inputSwap.outputNetwork,
@@ -54,7 +53,7 @@ export default class AlgoAdapter implements JellyAdapter {
         return new BigNumber(amount).dividedBy(new BigNumber(10).exponentiatedBy(Config().decimals)).toString();
     }
 
-    formatInput(data: any, receiver = this.config.receiverAddress, currentBlock: number): ContractSwap {
+    formatInput(data: any, receiver = this.config.receiverAddress, currentBlock?: number): ContractSwap {
         try {
             const inputAmount = this.parseToNative(data.inputAmount);
             const hashLock = this.generateHashLock(data.secret);
