@@ -135,7 +135,7 @@ export default class HTLC {
 
     async getCurrentBlock(): Promise<string | number> {
         try {
-            return await this.provider.getCurrentBlock()
+            return await this.provider.getCurrentBlock();
         } catch (err) {
             return err;
         }
