@@ -43,7 +43,6 @@ export default class AvaContract implements JellyContract {
 
     async withdraw(withdraw: ContractWithdraw, options?: Options) {
         const overrideOptions = await this.extendOptions(options);
-        console.log(overrideOptions, withdraw);
         const result = await this.contract.withdraw(withdraw.id, withdraw.secret, overrideOptions);
         return result.hash;
     }

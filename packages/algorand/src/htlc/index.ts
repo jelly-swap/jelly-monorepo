@@ -32,7 +32,6 @@ export default class HTLC {
 
             return fundHTLCContract(params, htlc, this.wallet, value, this.provider, metadata);
         } catch (error) {
-            console.log(error);
             throw error;
         }
     }
@@ -83,7 +82,6 @@ export default class HTLC {
             let tx = (await this.provider.sendRawTransaction(rawSignedTxn.blob, metadata));
             return tx;
         } catch (error) {
-            console.log('Error withdrawing', error);
             throw error;
         }
     }
@@ -127,7 +125,6 @@ export default class HTLC {
             let tx = (await this.provider.sendRawTransaction(rawSignedTxn.blob, metadata));
             return tx;
         } catch (error) {
-            console.log('Error refunding', error);
             throw error;
         }
 

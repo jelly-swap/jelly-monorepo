@@ -25,7 +25,6 @@ export const fundHTLCContract = async (
         const tx = await algodClient.sendRawTransaction(signedTxn, metadata);
         return tx;
     } catch (error) {
-        console.log('Error funding HTLC contract', error);
         throw error;
     }
 };
