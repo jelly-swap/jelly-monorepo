@@ -9,6 +9,5 @@ export default class KeyPairWallet {
         this.address = address;
         this.privateKey = privateKey;
         this.provider = provider;
-
     }
 }

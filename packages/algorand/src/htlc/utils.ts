@@ -4,7 +4,7 @@ export const fundHTLCContract = async (
     params: any,
     htlc: any,
     senderWallet: any,
-    amount = 1000000,
+    amount: any,
     algodClient: any,
     metadata: any,
 ) => {
@@ -28,7 +28,6 @@ export const fundHTLCContract = async (
         throw error;
     }
 };
-
 
 export const formatNote = (note: any) => {
     return algosdk.encodeObj(JSON.stringify(note));

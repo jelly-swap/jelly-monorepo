@@ -5,10 +5,12 @@ import { sha256 } from '@jelly-swap/utils';
 import { RefundEvent } from '../types';
 import algosdk from 'algosdk';
 
+const htlcT = require('algosdk/src/logicTemplates/htlc')
+
 export default class HTLC {
     provider: AlgorandProvider;
     wallet: AlgorandWallet;
-    htlcTemplate = require('algosdk/src/logicTemplates/htlc');
+    htlcTemplate = htlcT;
     config: any;
 
     constructor(wallet: any, config = Config()) {
@@ -74,12 +76,10 @@ export default class HTLC {
                 closeRemainderTo: recipientAddress,
                 note: formatNote(metadata),
             };
-            const args = [];
-            args.push(secret);
-            const lsig = algosdk.makeLogicSig(htlc.getProgram(), args);
+            const lsig = algosdk.makeLogicSig(htlc.getProgram(), [secret]);
             const rawSignedTxn = algosdk.signLogicSigTransaction(txn, lsig);
 
-            let tx = (await this.provider.sendRawTransaction(rawSignedTxn.blob, metadata));
+            let tx = await this.provider.sendRawTransaction(rawSignedTxn.blob, metadata);
             return tx;
         } catch (error) {
             throw error;
@@ -134,7 +134,7 @@ export default class HTLC {
         try {
             return await this.provider.getCurrentBlock();
         } catch (err) {
-            return err;
+            throw err;
         }
     }
 
@@ -142,7 +142,7 @@ export default class HTLC {
         try {
             return await this.provider.getBalance(_address);
         } catch (err) {
-            return err;
+            throw err;
         }
     }
 }
