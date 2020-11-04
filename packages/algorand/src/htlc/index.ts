@@ -5,7 +5,8 @@ import { sha256 } from '@jelly-swap/utils';
 import { RefundEvent } from '../types';
 import algosdk from 'algosdk';
 
-const htlcT = require('algosdk/src/logicTemplates/htlc')
+const htlcT = require('algosdk/src/logicTemplates/htlc');
+const zeroAddress = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ';
 
 export default class HTLC {
     provider: AlgorandProvider;
@@ -65,7 +66,7 @@ export default class HTLC {
 
             const txn = {
                 from: htlc.getAddress(),
-                to: Config().zeroAddress,
+                to: zeroAddress,
                 fee: 1,
                 type: 'pay',
                 amount: 0,
@@ -108,7 +109,7 @@ export default class HTLC {
 
             const txn = {
                 from: htlc.getAddress(),
-                to: Config().zeroAddress,
+                to: zeroAddress,
                 fee: 1,
                 type: 'pay',
                 amount: 0,

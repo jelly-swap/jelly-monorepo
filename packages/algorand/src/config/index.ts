@@ -8,6 +8,5 @@ export default (expiration = 10800) => {
         decimals: 6,
         blockTimeSeconds: 4,
         maxFee: 2000,
-        zeroAddress: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ',
     };
 };
