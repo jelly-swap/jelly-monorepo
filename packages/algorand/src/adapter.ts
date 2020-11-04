@@ -1,11 +1,11 @@
+import { AlgorandProvider } from '@jelly-swap/algo-provider';
 import { sha256 } from '@jelly-swap/utils';
 import BigNumber from 'bignumber.js';
 
-import { JellyAdapter, ContractSwap } from './types';
+import { AlgoAdapterInterface, ContractSwap } from './types';
 import Config from './config';
-import { AlgorandProvider } from '@jelly-swap/algo-provider';
 
-export default class AlgoAdapter implements JellyAdapter {
+export default class AlgoAdapter implements AlgoAdapterInterface {
     private config: any;
     private algoProvider: AlgorandProvider;
 
@@ -14,31 +14,26 @@ export default class AlgoAdapter implements JellyAdapter {
         this.algoProvider = new AlgorandProvider(this.config.apiProviderUrl);
     }
 
-    createSwapFromInput(inputSwap: ContractSwap, sender = this.config.receiverAddress): any {
-        return this.algoProvider.getCurrentBlock()
-        .then((currentBlock) => {
-            const expiration = currentBlock + Math.floor(this.config.expiration / this.config.blockTimeSeconds);
+    async createSwapFromInput(inputSwap: ContractSwap, sender = this.config.receiverAddress): Promise<ContractSwap> {
+        const currentBlock = await this.algoProvider.getCurrentBlock();
+        const expiration = currentBlock + Math.floor(this.config.expiration / this.config.blockTimeSeconds);
 
-            const result = {
-                network: inputSwap.outputNetwork,
-                outputAmount: inputSwap.inputAmount,
-                expiration,
-                hashLock: inputSwap.hashLock,
-                sender,
-                receiver: inputSwap.outputAddress,
-                refundAddress: sender,
-                outputNetwork: inputSwap.network,
-                outputAddress: inputSwap.receiver,
-                inputAmount: Number(inputSwap.outputAmount),
-            };
+        const result = {
+            network: inputSwap.outputNetwork,
+            outputAmount: inputSwap.inputAmount,
+            expiration,
+            hashLock: inputSwap.hashLock,
+            sender,
+            receiver: inputSwap.outputAddress,
+            refundAddress: sender,
+            outputNetwork: inputSwap.network,
+            outputAddress: inputSwap.receiver,
+            inputAmount: Number(inputSwap.outputAmount),
+        };
 
-            const id = this.generateId(result);
+        const id = this.generateId(result);
 
-            return { ...result, id };
-        }, (err) => {
-            throw err;
-        })
-
+        return { ...result, id };
     }
 
     addressValid = (address: string): boolean => {
@@ -61,25 +56,20 @@ export default class AlgoAdapter implements JellyAdapter {
         return new BigNumber(amount).dividedBy(new BigNumber(10).exponentiatedBy(this.config.decimals)).toString();
     }
 
-    formatInput(data: any, receiver = this.config.receiverAddress): any {
-        return this.algoProvider.getCurrentBlock()
-        .then((currentBlock) => {
-            const inputAmount = this.parseToNative(data.inputAmount);
-            const hashLock = this.generateHashLock(data.secret);
-            const expiration = currentBlock + Math.floor(this.config.expiration / this.config.blockTimeSeconds);
+    async formatInput(data: any, receiver = this.config.receiverAddress): Promise<ContractSwap> {
+        const currentBlock = await this.algoProvider.getCurrentBlock();
+        const inputAmount = this.parseToNative(data.inputAmount);
+        const hashLock = this.generateHashLock(data.secret);
+        const expiration = currentBlock + Math.floor(this.config.expiration / this.config.blockTimeSeconds);
 
-            return {
-                ...data,
-                inputAmount,
-                hashLock,
-                receiver,
-                network: 'ALGO',
-                expiration,
-            };
-        }, (err) => {
-            throw err;
-        })
-
+        return {
+            ...data,
+            inputAmount,
+            hashLock,
+            receiver,
+            network: 'ALGO',
+            expiration,
+        };
     }
 
     generateId(swap: ContractSwap): string {

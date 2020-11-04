@@ -1,12 +1,11 @@
-import { JellyContract, ContractSwap, AlgoContractRefund, AlgoContractWithdraw } from './types';
 import { AlgorandWallet } from '@jelly-swap/types';
 
+import { JellyContract, ContractSwap, AlgoContractRefund, AlgoContractWithdraw } from './types';
 import Config from './config';
 import HTLC from './htlc';
 
 export default class AlgoContract implements JellyContract {
     public config: any;
-
     private contract: HTLC;
 
     constructor(wallet: AlgorandWallet, config = Config()) {
@@ -39,7 +38,7 @@ export default class AlgoContract implements JellyContract {
 
         const refundAddress = swap.sender;
 
-        const result = await this.contract.newSwap(
+        return await this.contract.newSwap(
             Number(swap.inputAmount),
             swap.receiver,
             refundAddress,
@@ -47,7 +46,6 @@ export default class AlgoContract implements JellyContract {
             Number(swap.expiration),
             metadata
         );
-        return result;
     }
 
     async withdraw(withdraw: AlgoContractWithdraw): Promise<string> {
@@ -60,8 +58,7 @@ export default class AlgoContract implements JellyContract {
             secret: withdraw.secret,
         };
 
-        const result = await this.contract.withdraw(
-            withdraw.transactionHash,
+        return await this.contract.withdraw(
             withdraw.receiver,
             withdraw.refundAddress,
             Number(withdraw.expiration),
@@ -69,8 +66,6 @@ export default class AlgoContract implements JellyContract {
             metadata,
             withdraw.hashLock
         );
-
-        return result;
     }
 
     async refund(refund: AlgoContractRefund): Promise<string> {
@@ -82,16 +77,12 @@ export default class AlgoContract implements JellyContract {
             hashLock: refund.hashLock,
         };
 
-        const result = await this.contract.refund(
-            refund.transactionHash,
+        return await this.contract.refund(
             refund.receiver,
             refund.refundAddress,
             Number(refund.expiration),
             refund.hashLock,
             metadata
         );
-
-        return result;
-
     }
 }

@@ -4,4 +4,4 @@ import Adapter from './adapter';
 import Providers from './providers';
 import { version } from '../package.json';
 
-export { Contract, Config, Adapter,Providers, version };
+export { Contract, Config, Adapter, Providers, version };

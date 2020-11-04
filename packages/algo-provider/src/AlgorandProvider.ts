@@ -1,27 +1,13 @@
-import memoize from 'memoizee';
-
 import HttpClient from './HttpClient';
-
-import CacheConfig from './CacheConfig';
 
 export default class AlgorandProvider {
     private httpClient: HttpClient;
-    private getCurrentBlockCache: Function;
 
     constructor(baseURL: string) {
         this.httpClient = new HttpClient(baseURL);
-        this.getCurrentBlockCache = memoize(this._getCurrentBlock, CacheConfig());
     }
 
-    async getCurrentBlock(cache = false) {
-        if (cache) {
-            return await this.getCurrentBlockCache();
-        }
-
-        return await this._getCurrentBlock();
-    }
-
-    async _getCurrentBlock() {
+    async getCurrentBlock() {
         return await this.httpClient.get(`/block/tip`);
     }
 
