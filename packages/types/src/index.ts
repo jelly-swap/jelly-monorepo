@@ -109,6 +109,11 @@ export interface Filter {
 }
 
 export {
+    AlgorandProvider,
+    AlgorandWallet
+} from './AlgorandTypes';
+
+export {
     BitcoinProvider,
     BitcoinWallet,
     BitcoinNetwork,
