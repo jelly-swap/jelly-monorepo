@@ -10,7 +10,14 @@ export {
     JellyAdapter,
 } from '@jelly-swap/types';
 
-import { ContractWithdraw, ContractRefund, SwapEvent } from '@jelly-swap/types';
+import {
+    ContractWithdraw,
+    ContractRefund,
+    SwapEvent,
+    JellyAdapter,
+    UserInputSwap,
+    ContractSwap,
+} from '@jelly-swap/types';
 
 export interface AlgoContractRefund extends ContractRefund {
     hashLock: string;
@@ -32,4 +39,9 @@ export interface AlgoContractWithdraw extends ContractWithdraw {
 
 export interface AlgoSwapEvent extends SwapEvent {
     refundAddress: string;
+}
+
+export interface AlgoAdapterInterface extends Omit<JellyAdapter, 'formatInput' | 'createSwapFromInput'> {
+    formatInput(data: UserInputSwap, receiver: string): Promise<ContractSwap>;
+    createSwapFromInput(inputSwap: ContractSwap, sender?: string): Promise<ContractSwap>;
 }

@@ -1,7 +1,6 @@
-import HttpClient from './httpClient';
 import MnemonicWallet from './mnemonicWallet';
 import KeyPairWallet from './keyPairWallet';
 
-export { HttpClient, MnemonicWallet, KeyPairWallet };
+export { MnemonicWallet, KeyPairWallet };
 
-export default { HttpClient, MnemonicWallet, KeyPairWallet };
+export default { MnemonicWallet, KeyPairWallet };

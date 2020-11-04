@@ -1,18 +1,19 @@
-import Config from '../config';
-import { AlgorandProvider, AlgorandWallet } from '@jelly-swap/types';
-import { fundHTLCContract, formatNote } from './utils';
-import { sha256 } from '@jelly-swap/utils';
-import { RefundEvent } from '../types';
 import algosdk from 'algosdk';
+import { HTLC_TEMPLATE } from 'algosdk/src/logicTemplates/htlc';
 
-const htlcT = require('algosdk/src/logicTemplates/htlc');
-const zeroAddress = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ';
+import { AlgorandProvider, AlgorandWallet } from '@jelly-swap/types';
+import { sha256 } from '@jelly-swap/utils';
+
+import Config from '../config';
+import { fundHTLCContract, formatNote } from './utils';
+import { RefundEvent } from '../types';
+
+const ZERO_ADDRESS = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ';
 
 export default class HTLC {
-    provider: AlgorandProvider;
-    wallet: AlgorandWallet;
-    htlcTemplate = htlcT;
-    config: any;
+    private config: any;
+    private wallet: AlgorandWallet;
+    private provider: AlgorandProvider;
 
     constructor(wallet: any, config = Config()) {
         this.config = config;
@@ -31,7 +32,14 @@ export default class HTLC {
         try {
             const params = await this.provider.getTransactionParams();
             const hashFn = 'sha256';
-            const htlc = new this.htlcTemplate.HTLC(refundAddress, recipientAddress, hashFn, hashLock, expiration, this.config.maxFee);
+            const htlc = new HTLC_TEMPLATE.HTLC(
+                refundAddress,
+                recipientAddress,
+                hashFn,
+                hashLock,
+                expiration,
+                this.config.maxFee
+            );
 
             return fundHTLCContract(params, htlc, this.wallet, value, this.provider, metadata);
         } catch (error) {
@@ -40,7 +48,6 @@ export default class HTLC {
     }
 
     public async withdraw(
-        initiationTxHash: string,
         recipientAddress: string,
         refundAddress: string,
         expiration: number,
@@ -55,7 +62,7 @@ export default class HTLC {
                 secretHash = sha256(secret);
             }
 
-            const htlc = new this.htlcTemplate.HTLC(
+            const htlc = new HTLC_TEMPLATE.HTLC(
                 refundAddress,
                 recipientAddress,
                 hashFn,
@@ -66,7 +73,7 @@ export default class HTLC {
 
             const txn = {
                 from: htlc.getAddress(),
-                to: zeroAddress,
+                to: ZERO_ADDRESS,
                 fee: 1,
                 type: 'pay',
                 amount: 0,
@@ -88,17 +95,17 @@ export default class HTLC {
     }
 
     async refund(
-        initiationTxHash: string,
         recipientAddress: string,
         refundAddress: string,
         expiration: number,
         secretHash: any,
-        metadata: RefundEvent) {
+        metadata: RefundEvent
+    ) {
         try {
             const params = await this.provider.getTransactionParams();
             const hashFn = 'sha256';
 
-            const htlc = new this.htlcTemplate.HTLC(
+            const htlc = new HTLC_TEMPLATE.HTLC(
                 refundAddress,
                 recipientAddress,
                 hashFn,
@@ -109,7 +116,7 @@ export default class HTLC {
 
             const txn = {
                 from: htlc.getAddress(),
-                to: zeroAddress,
+                to: ZERO_ADDRESS,
                 fee: 1,
                 type: 'pay',
                 amount: 0,
@@ -123,27 +130,18 @@ export default class HTLC {
             const lsig = algosdk.makeLogicSig(htlc.getProgram(), ['refund']);
             const rawSignedTxn = algosdk.signLogicSigTransaction(txn, lsig);
 
-            let tx = (await this.provider.sendRawTransaction(rawSignedTxn.blob, metadata));
+            let tx = await this.provider.sendRawTransaction(rawSignedTxn.blob, metadata);
             return tx;
         } catch (error) {
             throw error;
         }
-
     }
 
     async getCurrentBlock(): Promise<string | number> {
-        try {
-            return await this.provider.getCurrentBlock();
-        } catch (err) {
-            throw err;
-        }
+        return await this.provider.getCurrentBlock();
     }
 
-    async getBalance(_address: string): Promise<string | number> {
-        try {
-            return await this.provider.getBalance(_address);
-        } catch (err) {
-            throw err;
-        }
+    async getBalance(address: string): Promise<string | number> {
+        return await this.provider.getBalance(address);
     }
 }

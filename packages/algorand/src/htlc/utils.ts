@@ -6,7 +6,7 @@ export const fundHTLCContract = async (
     senderWallet: any,
     amount: any,
     algodClient: any,
-    metadata: any,
+    metadata: any
 ) => {
     const note = formatNote(metadata);
 
@@ -21,14 +21,7 @@ export const fundHTLCContract = async (
 
     const signedTxn = txn.signTxn(senderWallet.privateKey);
 
-    try {
-        const tx = await algodClient.sendRawTransaction(signedTxn, metadata);
-        return tx;
-    } catch (error) {
-        throw error;
-    }
+    return await algodClient.sendRawTransaction(signedTxn, metadata);
 };
 
-export const formatNote = (note: any) => {
-    return algosdk.encodeObj(JSON.stringify(note));
-}
+export const formatNote = (note: any) => algosdk.encodeObj(JSON.stringify(note));
