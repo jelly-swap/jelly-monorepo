@@ -11,7 +11,7 @@ export default class AlgoAdapter implements AlgoAdapterInterface {
 
     constructor(config = Config()) {
         this.config = config;
-        this.algoProvider = new AlgorandProvider(this.config.apiProviderUrl);
+        this.algoProvider = new AlgorandProvider(this.config.providerUrl);
     }
 
     async createSwapFromInput(inputSwap: ContractSwap, sender = this.config.receiverAddress): Promise<ContractSwap> {

@@ -1,11 +1,11 @@
 import algosdk from 'algosdk';
-import { HTLC_TEMPLATE } from 'algosdk/src/logicTemplates/htlc';
+import HTLC_TEMPLATE from 'algosdk/src/logicTemplates/htlc';
 
 import { AlgorandProvider, AlgorandWallet } from '@jelly-swap/types';
 import { sha256 } from '@jelly-swap/utils';
 
 import Config from '../config';
-import { fundHTLCContract, formatNote } from './utils';
+import { sendTx, formatNote } from './utils';
 import { RefundEvent } from '../types';
 
 const ZERO_ADDRESS = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ';
@@ -26,22 +26,21 @@ export default class HTLC {
         recipientAddress: string,
         refundAddress: string,
         hashLock: string,
-        expiration: number = this.config.expiration,
+        expiration: number,
         metadata: any
     ) {
         try {
-            const params = await this.provider.getTransactionParams();
             const hashFn = 'sha256';
             const htlc = new HTLC_TEMPLATE.HTLC(
                 refundAddress,
                 recipientAddress,
                 hashFn,
                 hashLock,
-                expiration,
+                Number(expiration),
                 this.config.maxFee
             );
 
-            return fundHTLCContract(params, htlc, this.wallet, value, this.provider, metadata);
+            return sendTx(this.wallet, htlc.getAddress(), value, metadata);
         } catch (error) {
             throw error;
         }

@@ -1,27 +1,15 @@
 import algosdk from 'algosdk';
 
-export const fundHTLCContract = async (
-    params: any,
-    htlc: any,
-    senderWallet: any,
-    amount: any,
-    algodClient: any,
-    metadata: any
-) => {
+export const sendTx = async (wallet: any, to: string, amount: number, metadata: any) => {
+    const params = await wallet.provider.getTransactionParams();
+
     const note = formatNote(metadata);
 
-    const txn = algosdk.makePaymentTxnWithSuggestedParams(
-        senderWallet.address,
-        htlc.getAddress(),
-        amount,
-        undefined,
-        note,
-        params
-    );
+    const txn = algosdk.makePaymentTxnWithSuggestedParams(wallet.address, to, Number(amount), undefined, note, params);
 
-    const signedTxn = txn.signTxn(senderWallet.privateKey);
+    const signedTxn = txn.signTxn(wallet.privateKey);
 
-    return await algodClient.sendRawTransaction(signedTxn, metadata);
+    return await wallet.provider.sendRawTransaction(signedTxn, metadata);
 };
 
 export const formatNote = (note: any) => algosdk.encodeObj(JSON.stringify(note));
