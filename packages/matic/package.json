@@ -1,6 +1,6 @@
 {
     "name": "@jelly-swap/matic",
-    "version": "0.1.51",
+    "version": "0.1.52",
     "description": "JellySwap TypeScript implementation for Matic.",
     "author": "kraykov <raykov@weichain.tech>",
     "homepage": "https://github.com/jelly-swap/jelly-monorepo#readme",
@@ -29,8 +29,8 @@
         "url": "https://github.com/jelly-swap/jelly-monorepo/issues"
     },
     "dependencies": {
-        "@jelly-swap/types": "^0.1.51",
-        "@jelly-swap/utils": "^0.1.51",
+        "@jelly-swap/types": "^0.1.52",
+        "@jelly-swap/utils": "^0.1.52",
         "ethers": "^4.0.40"
     },
     "gitHead": "94fe5aef3e7d459bdeb9561b61b02013b3741434"
