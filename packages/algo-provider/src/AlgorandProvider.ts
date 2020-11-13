@@ -20,7 +20,12 @@ export default class AlgorandProvider {
     }
 
     async getFee() {
-        return await this.httpClient.get('/block/fee/');
+        return await this.httpClient.get('/block/fee');
+    }
+
+    async getBlockTime() {
+        const result = await this.httpClient.get('/block/time');
+        return result.time || 4;
     }
 
     async getBalance(address: string) {

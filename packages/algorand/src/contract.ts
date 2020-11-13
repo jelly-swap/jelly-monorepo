@@ -1,6 +1,6 @@
 import { AlgorandWallet } from '@jelly-swap/types';
 
-import { JellyContract, ContractSwap, AlgoContractRefund, AlgoContractWithdraw } from './types';
+import { JellyContract, AlgoContractRefund, AlgoContractWithdraw, AlgoSwap } from './types';
 import Config from './config';
 import HTLC from './htlc';
 
@@ -21,7 +21,7 @@ export default class AlgoContract implements JellyContract {
         return await this.contract.getBalance(_address);
     }
 
-    async newContract(swap: ContractSwap): Promise<string> {
+    async newContract(swap: AlgoSwap): Promise<string> {
         const metadata = {
             eventName: 'J_NEW_CONTRACT',
             id: swap.id,
@@ -33,7 +33,7 @@ export default class AlgoContract implements JellyContract {
             outputAddress: swap.outputAddress,
             inputAmount: swap.inputAmount,
             outputAmount: swap.outputAmount,
-            expiration: swap.expiration,
+            expireBlock: swap.expireBlock,
         };
 
         const refundAddress = swap.sender;
@@ -43,7 +43,7 @@ export default class AlgoContract implements JellyContract {
             swap.receiver,
             refundAddress,
             swap.hashLock,
-            Number(swap.expiration),
+            Number(swap.expireBlock),
             metadata
         );
     }
@@ -53,15 +53,15 @@ export default class AlgoContract implements JellyContract {
             eventName: 'J_WITHDRAW',
             id: withdraw.id,
             hashLock: withdraw.hashLock,
-            sender: withdraw.sender,
-            receiver: withdraw.receiver,
+            sender: withdraw.sender.toUpperCase(),
+            receiver: withdraw.receiver.toUpperCase(),
             secret: withdraw.secret,
         };
 
         return await this.contract.withdraw(
-            withdraw.receiver,
-            withdraw.refundAddress,
-            Number(withdraw.expiration),
+            withdraw.receiver.toUpperCase(),
+            withdraw.refundAddress.toUpperCase(),
+            Number(withdraw.expireBlock),
             withdraw.secret,
             metadata,
             withdraw.hashLock
@@ -72,15 +72,15 @@ export default class AlgoContract implements JellyContract {
         const metadata = {
             eventName: 'J_REFUND',
             id: refund.id,
-            sender: refund.sender,
-            receiver: refund.receiver,
+            sender: refund.sender.toUpperCase(),
+            receiver: refund.receiver.toUpperCase(),
             hashLock: refund.hashLock,
         };
 
         return await this.contract.refund(
-            refund.receiver,
-            refund.refundAddress,
-            Number(refund.expiration),
+            refund.receiver.toUpperCase(),
+            refund.refundAddress.toUpperCase(),
+            Number(refund.expireBlock),
             refund.hashLock,
             metadata
         );

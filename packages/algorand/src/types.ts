@@ -25,7 +25,7 @@ export interface AlgoContractRefund extends ContractRefund {
     receiver: string;
     transactionHash: string;
     refundAddress: string;
-    expiration: string;
+    expireBlock: string;
 }
 
 export interface AlgoContractWithdraw extends ContractWithdraw {
@@ -34,7 +34,7 @@ export interface AlgoContractWithdraw extends ContractWithdraw {
     receiver: string;
     transactionHash: string;
     refundAddress: string;
-    expiration: string;
+    expireBlock: string;
 }
 
 export interface AlgoSwapEvent extends SwapEvent {
@@ -44,4 +44,8 @@ export interface AlgoSwapEvent extends SwapEvent {
 export interface AlgoAdapterInterface extends Omit<JellyAdapter, 'formatInput' | 'createSwapFromInput'> {
     formatInput(data: UserInputSwap, receiver: string): Promise<ContractSwap>;
     createSwapFromInput(inputSwap: ContractSwap, sender?: string): Promise<ContractSwap>;
+}
+
+export interface AlgoSwap extends ContractSwap {
+    expireBlock: number;
 }
