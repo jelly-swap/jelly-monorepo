@@ -2,7 +2,7 @@ import algosdk from 'algosdk';
 import HTLC_TEMPLATE from 'algosdk/src/logicTemplates/htlc';
 
 import { AlgorandProvider, AlgorandWallet } from '@jelly-swap/types';
-import { sha256 } from '@jelly-swap/utils';
+import { fixHash, sha256 } from '@jelly-swap/utils';
 
 import Config from '../config';
 import { sendTx, formatNote } from './utils';
@@ -35,7 +35,7 @@ export default class HTLC {
                 refundAddress,
                 recipientAddress,
                 hashFn,
-                hashLock,
+                Buffer.from(fixHash(hashLock, false), 'hex'),
                 Number(expiration),
                 this.config.maxFee
             );
@@ -52,20 +52,21 @@ export default class HTLC {
         expiration: number,
         secret: string,
         metadata: any,
-        secretHash?: any
+        hashLock?: any
     ) {
         try {
             const params = await this.provider.getTransactionParams();
             const hashFn = 'sha256';
-            if (!secretHash) {
-                secretHash = sha256(secret);
+
+            if (!hashLock) {
+                hashLock = sha256(secret);
             }
 
             const htlc = new HTLC_TEMPLATE.HTLC(
                 refundAddress,
                 recipientAddress,
                 hashFn,
-                secretHash,
+                Buffer.from(fixHash(hashLock, false), 'hex'),
                 expiration,
                 this.config.maxFee
             );
@@ -83,7 +84,7 @@ export default class HTLC {
                 closeRemainderTo: recipientAddress,
                 note: formatNote(metadata),
             };
-            const lsig = algosdk.makeLogicSig(htlc.getProgram(), [secret]);
+            const lsig = algosdk.makeLogicSig(htlc.getProgram(), [Buffer.from(fixHash(secret, false), 'hex')]);
             const rawSignedTxn = algosdk.signLogicSigTransaction(txn, lsig);
 
             let tx = await this.provider.sendRawTransaction(rawSignedTxn.blob, metadata);
@@ -97,7 +98,7 @@ export default class HTLC {
         recipientAddress: string,
         refundAddress: string,
         expiration: number,
-        secretHash: any,
+        hashLock: any,
         metadata: RefundEvent
     ) {
         try {
@@ -108,7 +109,7 @@ export default class HTLC {
                 refundAddress,
                 recipientAddress,
                 hashFn,
-                secretHash,
+                Buffer.from(fixHash(hashLock, false), 'hex'),
                 expiration,
                 this.config.maxFee
             );

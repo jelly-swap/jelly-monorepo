@@ -1,5 +1,6 @@
+import algosdk from 'algosdk';
 import { AlgorandProvider } from '@jelly-swap/types';
-const algosdk = require('algosdk');
+
 export default class MnemonicWallet {
     address: string;
     privateKey: string;
