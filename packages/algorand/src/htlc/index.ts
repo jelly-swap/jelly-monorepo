@@ -57,6 +57,7 @@ export default class HTLC {
         try {
             const params = await this.provider.getTransactionParams();
             const hashFn = 'sha256';
+
             if (!hashLock) {
                 hashLock = sha256(secret);
             }
@@ -83,7 +84,7 @@ export default class HTLC {
                 closeRemainderTo: recipientAddress,
                 note: formatNote(metadata),
             };
-            const lsig = algosdk.makeLogicSig(htlc.getProgram(), [secret]);
+            const lsig = algosdk.makeLogicSig(htlc.getProgram(), [Buffer.from(fixHash(secret, false), 'hex')]);
             const rawSignedTxn = algosdk.signLogicSigTransaction(txn, lsig);
 
             let tx = await this.provider.sendRawTransaction(rawSignedTxn.blob, metadata);
