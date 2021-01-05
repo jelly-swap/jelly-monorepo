@@ -29,7 +29,7 @@
         "url": "https://github.com/jelly-swap/monorepo/issues"
     },
     "dependencies": {
-        "axios": "^0.19.0",
+        "axios": "^0.21.1",
         "bignumber.js": "^9.0.0",
         "memoizee": "^0.4.14"
     },

@@ -29,7 +29,7 @@
         "@aeternity/aepp-sdk": "7.6.0",
         "@jelly-swap/types": "^0.1.53",
         "@jelly-swap/utils": "^0.1.53",
-        "axios": "^0.19.0",
+        "axios": "^0.21.1",
         "bignumber.js": "^9.0.0",
         "json-bigint": "^0.3.0",
         "memoizee": "^0.4.14",
