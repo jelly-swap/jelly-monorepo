@@ -1,0 +1,38 @@
+{
+    "name": "@jelly-swap/kaafila",
+    "version": "0.1.53",
+    "description": "JellySwap TypeScript implementation for Kaafila.",
+    "author": "Marc Vergara <marc.vergara.f@gmail.com>",
+    "homepage": "https://github.com/jelly-swap/monorepo#readme",
+    "license": "ISC",
+    "main": "./dist/src/index.js",
+    "types": "./dist/src/index.d.ts",
+    "directories": {
+        "dist": "dist",
+        "src": "src"
+    },
+    "files": [
+        "dist",
+        "src"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/jelly-swap/monorepo.git"
+    },
+    "scripts": {
+        "build": "tsc"
+    },
+    "bugs": {
+        "url": "https://github.com/jelly-swap/monorepo/issues"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "dependencies": {
+        "@jelly-swap/types": "^0.1.53",
+        "@jelly-swap/utils": "^0.1.53",
+        "algosdk": "1.7.2",
+        "create-hash": "^1.2.0"
+    },
+    "gitHead": "3133149d2fdc9e3f3fd8032968914b52e0d5752b"
+}
